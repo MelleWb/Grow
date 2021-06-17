@@ -8,11 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		851AFF392673D6D70092DA9B /* GrowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF382673D6D70092DA9B /* GrowApp.swift */; };
-		851AFF3B2673D6D70092DA9B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF3A2673D6D70092DA9B /* ContentView.swift */; };
+		851AFF3B2673D6D70092DA9B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF3A2673D6D70092DA9B /* HomeView.swift */; };
 		851AFF3D2673D6DB0092DA9B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 851AFF3C2673D6DB0092DA9B /* Assets.xcassets */; };
 		851AFF402673D6DB0092DA9B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 851AFF3F2673D6DB0092DA9B /* Preview Assets.xcassets */; };
 		851AFF4B2673D6DC0092DA9B /* GrowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF4A2673D6DC0092DA9B /* GrowTests.swift */; };
 		851AFF562673D6DC0092DA9B /* GrowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF552673D6DC0092DA9B /* GrowUITests.swift */; };
+		851AFF642673E4830092DA9B /* TrainingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF632673E4830092DA9B /* TrainingDetailView.swift */; };
+		85BACD86267B33BD00FD29D7 /* TrainingFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85BACD85267B33BD00FD29D7 /* TrainingFunctions.swift */; };
+		85E3486F26750437003C4311 /* JsonDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E3486E26750437003C4311 /* JsonDefinition.swift */; };
+		85E34872267504ED003C4311 /* StaticJson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E34871267504ED003C4311 /* StaticJson.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,7 +39,7 @@
 /* Begin PBXFileReference section */
 		851AFF352673D6D70092DA9B /* Grow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		851AFF382673D6D70092DA9B /* GrowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowApp.swift; sourceTree = "<group>"; };
-		851AFF3A2673D6D70092DA9B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		851AFF3A2673D6D70092DA9B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		851AFF3C2673D6DB0092DA9B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		851AFF3F2673D6DB0092DA9B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		851AFF412673D6DB0092DA9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -45,6 +49,10 @@
 		851AFF512673D6DC0092DA9B /* GrowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GrowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		851AFF552673D6DC0092DA9B /* GrowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowUITests.swift; sourceTree = "<group>"; };
 		851AFF572673D6DC0092DA9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		851AFF632673E4830092DA9B /* TrainingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDetailView.swift; sourceTree = "<group>"; };
+		85BACD85267B33BD00FD29D7 /* TrainingFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingFunctions.swift; sourceTree = "<group>"; };
+		85E3486E26750437003C4311 /* JsonDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonDefinition.swift; sourceTree = "<group>"; };
+		85E34871267504ED003C4311 /* StaticJson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticJson.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,8 +103,11 @@
 		851AFF372673D6D70092DA9B /* Grow */ = {
 			isa = PBXGroup;
 			children = (
+				85BACD87267B33D100FD29D7 /* Controllers */,
+				85E3486D26750412003C4311 /* Models */,
 				851AFF382673D6D70092DA9B /* GrowApp.swift */,
-				851AFF3A2673D6D70092DA9B /* ContentView.swift */,
+				851AFF3A2673D6D70092DA9B /* HomeView.swift */,
+				851AFF632673E4830092DA9B /* TrainingDetailView.swift */,
 				851AFF3C2673D6DB0092DA9B /* Assets.xcassets */,
 				851AFF412673D6DB0092DA9B /* Info.plist */,
 				851AFF3E2673D6DB0092DA9B /* Preview Content */,
@@ -128,6 +139,23 @@
 				851AFF572673D6DC0092DA9B /* Info.plist */,
 			);
 			path = GrowUITests;
+			sourceTree = "<group>";
+		};
+		85BACD87267B33D100FD29D7 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				85BACD85267B33BD00FD29D7 /* TrainingFunctions.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		85E3486D26750412003C4311 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				85E34871267504ED003C4311 /* StaticJson.swift */,
+				85E3486E26750437003C4311 /* JsonDefinition.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -259,7 +287,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				851AFF3B2673D6D70092DA9B /* ContentView.swift in Sources */,
+				851AFF642673E4830092DA9B /* TrainingDetailView.swift in Sources */,
+				85BACD86267B33BD00FD29D7 /* TrainingFunctions.swift in Sources */,
+				851AFF3B2673D6D70092DA9B /* HomeView.swift in Sources */,
+				85E34872267504ED003C4311 /* StaticJson.swift in Sources */,
+				85E3486F26750437003C4311 /* JsonDefinition.swift in Sources */,
 				851AFF392673D6D70092DA9B /* GrowApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -418,7 +450,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
+				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Grow/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -426,7 +460,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.Grow;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.grow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -439,7 +473,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
+				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Grow/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -447,7 +483,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.Grow;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.grow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
