@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "food.svg",
+      "filename" : "noun_menu bar_2273785.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
@@ -12,12 +12,12 @@
           "value" : "dark"
         }
       ],
-      "filename" : "food_white.svg",
+      "filename" : "bar_white.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "food-1.svg",
+      "filename" : "noun_menu bar_2273785-1.svg",
       "idiom" : "universal",
       "scale" : "2x"
     },
@@ -28,12 +28,12 @@
           "value" : "dark"
         }
       ],
-      "filename" : "food_white-1.svg",
+      "filename" : "bar_white-1.svg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "food-2.svg",
+      "filename" : "noun_menu bar_2273785-2.svg",
       "idiom" : "universal",
       "scale" : "3x"
     },
@@ -44,7 +44,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "food_white-2.svg",
+      "filename" : "bar_white-2.svg",
       "idiom" : "universal",
       "scale" : "3x"
     }

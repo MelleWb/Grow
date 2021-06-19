@@ -13,15 +13,13 @@ struct HomeView: View {
     
     var body: some View {
         
-        let drag = DragGesture()
+        let tap = TapGesture()
             .onEnded {
-                if $0.translation.width < -100 {
-                    withAnimation {
-                        self.showMenu = false
-                    }
+                withAnimation{
+                self.showMenu = false
                 }
             }
-
+        
         return NavigationView {
         GeometryReader { geometry in
                 ZStack(alignment: .leading) {
@@ -35,7 +33,7 @@ struct HomeView: View {
                             .transition(.move(edge: .leading))
                         }
                 }
-                .gesture(drag)
+                .gesture(tap)
         }
         .navigationBarTitle("Dashboard", displayMode: .inline)
         .navigationBarItems(leading: (
@@ -44,7 +42,9 @@ struct HomeView: View {
                                     self.showMenu.toggle()
                                 }
                             }) {
-                                Image(systemName: "line.horizontal.3").foregroundColor(Color .black)
+                                Image("hamburgerMenu")
+                                    .resizable()
+                                    .frame(width: 25, height: 25, alignment: .center)
                             }
                         ))
         }
@@ -66,19 +66,19 @@ struct MainView: View {
                         Image("dumbbell")
                             .resizable()
                             .frame(width: 40, height: 45, alignment: .leading)
-                    Text("Training").padding(.init(top: 20, leading: 0, bottom: 20, trailing: 0))
+                    Text("Training").padding(.init(top: 20, leading: 0, bottom: 20, trailing: 0)).foregroundColor(Color.init("textColor"))
                     }
                     HStack{
                         Image("food")
                             .resizable()
                             .frame(width: 40, height: 45, alignment: .leading)
-                    Text("Voeding").padding(.init(top: 20, leading: 0, bottom: 20, trailing: 0))
+                    Text("Voeding").padding(.init(top: 20, leading: 0, bottom: 20, trailing: 0)).foregroundColor(Color.init("textColor"))
                     }
                 }
             }
-        }.padding(.init(top: 12, leading: 0, bottom: 0, trailing: 0))
-            }
-        }
+        }.padding(.init(top: 12, leading: 0, bottom: 0, trailing: 0)).contentShape(Rectangle())
+    }
+}
 
 struct TrainingOverview: View{
     

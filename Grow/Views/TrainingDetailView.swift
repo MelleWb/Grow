@@ -58,10 +58,10 @@ struct TrainingDetailView: View {
             
                 HStack{
                     VStack (alignment: .leading) {
-                        Text(name).font(.headline).padding(.bottom, 5)
-                        Text(setsString + " sets").font(.subheadline).padding(.bottom, 5)
-                        Text(repsString + " reps").font(.subheadline).padding(.bottom, 5)
-                        Text("Estimated " + estmtdKG + " kgs").font(.subheadline)
+                        Text(name).font(.headline).padding(.bottom, 5).foregroundColor(Color.init("textColor"))
+                        Text(setsString + " sets").font(.subheadline).padding(.bottom, 5).foregroundColor(Color.init("textColor"))
+                        Text(repsString + " reps").font(.subheadline).padding(.bottom, 5).foregroundColor(Color.init("textColor"))
+                        Text("Estimated " + estmtdKG + " kgs").font(.subheadline).foregroundColor(Color.init("textColor"))
                     }
                     
                 }.padding(.init(top: 12, leading: 5, bottom: 12, trailing: 5))

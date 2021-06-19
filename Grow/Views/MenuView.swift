@@ -21,8 +21,11 @@ struct MenuView: View {
                         .overlay(Circle().stroke(Color.black, lineWidth:1))
                         .clipShape(Circle())
                         .shadow(radius: 10)
-                Text("Grow").font(.headline)
+                    Text("Grow").font(.headline).foregroundColor(Color.init("textColor"))
+                    
                 }.padding(.init(top: 100, leading: 0, bottom: 12, trailing: 0))
+            
+            Divider()
 
             ForEach(0..<items.count) { i in
                 MenuItem(item: items[i], id:i)
@@ -31,23 +34,13 @@ struct MenuView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(Color.init("background"))
         .border(Color.gray, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
         .edgesIgnoringSafeArea(.all)
     }
 }
 
 struct MenuItem:View {
-    /*
-    func determinePadding(id: Int) -> CGFloat{
-        if id==0 {
-            return 100
-        }
-        else{
-            return 30
-        }
-    }
-    */
     var item: [String]
     var id: Int
     
@@ -60,7 +53,7 @@ struct MenuItem:View {
                 .resizable()
                 .frame(width: 20, height: 25, alignment: .leading)
             Text(item[0])
-                .foregroundColor(.black)
+                .foregroundColor(Color.init("textColor"))
                 .font(.headline)
         }
         .padding(.top, 30)
