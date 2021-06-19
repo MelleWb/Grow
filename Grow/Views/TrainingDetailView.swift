@@ -12,21 +12,29 @@ struct TrainingDetailView: View {
     var image: String
     var exercises: [exercises]?
     
+    func determineSetName(exercizeCount: Int) -> String {
+        if(exercizeCount==1){
+            return "Set"
+        }
+        else {
+            return "Superset"
+        }
+    }
+    
         var body: some View {
             
             VStack {
                 Image(image)
                     .resizable()
-                    .frame(width: 75, height: 75)
-                    .shadow(radius: 10)
+                    .frame(width: 45, height: 50)
                 Text(name)
                     .font(.title)
                 
             }.padding().navigationBarTitle(Text(name), displayMode: .inline)
             List{
-                ForEach(exercises ?? [], id: \.self){ exercises in
-                    Section(header:Text("Superset")){
-                    ForEach(exercises.set, id: \.self){ set in
+                ForEach(exercises ?? [], id: \.self){ exercise in
+                    Section(header:Text(determineSetName(exercizeCount: exercise.set.count))){
+                        ForEach(exercise.set, id: \.self){ set in
                         ExercizeRow(name: set.exercise.name, reps:set.exercise.reps, sets:set.exercise.sets, pb:set.exercise.pb ?? 0 )
                             }
                         }

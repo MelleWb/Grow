@@ -15,7 +15,7 @@ struct JsonOverviewResponse {
         jsonString =
     """
 {
-    "trainee": "Swen",
+    "trainee": "Melle",
     "days": [
         {
             "type": "Rust"
@@ -110,44 +110,50 @@ struct JsonOverviewResponse {
             "exercises": [
                 {
                     "set": [{
-                        "exercise": {
-                            "name": "Squat",
-                            "reps": 8,
-                            "sets": 4
+                            "exercise": {
+                                "name": "Squat",
+                                "reps": 8,
+                                "sets": 4
+                            }
                         },
-                        "exercise": {
-                            "name": "Barbell romanian deadlift",
-                            "reps": 8,
-                            "sets": 4
-                        }
+                        {
+                            "exercise": {
+                                "name": "Barbell romanian deadlift",
+                                "reps": 8,
+                                "sets": 4
+                            }
                     }]
             },
                 {
                     "set": [{
-                        "exercise": {
-                            "name": "Bulgarian split squat",
-                            "reps": 10,
-                            "sets": 4
+                            "exercise": {
+                                "name": "Bulgarian split squat",
+                                "reps": 10,
+                                "sets": 4
+                            }
                         },
-                        "exercise": {
-                            "name": "Leg curl",
-                            "reps": 12,
-                            "sets": 4
-                        }
+                        {
+                            "exercise": {
+                                "name": "Leg curl",
+                                "reps": 12,
+                                "sets": 4
+                            }
                     }]
             },
                 {
                     "set": [{
-                        "exercise": {
-                            "name": "Leg extension",
-                            "reps": 12,
-                            "sets": 3
+                            "exercise": {
+                                "name": "Leg extension",
+                                "reps": 12,
+                                "sets": 3
+                            }
                         },
-                        "exercise": {
-                            "name": "Seated calf raises",
-                            "reps": 15,
-                            "sets": 3
-                        }
+                        {
+                            "exercise": {
+                                "name": "Seated calf raises",
+                                "reps": 15,
+                                "sets": 3
+                            }
                     }]
             },
                 {
@@ -170,8 +176,8 @@ struct JsonOverviewResponse {
                             "name": "Weigthed push-up",
                             "reps": 8,
                             "sets": 4
-                        },
-                        "exercise": {
+                        }},
+                        {"exercise": {
                             "name": "Barbell bent over row",
                             "reps": 10,
                             "sets": 4
@@ -185,8 +191,8 @@ struct JsonOverviewResponse {
                                 "name": "Barbell incline bench press",
                                 "reps": 10,
                                 "sets": 3
-                            },
-                            "exercise": {
+                            }},
+                            {"exercise": {
                                 "name": "One arm lat pull down",
                                 "reps": 12,
                                 "sets": 4
@@ -209,8 +215,8 @@ struct JsonOverviewResponse {
                                 "name": "Dumbbell standing bicep curls",
                                 "reps": 12,
                                 "sets": 3
-                            },
-                            "exercise": {
+                            }},
+                            {"exercise": {
                                 "name": "Pulley rope standing triceps extension",
                                 "reps": 15,
                                 "sets": 3
@@ -241,8 +247,8 @@ struct JsonOverviewResponse {
                             "name": "Barbell split squat",
                             "reps": 12,
                             "sets": 4
-                        },
-                        "exercise": {
+                        }},
+                        {"exercise": {
                             "name": "Hyperextension",
                             "reps": 12,
                             "sets": 3
@@ -255,8 +261,8 @@ struct JsonOverviewResponse {
                             "name": "Leg extension",
                             "reps": 15,
                             "sets": 3
-                        },
-                        "exercise": {
+                        }},
+                        {"exercise": {
                             "name": "Seated calf raise",
                             "reps": 15,
                             "sets": 3
@@ -273,8 +279,8 @@ struct JsonOverviewResponse {
                             "name": "Incline dumbbell press",
                             "reps": 12,
                             "sets": 3
-                        },
-                        "exercise": {
+                        }},
+                        {"exercise": {
                             "name": "Dumbbell row incline",
                             "reps": 15,
                             "sets": 3
@@ -287,8 +293,8 @@ struct JsonOverviewResponse {
                             "name": "Dumbbell deep push up",
                             "reps": 15,
                             "sets": 3
-                        },
-                        "exercise": {
+                        }},
+                        {"exercise": {
                             "name": "Lat prayer",
                             "reps": 15,
                             "sets": 3
@@ -301,8 +307,8 @@ struct JsonOverviewResponse {
                             "name": "Upper chest cable fly",
                             "reps": 15,
                             "sets": 3
-                        },
-                        "exercise": {
+                        }},
+                        {"exercise": {
                             "name": "Pulley rope high pull",
                             "reps": 15,
                             "sets": 3
@@ -312,6 +318,7 @@ struct JsonOverviewResponse {
          ]
 }]
 }
+
 
 """
     }
