@@ -6,12 +6,23 @@
 //
 
 import SwiftUI
+import Firebase
 
 @main
+
+
 struct GrowApp: App {
+    
+    init() {
+            FirebaseApp.configure()
+        }
+    
     var body: some Scene {
+    
         WindowGroup {
-            HomeView()
+            SceneDelegate()
         }
     }
 }
+
+

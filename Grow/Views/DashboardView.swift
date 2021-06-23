@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import Firebase
 
-struct HomeView: View {
+struct DashboardView: View {
     
     @State var showMenu = false
     
@@ -25,11 +26,11 @@ struct HomeView: View {
                 ZStack(alignment: .leading) {
                     MainView(showMenu: self.$showMenu)
                         .frame(width: geometry.size.width, height: geometry.size.height)
-                        .offset(x: self.showMenu ? geometry.size.width/2 : 0)
+                        .offset(x: self.showMenu ? geometry.size.width/1.25 : 0)
                         .disabled(self.showMenu ? true : false)
                     if self.showMenu {
                         MenuView()
-                            .frame(width: geometry.size.width/2)
+                            .frame(width: geometry.size.width/1.25)
                             .transition(.move(edge: .leading))
                         }
                 }
@@ -54,12 +55,14 @@ struct HomeView: View {
 
 struct MainView: View {
     @Binding var showMenu: Bool
-    var body: some View {
     
+    let user = Auth.auth().currentUser
+    
+    var body: some View {
         VStack {
             Image("dashboard").resizable().frame(width: 70, height: 75)
             Spacer().frame(height: 50)
-            Text("Melle Wittebrood")
+            Text(user?.email ?? "Hallo!")
             HStack{
                 List{
                     HStack{
@@ -75,6 +78,23 @@ struct MainView: View {
                     Text("Voeding").padding(.init(top: 20, leading: 0, bottom: 20, trailing: 0)).foregroundColor(Color.init("textColor"))
                     }
                 }
+            }
+            Button(action: {
+                let firebaseAuth = Auth.auth()
+               do {
+                 try firebaseAuth.signOut()
+               } catch let signOutError as NSError {
+                 print ("Error signing out: %@", signOutError)
+               }
+            })
+            {
+                Text("Logout")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(width: 220, height: 60)
+                    .background(Color.init("textColor"))
+                    .cornerRadius(15.0)
             }
         }.padding(.init(top: 12, leading: 0, bottom: 0, trailing: 0)).contentShape(Rectangle())
     }
@@ -126,10 +146,10 @@ struct DayRow: View {
 }
 
 
-struct HomeView_Previews: PreviewProvider {
+struct DashboardView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            HomeView()
+            DashboardView()
         }
     }
 }

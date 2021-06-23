@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct MenuView: View {
-    var items = [["Dashboard", "dashboard"],["Training","dumbbell"],["Chat","chat"], ["Voeding","food"]]
+    
+    
+    var views = [aView(view: AnyView(UpdateProfile(displayName: "")), label: "Profiel", image: ""),
+                 aView(view: AnyView(TrainingOverview()), label: "Training", image: "dumbbell")]
     
     var body: some View {
         
@@ -18,17 +21,29 @@ struct MenuView: View {
                     Image("menuImage")
                         .resizable()
                         .frame(width: 70, height: 75)
-                        .overlay(Circle().stroke(Color.black, lineWidth:1))
-                        .clipShape(Circle())
                         .shadow(radius: 10)
-                    Text("Grow").font(.headline).foregroundColor(Color.init("textColor"))
+                    Text("Grow").font(.headline).foregroundColor(Color.init("blackWhite"))
                     
-                }.padding(.init(top: 100, leading: 0, bottom: 12, trailing: 0))
+                }.padding(.init(top: 80, leading: 0, bottom: 7, trailing: 0))
             
             Divider()
 
-            ForEach(0..<items.count) { i in
-                MenuItem(item: items[i], id:i)
+            ForEach(views, id: \.id) { view in
+                //MenuItem(view: view.view, label: view.label, image: view.image)
+                NavigationLink( destination: view.view) {
+                        HStack {
+                            
+                            Image(view.image)
+                                .resizable()
+                                .frame(width: 20, height: 25, alignment: .leading)
+
+                            Text(view.label)
+                                .foregroundColor(Color.init("textColor"))
+                                .font(.headline)
+                        }
+                        .padding(.top, 30)
+                    }
+                
             }
             Spacer()
         }
@@ -40,26 +55,6 @@ struct MenuView: View {
     }
 }
 
-struct MenuItem:View {
-    var item: [String]
-    var id: Int
-    
-    var body: some View{
-        return NavigationLink(
-            destination: TrainingOverview()){
-            
-        HStack {
-            Image(item[1])
-                .resizable()
-                .frame(width: 20, height: 25, alignment: .leading)
-            Text(item[0])
-                .foregroundColor(Color.init("textColor"))
-                .font(.headline)
-        }
-        .padding(.top, 30)
-        }
-    }
-}
 
 struct MenuView_Previews: PreviewProvider {
     static var previews: some View {

@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Grrow.png",
+      "filename" : "menuImage.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Grrow-1.png",
+      "filename" : "menuImage-1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Grrow-2.png",
+      "filename" : "menuImage-2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
