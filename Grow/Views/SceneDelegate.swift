@@ -11,7 +11,6 @@ import Firebase
 struct SceneDelegate : View{
 
     @ObservedObject var userSettings = UserSettings()
-    
     @State var ViewToDisplay:String = ""
     
     func setViewToDisplay(view: String){
@@ -20,7 +19,6 @@ struct SceneDelegate : View{
     
     var body: some View{
         VStack{
-            
             if ViewToDisplay == "Dashboard" {
                 DashboardView()
                 } else {

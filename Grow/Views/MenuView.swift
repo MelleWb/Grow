@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct MenuView: View {
     
-    
-    var views = [aView(view: AnyView(UpdateProfile(displayName: "")), label: "Profiel", image: ""),
-                 aView(view: AnyView(TrainingOverview()), label: "Training", image: "dumbbell")]
-    
+   
+    var views = [aView(view: AnyView(TrainingOverview()), label: "Training", image: "dumbbell"),
+                 aView(view: AnyView(ExerciseOverview()), label: "Oefeningen", image: "lower")
+    ]
     var body: some View {
         
         VStack(alignment: .leading) {
@@ -22,7 +23,7 @@ struct MenuView: View {
                         .resizable()
                         .frame(width: 70, height: 75)
                         .shadow(radius: 10)
-                    Text("Grow").font(.headline).foregroundColor(Color.init("blackWhite"))
+                    Text("Grow").font(.headline).foregroundColor(Color.init("blackWhite")).padding(.init(30))
                     
                 }.padding(.init(top: 80, leading: 0, bottom: 7, trailing: 0))
             
@@ -35,17 +36,34 @@ struct MenuView: View {
                             
                             Image(view.image)
                                 .resizable()
-                                .frame(width: 20, height: 25, alignment: .leading)
+                                .frame(width: 25, height: 25, alignment: .leading)
 
                             Text(view.label)
                                 .foregroundColor(Color.init("textColor"))
-                                .font(.headline)
+                                .font(.system(size: 20))
                         }
                         .padding(.top, 30)
-                    }
+                    }.navigationViewStyle(StackNavigationViewStyle())
                 
             }
             Spacer()
+            Button(action: {
+                let firebaseAuth = Auth.auth()
+               do {
+                 try firebaseAuth.signOut()
+               } catch let signOutError as NSError {
+                 print ("Error signing out: %@", signOutError)
+               }
+            })
+            {
+                Text("Logout")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(width: 200, height: 60, alignment: .center)
+                    .background(Color.init("buttonColor"))
+                    .cornerRadius(15.0)
+            }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
