@@ -56,8 +56,7 @@ struct AddExercise: View {
                         settings.isPersistenceEnabled = true
                         let db = Firestore.firestore()
                         
-                        var ref: DocumentReference? = nil
-                        ref = db.collection("exercises").addDocument(data: [
+                        db.collection("exercises").addDocument(data: [
                             "name": self.name,
                             "category": self.category,
                             "description": self.description

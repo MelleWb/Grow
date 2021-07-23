@@ -44,7 +44,10 @@ struct DashboardView: View {
         }
         .environmentObject(userModel)
         .onAppear(perform:{
-                    userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
+            userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
+            
+            let pushManager = PushNotificationManager(userID: Auth.auth().currentUser!.uid)
+            pushManager.registerForPushNotifications()
         })
         .navigationBarTitle("Dashboard", displayMode: .inline)
         .navigationBarItems(leading: (
@@ -141,7 +144,7 @@ struct MainView: View {
                         }
                     }
                     HStack{
-                        NavigationLink(destination: ExerciseOverview()){
+                        NavigationLink(destination: ExerciseOverview(searchText: "")){
                             //
                         }
                     }
@@ -157,49 +160,4 @@ struct MainView: View {
 
         return Text("").frame(width:geometry.size.width)
         }
-}
-
-struct TrainingOverview: View{
-    
-    @State var trainingOverview: overview = JsonParser().trainingOverview
-    
-    var body: some View {
-            List {
-                    ForEach(0..<trainingOverview.days.count) {
-                        i in DayRow(days: trainingOverview.days[i])
-                }.onMove(perform: { indexSet, index in
-                    self.trainingOverview.days.move(fromOffsets: indexSet, toOffset: index)
-                    
-                })
-                }    .navigationBarTitle(Text(verbatim: "Schema van " + trainingOverview.trainee))
-            .navigationBarItems(trailing: EditButton())
-    }
-
-    
-}
-
-
-struct DayRow: View {
-    
-    let days: days
-    
-    var body: some View {
-
-        let image = determineImage(type: days.type)
-        
-        return NavigationLink(
-            destination: TrainingDetailView(name: days.type, image:image, exercises: days.exercises)){
-        
-            HStack{
-                Image(image)
-                    .resizable()
-                    .frame(width:45, height:50)
-                VStack (alignment: .leading) {
-                    Text(days.type).font(.headline)
-                }
-            }.padding(.init(top: 12, leading: 0, bottom: 12, trailing: 0))
-            
-            
-        }
-    }
 }

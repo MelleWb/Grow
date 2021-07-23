@@ -9,9 +9,8 @@ import SwiftUI
 import Firebase
 
 struct MenuView: View {
-    
    
-    var views = [aView(view: AnyView(TrainingOverview()), label: "Training", image: "dumbbell"),
+    var views = [aView(view: AnyView(TrainingOverview()), label: "Schemas", image: "dumbbell"),
                  aView(view: AnyView(ExerciseOverview()), label: "Oefeningen", image: "lower")
     ]
     var body: some View {

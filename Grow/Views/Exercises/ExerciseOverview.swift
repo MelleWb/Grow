@@ -6,11 +6,16 @@
 //
 
 import SwiftUI
+import UIKit
 import Firebase
 
 struct ExerciseOverview: View {
+    
     @ObservedObject var exerciseModel = ExerciseDataModel()
+    
     @State var showAddExerciseSheetView = false
+    @State var searchText = ""
+    @State var searching = false
     
     func delete(at offsets: IndexSet) {
         
@@ -31,22 +36,26 @@ struct ExerciseOverview: View {
     }
     
     var body: some View{
-        NavigationView{
-            
-            List {
-                           ForEach(exerciseModel.exercises, id: \.self) { exercise in
-                                NavigationLink( destination: ExerciseDetailView(exercise: exercise)) {
-                                            VStack(alignment: .leading) {
-                                                Text(exercise.name).font(.title)
-                                                Text(exercise.category).font(.subheadline)
-                                            }
-                                }
-                           }
-                           .onDelete(perform: delete)
-                       }
-            
+            VStack(alignment: .leading){
+                List {
+                    SearchBar(searchText: $searchText, searching: $searching)
+                    ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
+                        return exercise.name.hasPrefix(searchText) || searchText == ""
+                    }), id: \.self) { exercise in
+                        NavigationLink( destination: ExerciseDetailView(exercise: exercise)) {
+                                    VStack(alignment: .leading) {
+                                        Text(exercise.name).font(.headline)
+                                        Text(exercise.category).font(.subheadline)
+                                    }
+                        }
+                   }
+                   .onDelete(perform: delete)
+            }.gesture(DragGesture()
+                        .onChanged({ _ in
+                            UIApplication.shared.dismissKeyboard()
+                        })
+            )
             }.onAppear(perform: exerciseModel.fetchData)
-            .navigationViewStyle(StackNavigationViewStyle())
             .navigationTitle("Oefeningen overzicht")
             .navigationBarItems(trailing: (
                             Button(action: {
@@ -55,18 +64,16 @@ struct ExerciseOverview: View {
                                 }
                             }) {
                                 Image(systemName: "plus")
-                                    .resizable()
-                                    .frame(width: 25, height: 25, alignment: .center)
                             })
                         )
         .sheet(isPresented: $showAddExerciseSheetView) {
             AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView, name: "", description: "", category: "")
+            }
         }
     }
-}
 
-struct ExerciseOverview_Previews: PreviewProvider {
-    static var previews: some View {
-        ExerciseOverview()
-    }
-}
+extension UIApplication {
+      func dismissKeyboard() {
+          sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+      }
+  }

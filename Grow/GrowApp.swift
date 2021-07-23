@@ -10,9 +10,8 @@ import Firebase
 
 @main
 
-
 struct GrowApp: App {
-    
+    //@UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     init() {
             FirebaseApp.configure()
         }
@@ -25,4 +24,9 @@ struct GrowApp: App {
     }
 }
 
-
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        
+        return true
+    }
+}

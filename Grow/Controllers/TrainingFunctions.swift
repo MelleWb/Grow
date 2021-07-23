@@ -7,18 +7,19 @@
 
 import Foundation
 
+/*
 struct JsonParser {
     var trainingJSONString:String
-    var trainingOverview: overview
+    var trainingOverview: Overview
     
     init(){
         trainingJSONString = JsonOverviewResponse().jsonString
     
     let jsonData = trainingJSONString.data(using: .utf8)!
-        trainingOverview = try! JSONDecoder().decode(overview.self, from: jsonData)
+        trainingOverview = try! JSONDecoder().decode(Overview.self, from: jsonData)
     }
 }
-
+*/
 func determineImage(type: String) -> String {
     var image: String
     

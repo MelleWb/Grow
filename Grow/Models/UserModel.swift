@@ -30,6 +30,7 @@ struct User: Codable {
     var fat: Int?
     var fiber: Int?
     var pal: Int?
+    var fcmToken: String?
     
     init(id: String? = nil,
          firstName: String? = nil,
@@ -47,7 +48,8 @@ struct User: Codable {
          protein: Int? = nil,
          fat: Int? = nil,
          fiber: Int? = nil,
-         pal: Int? = nil
+         pal: Int? = nil,
+         fcmToken: String? = nil
     ) {
         self.id = id
         self.firstName = firstName
@@ -66,6 +68,7 @@ struct User: Codable {
         self.fat = fat
         self.fiber = fiber
         self.pal = pal
+        self.fcmToken = fcmToken
     }
 }
 

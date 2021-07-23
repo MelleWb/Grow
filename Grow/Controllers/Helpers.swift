@@ -73,3 +73,12 @@ class FirebaseAuthentication: ObservableObject {
         }
     }
 }
+
+struct AddButton<Destination : View>: View {
+
+    var destination:  Destination
+
+    var body: some View {
+        NavigationLink(destination: self.destination) { Image(systemName: "plus") }
+    }
+}
