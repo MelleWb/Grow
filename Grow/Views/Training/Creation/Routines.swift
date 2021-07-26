@@ -6,26 +6,28 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct AddSchema: View{
     
     @Environment(\.presentationMode) private var presentationMode
     @State var showAddRoutine: Bool = false
-    @ObservedObject var schemaModel = TrainingDataModel()
-
+    @State var routine: Routine?
+    @StateObject var schemaModel = TrainingDataModel()
+    var schema: Schema?
     
     var body: some View{
         NavigationView{
             VStack{
                 
-            NavigationLink(
-                destination: AddRoutine().environmentObject(schemaModel),
-                        isActive: $showAddRoutine
-                    ) {
-                AddRoutine().environmentObject(schemaModel)
-            }.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
-                
-            Form{
+                if showAddRoutine {
+                    NavigationLink(
+                        destination: AddRoutine(routine: routine ?? Routine(), routineType: "").environmentObject(schemaModel),
+                                isActive: $showAddRoutine
+                            ) {
+                        AddRoutine(routine: routine ?? Routine(), routineType: "").environmentObject(schemaModel)
+                    }.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
+                }
                     
                 TextField("Naam van het schema", text: $schemaModel.schema.name)
                 .padding()
@@ -48,22 +50,28 @@ struct AddSchema: View{
                 .pickerStyle(SegmentedPickerStyle())
 
             }
+                Spacer()
                 
+                Form{
                     List{
-                        if !(schemaModel.schema.routines ?? []).isEmpty {
-                        ForEach(schemaModel.schema.routines!) { routine in
-                            
-                            NavigationLink(destination: AddRoutine(routine: routine).environmentObject(schemaModel)){
-                                    VStack{
-                                        Text(routine.type!).font(.headline)
-                                        }
+                        if !(schemaModel.schema.routines).isEmpty {
+                            ForEach(schemaModel.schema.routines) { routine in
+                                
+                                ZStack{
+                                    Button("", action:{})
+                                    NavigationLink(destination: AddRoutine(routine: routine, routineType: routine.type ?? "").environmentObject(schemaModel)){
+                                        VStack{
+                                            Text(routine.type!).font(.headline)
+                                            }
+                                    }
                                 }
-                            }
+                            }.onDelete(perform: deleteRoutine)
                         }
                                 Button(action: {
                                     self.showAddRoutine = true
-                                    let newRoutine: Routine = Routine()
-                                    self.schemaModel.schema.routines?.append(newRoutine)
+                                    self.routine = Routine()
+                                    //Call function in schemaModel to add the routine
+                                    self.schemaModel.addRoutine(for: self.routine!)
                                 }) {
                                     HStack{
                                         Image(systemName: "plus").foregroundColor(Color.init("textColor"))
@@ -72,7 +80,6 @@ struct AddSchema: View{
                                 }
                         }
                     }
-                }
             }.navigationBarTitle(Text("Schema"), displayMode: .inline)
         
         .navigationBarItems(leading:
@@ -85,45 +92,48 @@ struct AddSchema: View{
                               , trailing:
                             Button(action: {
                             //dismiss the sheet & save the training
-                                presentationMode.wrappedValue.dismiss()
+                                let settings = FirestoreSettings()
+                                settings.isPersistenceEnabled = true
+                                let db = Firestore.firestore()
+                                
+                                let saveSchema: Schema = self.schemaModel.schema
+                                let newSchemaRef = db.collection("schemas").document()
+                                
+                                do {
+                                    try newSchemaRef.setData(from: saveSchema)
+                                    presentationMode.wrappedValue.dismiss()
+                                }
+                                catch let error {
+                                    print(error)
+                                }
+                            
+                                
                            }) {
                             Text("Opslaan").bold()
                            }
                     )
-        .environmentObject(schemaModel)
+        }.onAppear(perform: {
+            if schema != nil {
+                self.schemaModel.schema = schema!
+            }
+        })
     }
+    func deleteRoutine(indexSet: IndexSet) {
+        self.schemaModel.schema.routines.remove(atOffsets: indexSet)
     }
+}
 
 
 struct AddRoutine : View{
     
     @EnvironmentObject var schemaModel: TrainingDataModel
-    //@ObservedObject var exerciseModel = ExerciseDataModel()
-    var routine: Routine?
-    var routineIndex: Int?
-    
-    init(routine: Routine = Routine(), routineIndex: Int? = 0){
-        if self.routine == nil {
-            self.routine = routine
-            self.routineIndex = schemaModel.schema.routines!.firstIndex(where: {$0.id == routine.id})!
-        }
-        else {
-            let routineID: UUID = self.routine!.id
-            self.routineIndex = schemaModel.schema.routines!.firstIndex(where: {$0.id == routineID})!
-        }
-    }
-
+    var routine: Routine
+    @State var routineType: String
     
     var body: some View{
-        
-        let typeBinding = Binding(
-            get: { self.schemaModel.schema.routines![routineIndex!].type },
-            set: { self.schemaModel.schema.routines![routineIndex!].type = $0 }
-        )
-        
             VStack{
                 Form{
-                    Picker(selection: typeBinding, label: Text("Trainingstype")) {
+                    Picker(selection: $routineType, label: Text("Trainingstype")) {
                         Text("Upper").tag("Upper")
                         Text("Lower").tag("Lower")
                         Text("Full Body").tag("Full Body")
@@ -135,99 +145,198 @@ struct AddRoutine : View{
                         Text("Arms").tag("Arms")
                         Text("Legs").tag("Legs")
                                     
-                                }
-                    .pickerStyle(DefaultPickerStyle())
-                    
-                    if !(routine?.superset ?? []).isEmpty {
-                        ForEach(routine!.superset!){ superset in
-                            //Do something
-                        }
                     }
-
-                /*
-                        ForEach(Array(routine.superset.enumerated()), id: \.1) { supersetIndex, superset in
-                            Section(header:
-                                        
-                                        HStack{Text("Superset \(supersetIndex + 1)").font(.headline).padding()
-                                            
-                                            
-                                            Button (action: {
-                                                self.schemaModel.schema.routines[routineIndex].superset.remove(at: supersetIndex)
-
-                                                
-                                            }, label: {
-                                                Image(systemName: "trash")
-                                                    .foregroundColor(Color.init("textColor"))
-                                                    .frame(width: 30, height: 30, alignment: .trailing)
-                                            })
-                                            
-                                            
-                                        }
-
-                            ){
-                                    
-                                SetsAndReps(superset: $schemaModel.schema.routines[routineIndex].superset[supersetIndex])
+                    .onChange(of: routineType) { tag in
+                        schemaModel.updateRoutineType(for: routine, to: routineType)
+                    }
+                    .pickerStyle(DefaultPickerStyle())
+                     
+                    if let routineIndex = schemaModel.getRoutineIndex(for: routine) {
+                        if !(schemaModel.schema.routines[routineIndex].superset ?? []).isEmpty {
+                            ForEach(schemaModel.schema.routines[routineIndex].superset!){ superset in
                                 
                                 List{
-                                    ForEach(Array(superset.exercise.enumerated()), id: \.1) { exerciseIndex, exercise in
+                                    Section(header: ShowSupersetHeader(routine: routine, superset: superset).environmentObject(schemaModel)
+
+                                    ){
                                         
-                                        AddExerciseToSuperset(exerciseName: $schemaModel.schema.routines[routineIndex].superset[supersetIndex].exercise[exerciseIndex].name)
-                                    }
-                                    Button(action:{
+                                        SetsAndReps(routine: routine, superset: superset).environmentObject(schemaModel)
                                         
-                                        let newExercise: ExerciseInfo = ExerciseInfo()
-                                        self.schemaModel.schema.routines[routineIndex].superset[supersetIndex].exercise.append(newExercise)
+                                        ExercisesInSuperset(routine: routine, superset: superset).environmentObject(schemaModel)
+                                        
+                                        Button(action:{
+                                        
+                                        //Do something
+                                        self.schemaModel.addExerciseToSuperset(for: routine, for: superset)
                                     }){
                                         HStack{
                                             Image(systemName: "plus").foregroundColor(Color.init("textColor"))
                                             Text("Voeg oefening toe").foregroundColor(Color.init("textColor"))
                                         }
                                     }
+                                        
                                 }
+
+                                    
                             }
+                                
                         }
+                    }
+                        
+
                 }
                 Button(action: {
-                    let newSuperset: Superset = Superset()
-                    self.schemaModel.schemas[schemaIndex].routines[routineIndex].superset.append(newSuperset)
-                    self.supersetIndex = self.schemaModel.schemas[schemaIndex].routines[routineIndex].superset.endIndex - 1
+                    self.schemaModel.addSuperset(for: routine)
                 }) {
                     HStack{
                         Image(systemName: "plus").foregroundColor(Color.init("textColor"))
                         Text("Voeg superset toe").foregroundColor(Color.init("textColor"))
                     }
                 }
-            }.onAppear(perform: {
-                exerciseModel.fetchData()
-            })*/
-                }
+            }
+        }
+    }
+}
+
+struct ShowSupersetHeader: View {
+    
+    @EnvironmentObject var schemaModel: TrainingDataModel
+    var routine: Routine
+    var superset: Superset
+    
+    var body: some View{
+        let supersetIndex: Int = schemaModel.getSupersetIndex(for: routine, for: superset) + 1
+        HStack{Text("Superset \(supersetIndex)").font(.headline).padding()
+            
+            Button (action: {
+                schemaModel.removeSuperset(for: superset, for: routine)
+                
+            }, label: {
+                Image(systemName: "trash")
+                    .foregroundColor(Color.init("textColor"))
+                    .frame(width: 30, height: 30, alignment: .trailing)
+            })
+            
+            
+        }
+    }
+}
+
+struct ExercisesInSuperset: View{
+    
+    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var exerciseModel = ExerciseDataModel()
+    var routine: Routine
+    var superset: Superset
+    
+    var body: some View {
+        
+        let routineIndex: Int = schemaModel.getRoutineIndex(for: routine)
+        let supersetIndex: Int = schemaModel.getSupersetIndex(for: routine, for: superset)
+        
+        if !(schemaModel.schema.routines[routineIndex].superset ?? []).isEmpty {
+            if !(schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercise ?? []).isEmpty {
+                ForEach(schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercise!){ exercise in
+                    NavigationLink(destination: ExerciseDetail(routine: routine, superset: superset, exerciseInfo: exercise, selectedExercise: exercise.name ).environmentObject(schemaModel)){
+                        Text(exercise.name)
+                    }
+                }.onDelete(perform:deleteExercise)
+            }
+        }
+    }
+    func deleteExercise(at offsets: IndexSet) {
+        let index: Int = offsets[offsets.startIndex]
+        self.schemaModel.removeExercise(for: routine, for: superset, for: index)
+    }
+}
+
+
+struct ExerciseDetail : View{
+    @ObservedObject var exerciseModel = ExerciseDataModel()
+    @EnvironmentObject var schemaModel: TrainingDataModel
+    @State var selectedExercise: String?
+    
+    var routine: Routine
+    var superset: Superset
+    var exerciseInfo: ExerciseInfo
+    @State var searchText = ""
+    @State var searching = false
+    
+    init(routine: Routine, superset: Superset, exerciseInfo: ExerciseInfo, selectedExercise: String?, searchText:String = "", searching:Bool = false){
+
+        self.routine = routine
+        self.superset = superset
+        self.exerciseInfo = exerciseInfo
+        self.selectedExercise = selectedExercise
+        self.searchText = searchText
+        self.searching = searching
+        
+        exerciseModel.fetchData()
+    }
+    
+    var body: some View {
+
+        List {
+            SearchBar(searchText: $searchText, searching: $searching)
+            ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
+                return exercise.name.hasPrefix(searchText) || searchText == ""
+            }), id: \.self) { exercise in
+            SelectionCell(exercise: exercise.name, routine: routine, superset: superset, exerciseInfo: exerciseInfo, selectedExercise: self.$selectedExercise).environmentObject(schemaModel)
+            }
+        }.gesture(DragGesture()
+                    .onChanged({ _ in
+                        UIApplication.shared.dismissKeyboard()
+                    })
+        )
+    }
+}
+
+struct SelectionCell: View {
+    
+    @EnvironmentObject var schemaModel: TrainingDataModel
+    let exercise: String
+    var routine: Routine
+    var superset: Superset
+    var exerciseInfo: ExerciseInfo
+    @Binding var selectedExercise: String?
+
+    var body: some View {
+        HStack {
+            if exercise == selectedExercise {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(Color.init("textColor"))
+            }
+            else {
+                Image(systemName: "circle")
+                    .foregroundColor(Color.init("textColor"))
+            }
+            
+            Text(exercise)
+        }   .onTapGesture {
+                    self.selectedExercise = self.exercise
+                    self.schemaModel.updateExercise(for: routine, for: superset, for: exerciseInfo, to: exercise)
             }
     }
 }
 
-struct AddExerciseToSuperset: View {
-    
-    @ObservedObject var exerciseModel = ExerciseDataModel()
-    @State var presentPicker = false
-    @State var tag: Int = 1
-    @Binding var exerciseName: String
-    
-    var body: some View {
-        Text("Oops")
-    }
-}
 
 struct SetsAndReps : View {
     
-    @Binding var superset: Superset
+    @EnvironmentObject var schemaModel: TrainingDataModel
+    var routine: Routine
+    var superset: Superset
+    
+    @State var reps: String = ""
+    @State var sets: String = ""
     
     var body: some View {
+        
         
         let setsProxy = Binding<String>(
             get: { String(Int(self.superset.sets)) },
             set: {
                 if let value = NumberFormatter().number(from: $0) {
-                    self.superset.sets = value.intValue
+                    self.schemaModel.updateSets(for: routine, for: superset, to: value.intValue)
                 }
             }
         )
@@ -235,11 +344,12 @@ struct SetsAndReps : View {
             get: { String(Int(self.superset.reprange)) },
             set: {
                 if let value = NumberFormatter().number(from: $0) {
-                    self.superset.reprange = value.intValue
+                    self.schemaModel.updateReps(for: routine, for: superset, to: value.intValue)
+                    
                 }
             }
         )
-        
+         
         HStack{
             VStack(alignment: .leading){
                 Text("Sets").font(.caption)

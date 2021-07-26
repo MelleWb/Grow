@@ -14,6 +14,7 @@ pod 'Firebase/Database'
 pod 'Firebase/Firestore'
 pod 'FirebaseFirestoreSwift'
 pod 'Firebase/Storage'
+pod 'Firebase/Messaging'
 pod 'Cache'
 
 # add pods for any other desired Firebase products
