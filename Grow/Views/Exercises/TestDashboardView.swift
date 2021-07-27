@@ -38,10 +38,10 @@ List{
                         Image("food")
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 75, height: 75, alignment: .leading)
-                            .clipShape(Circle())
-                            .shadow(radius: 10)
-                            .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 20))
+                            .frame(width: 30, height: 30, alignment: .leading)
+                            //.clipShape(Circle())
+                            //.shadow(radius: 10)
+                            .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
                         VStack(alignment: .leading){
                                 Text("Voeding")
@@ -59,10 +59,10 @@ List{
                     Image("upper")
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 75, height: 75, alignment: .leading)
-                        .clipShape(Circle())
-                        .shadow(radius: 10)
-                        .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        .frame(width: 30, height: 30, alignment: .leading)
+                        //.clipShape(Circle())
+                        //.shadow(radius: 10)
+                        .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
                     VStack(alignment: .leading){
                             Text("Training")
