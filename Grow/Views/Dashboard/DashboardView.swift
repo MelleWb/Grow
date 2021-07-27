@@ -8,6 +8,40 @@
 import SwiftUI
 import Firebase
 
+extension UITabBarController {
+    override open func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        let standardAppearance = UITabBarAppearance()
+        
+        standardAppearance.stackedLayoutAppearance.focused.titleTextAttributes = [.foregroundColor: UIColor.red]
+        standardAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.red]
+        standardAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.red]
+        
+        tabBar.standardAppearance = standardAppearance
+    }
+}
+
+struct TabBarView: View {
+    var body: some View {
+        TabView {
+                DashboardView()
+                       .tabItem {
+                        Label("Dashboard", systemImage: "gauge").foregroundColor(Color.init("textColor"))
+                       }
+
+                   ExerciseOverview()
+                       .tabItem {
+                        Label("Oefeningen", systemImage: "square.and.pencil").foregroundColor(Color.init("textColor"))
+                       }
+            
+                    TrainingOverview()
+                        .tabItem {
+                            Label("Schemas", systemImage: "list.dash").foregroundColor(Color.init("textColor"))
+                        }
+        }
+    }
+}
+
 struct DashboardView: View {
 
     
@@ -15,7 +49,7 @@ struct DashboardView: View {
     
     @State var showMenu = false
     @State var showProfileSheetView = false
-    @State var isShowing: Bool = false
+    @State var viewToShow: String = "LandingPageView"
     
     var body: some View {
         
@@ -26,11 +60,10 @@ struct DashboardView: View {
                 }
             }
 
-        return ProgressIndicator(isShowing: $isShowing) {
             NavigationView {
         GeometryReader { geometry in
                 ZStack(alignment: .leading) {
-                    MainView(showMenu: self.$showMenu)
+                    MainView(viewToShow: $viewToShow, showMenu: self.$showMenu)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .offset(x: self.showMenu ? geometry.size.width/1.25 : 0)
                         .disabled(self.showMenu ? true : false)
@@ -56,9 +89,10 @@ struct DashboardView: View {
                                     self.showMenu.toggle()
                                 }
                             }) {
-                                Image("hamburgerMenu")
+                                Image(systemName:"line.horizontal.3")
                                     .resizable()
-                                    .frame(width: 25, height: 25, alignment: .center)
+                                    .frame(width: 20, height: 20, alignment: .center)
+                                    .foregroundColor(Color.init("textColor"))
                             }
                         ),
         trailing: Button(action: {
@@ -72,15 +106,12 @@ struct DashboardView: View {
                 .frame(width: 25, height: 25, alignment: .center)
         }).sheet(isPresented: $showProfileSheetView) {
             UpdateProfile(showProfileSheetView: $showProfileSheetView, userModel: userModel, firstName: userModel.user.firstName ?? "", lastName: userModel.user.lastName ?? "", dateOfBirth: userModel.user.dateOfBirth ?? DateHelper.from(year: 1990, month: 1, day: 1), gender: userModel.user.gender ?? 0, weight: userModel.user.weight ?? 0, height: userModel.user.height ?? 0, plan: userModel.user.plan ?? 1, kcal: userModel.user.kcal ?? 0, palOption: userModel.user.pal ?? 0, originalImage: userModel.userImages.userImage?.image)
-                }
             }
         }
     }
 }
 
-
-struct MainView: View {
-    @Binding var showMenu: Bool
+struct LandingPageView: View {
     @EnvironmentObject var userModel: UserDataModel
     
     @State var frame: CGSize = .zero
@@ -160,4 +191,23 @@ struct MainView: View {
 
         return Text("").frame(width:geometry.size.width)
         }
+}
+
+struct MainView: View {
+    @Binding var viewToShow: String
+    var view: AnyView?
+    @Binding var showMenu: Bool
+    @EnvironmentObject var userModel: UserDataModel
+    
+    @State var frame: CGSize = .zero
+    var coachPicture: UIImage?
+    
+    var body: some View {
+        if viewToShow == "LandingPageView"{
+            LandingPageView()
+        }
+        else if viewToShow == "Schemas"{
+            TrainingOverview()
+        }
+    }
 }

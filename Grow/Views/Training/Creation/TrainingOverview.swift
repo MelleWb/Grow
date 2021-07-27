@@ -10,16 +10,15 @@ import SwiftUI
 struct TrainingOverview: View {
     
     @State private var showAddSchema = false
-    @State var schemaIndex: Int = 0
-    @ObservedObject var fetchedSchemas = TrainingDataModel()
+    @ObservedObject var schemas = TrainingDataModel()
     
     var body: some View {
         VStack{
             List {
                 
-                ForEach(Array(fetchedSchemas.fetchedSchemas.enumerated()), id: \.1) { index, schema in
+                ForEach(Array(schemas.fetchedSchemas.enumerated()), id: \.1) { index, schema in
                     
-                    NavigationLink(destination: AddSchema(schema: schema)){
+                    NavigationLink(destination: ReviewSchema(schema: schema).environmentObject(schemas)){
                         Text(schema.name)
                     }
                 }
@@ -30,7 +29,7 @@ struct TrainingOverview: View {
             }
             
         }.onAppear(perform:{
-            fetchedSchemas.fetchData()
+            schemas.fetchData()
         })
         .navigationBarTitle(Text("Schema overzicht"), displayMode: .inline)
         .navigationBarItems(trailing:

@@ -8,18 +8,27 @@
 import SwiftUI
 import Firebase
 
-struct AddSchema: View{
+struct ReviewSchema: View{
+    @EnvironmentObject var schemaModel: TrainingDataModel
+    var schema: Schema
+    
+    var body: some View {
+        VStack{
+            SchemaBody().environmentObject(schemaModel)
+        }
+    }
+}
+
+struct SchemaBody: View{
     
     @Environment(\.presentationMode) private var presentationMode
     @State var showAddRoutine: Bool = false
     @State var routine: Routine?
-    @StateObject var schemaModel = TrainingDataModel()
+    @EnvironmentObject var schemaModel: TrainingDataModel
     var schema: Schema?
     
     var body: some View{
-        NavigationView{
-            VStack{
-                
+            
                 if showAddRoutine {
                     NavigationLink(
                         destination: AddRoutine(routine: routine ?? Routine(), routineType: "").environmentObject(schemaModel),
@@ -28,18 +37,7 @@ struct AddSchema: View{
                         AddRoutine(routine: routine ?? Routine(), routineType: "").environmentObject(schemaModel)
                     }.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
                 }
-                    
-                TextField("Naam van het schema", text: $schemaModel.schema.name)
-                .padding()
-                .background(Color.init("textField"))
-                .cornerRadius(5.0)
-                .padding(.init(top: 20, leading: 20, bottom: 15, trailing: 20))
-            
-            Text("Geef het een naam waardoor het goed vindbaar wordt")
-                .font(.caption)
-                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
-                .frame(alignment: .leading)
-            
+        Form{
             HStack{
                 Picker(selection: $schemaModel.schema.type, label: Text("Kies trainingstype")) {
                                     Text("Strength").tag("Strength")
@@ -50,9 +48,8 @@ struct AddSchema: View{
                 .pickerStyle(SegmentedPickerStyle())
 
             }
-                Spacer()
                 
-                Form{
+                
                     List{
                         if !(schemaModel.schema.routines).isEmpty {
                             ForEach(schemaModel.schema.routines) { routine in
@@ -80,6 +77,24 @@ struct AddSchema: View{
                                 }
                         }
                     }
+            }
+    func deleteRoutine(indexSet: IndexSet) {
+        self.schemaModel.schema.routines.remove(atOffsets: indexSet)
+    }
+}
+
+struct AddSchema: View{
+    
+    @Environment(\.presentationMode) private var presentationMode
+    @State var showAddRoutine: Bool = false
+    @State var routine: Routine?
+    @StateObject var schemaModel = TrainingDataModel()
+    var schema: Schema?
+    
+    var body: some View{
+        NavigationView{
+            VStack{
+                SchemaBody().environmentObject(schemaModel)
             }.navigationBarTitle(Text("Schema"), displayMode: .inline)
         
         .navigationBarItems(leading:
@@ -92,19 +107,12 @@ struct AddSchema: View{
                               , trailing:
                             Button(action: {
                             //dismiss the sheet & save the training
-                                let settings = FirestoreSettings()
-                                settings.isPersistenceEnabled = true
-                                let db = Firestore.firestore()
-                                
-                                let saveSchema: Schema = self.schemaModel.schema
-                                let newSchemaRef = db.collection("schemas").document()
-                                
-                                do {
-                                    try newSchemaRef.setData(from: saveSchema)
+                                let success: Bool = self.schemaModel.createTraining()
+                                if success{
                                     presentationMode.wrappedValue.dismiss()
                                 }
-                                catch let error {
-                                    print(error)
+                                else{
+                                    print("some error")
                                 }
                             
                                 
@@ -112,11 +120,7 @@ struct AddSchema: View{
                             Text("Opslaan").bold()
                            }
                     )
-        }.onAppear(perform: {
-            if schema != nil {
-                self.schemaModel.schema = schema!
-            }
-        })
+        }
     }
     func deleteRoutine(indexSet: IndexSet) {
         self.schemaModel.schema.routines.remove(atOffsets: indexSet)

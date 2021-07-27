@@ -20,7 +20,7 @@ struct SceneDelegate : View{
     var body: some View{
         VStack{
             if ViewToDisplay == "Dashboard" {
-                DashboardView()
+                TabBarView()
                 } else {
                     LoginView()
                 }

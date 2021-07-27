@@ -18,8 +18,6 @@
 		8521A2942685BDFC00400657 /* (null) in Embed Frameworks */ = {isa = PBXBuildFile; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		853918662693893B0045A1B5 /* StatefulPreviewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853918652693893B0045A1B5 /* StatefulPreviewWrapper.swift */; };
 		8539186826938D290045A1B5 /* TrainingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8539186726938D290045A1B5 /* TrainingModel.swift */; };
-		85458A8226A75B0C00D0143A /* CustomPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85458A8126A75B0C00D0143A /* CustomPickerView.swift */; };
-		85458A8426A75B6400D0143A /* CustomPickerTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85458A8326A75B6400D0143A /* CustomPickerTextView.swift */; };
 		85476A2F267FBCE200BA68A2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85476A2E267FBCE200BA68A2 /* LoginView.swift */; };
 		85476A31267FC04100BA68A2 /* KeyboardResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85476A30267FC04100BA68A2 /* KeyboardResponder.swift */; };
 		854B05EA2681E81500A824CD /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B05E92681E81500A824CD /* ProgressIndicator.swift */; };
@@ -96,8 +94,6 @@
 		851AFF572673D6DC0092DA9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		853918652693893B0045A1B5 /* StatefulPreviewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatefulPreviewWrapper.swift; sourceTree = "<group>"; };
 		8539186726938D290045A1B5 /* TrainingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingModel.swift; sourceTree = "<group>"; };
-		85458A8126A75B0C00D0143A /* CustomPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPickerView.swift; sourceTree = "<group>"; };
-		85458A8326A75B6400D0143A /* CustomPickerTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPickerTextView.swift; sourceTree = "<group>"; };
 		85476A2E267FBCE200BA68A2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		85476A30267FC04100BA68A2 /* KeyboardResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardResponder.swift; sourceTree = "<group>"; };
 		854B05E92681E81500A824CD /* ProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
@@ -233,19 +229,9 @@
 			path = GrowUITests;
 			sourceTree = "<group>";
 		};
-		85458A8026A75AEC00D0143A /* CustomPicker */ = {
-			isa = PBXGroup;
-			children = (
-				85458A8126A75B0C00D0143A /* CustomPickerView.swift */,
-				85458A8326A75B6400D0143A /* CustomPickerTextView.swift */,
-			);
-			path = CustomPicker;
-			sourceTree = "<group>";
-		};
 		85BACD87267B33D100FD29D7 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				85458A8026A75AEC00D0143A /* CustomPicker */,
 				854B05EB26820A8700A824CD /* UserDefaults.swift */,
 				85476A30267FC04100BA68A2 /* KeyboardResponder.swift */,
 				85BACD85267B33BD00FD29D7 /* TrainingFunctions.swift */,
@@ -591,10 +577,8 @@
 				85DF0607268C4CA400020559 /* AddExercise.swift in Sources */,
 				85D210682691EEA0002BA11C /* TrainingOverview.swift in Sources */,
 				85BACD86267B33BD00FD29D7 /* TrainingFunctions.swift in Sources */,
-				85458A8426A75B6400D0143A /* CustomPickerTextView.swift in Sources */,
 				85F92EEA2694AD9F00698585 /* Routines.swift in Sources */,
 				85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */,
-				85458A8226A75B0C00D0143A /* CustomPickerView.swift in Sources */,
 				851AFF3B2673D6D70092DA9B /* DashboardView.swift in Sources */,
 				85D21061268F8F32002BA11C /* SearchBar.swift in Sources */,
 				85E34872267504ED003C4311 /* StaticJson.swift in Sources */,

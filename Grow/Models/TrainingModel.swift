@@ -16,6 +16,12 @@ class TrainingDataModel: ObservableObject{
     
     private var db = Firestore.firestore()
     
+    func setSingleSchemaFromFetchedSchemas(for schema:Schema) {
+        if let index = self.fetchedSchemas.firstIndex(where: { $0.id == schema.id }) {
+            self.schema = self.fetchedSchemas[index]
+        }
+    }
+    
     func addRoutine(for routine: Routine) {
         if let index = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
             if index == -1 {
@@ -152,7 +158,6 @@ class TrainingDataModel: ObservableObject{
                     switch result {
                     case .success(let schema):
                         if let schema = schema {
-                            print ("Schema: \(schema)")
                             return Schema(id: schema.id, type: schema.type, name: schema.name, routines: schema.routines)
                         }
                         else {
@@ -166,6 +171,44 @@ class TrainingDataModel: ObservableObject{
                 }
             }
         }
+    
+    func createTraining() -> Bool{
+        
+        // First create a proper schema name
+        var schemaName: String = ""
+        var load: Double = 0.0
+        let routineCount = self.schema.routines.count
+        
+        schemaName += "\(routineCount)x-"
+        
+        for routines in self.schema.routines {
+            let routineSubstring = routines.type?.prefix(1) ?? "?"
+            schemaName += routineSubstring
+            
+            for set in routines.superset ?? []{
+                load += Double((set.reprange * set.sets))
+            }
+        }
+        
+        schemaName += "-Load:\(load)"
+        self.schema.name = schemaName
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let saveSchema: Schema = self.schema
+        let newSchemaRef = db.collection("schemas").document()
+        
+        do {
+            try newSchemaRef.setData(from: saveSchema)
+        }
+        catch let error {
+            print(error)
+            return false
+        }
+        return true
+    }
     
     func updateTraining(){
         //Do Something
