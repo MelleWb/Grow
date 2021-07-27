@@ -32,6 +32,7 @@
 		85BA4E60268A6D5700D71521 /* Pods_Grow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED30685E6FCB1070B6129F05 /* Pods_Grow.framework */; };
 		85BACD86267B33BD00FD29D7 /* TrainingFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85BACD85267B33BD00FD29D7 /* TrainingFunctions.swift */; };
 		85BACD8C267B6D0400FD29D7 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85BACD8B267B6D0400FD29D7 /* MenuView.swift */; };
+		85C48AE326B0978100BFE48E /* FoodModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C48AE226B0978000BFE48E /* FoodModel.swift */; };
 		85D21061268F8F32002BA11C /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D21060268F8F32002BA11C /* SearchBar.swift */; };
 		85D210682691EEA0002BA11C /* TrainingOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D210672691EEA0002BA11C /* TrainingOverview.swift */; };
 		85DF0607268C4CA400020559 /* AddExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DF0606268C4CA400020559 /* AddExercise.swift */; };
@@ -110,6 +111,7 @@
 		859B9453268B9A37003F58F2 /* ExerciseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseModel.swift; sourceTree = "<group>"; };
 		85BACD85267B33BD00FD29D7 /* TrainingFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingFunctions.swift; sourceTree = "<group>"; };
 		85BACD8B267B6D0400FD29D7 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		85C48AE226B0978000BFE48E /* FoodModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodModel.swift; sourceTree = "<group>"; };
 		85D21060268F8F32002BA11C /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		85D210672691EEA0002BA11C /* TrainingOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingOverview.swift; sourceTree = "<group>"; };
 		85DF0606268C4CA400020559 /* AddExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExercise.swift; sourceTree = "<group>"; };
@@ -318,6 +320,7 @@
 				85E34871267504ED003C4311 /* StaticJson.swift */,
 				859B9453268B9A37003F58F2 /* ExerciseModel.swift */,
 				8539186726938D290045A1B5 /* TrainingModel.swift */,
+				85C48AE226B0978000BFE48E /* FoodModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -589,6 +592,7 @@
 				851AFF3B2673D6D70092DA9B /* DashboardView.swift in Sources */,
 				85D21061268F8F32002BA11C /* SearchBar.swift in Sources */,
 				85E34872267504ED003C4311 /* StaticJson.swift in Sources */,
+				85C48AE326B0978100BFE48E /* FoodModel.swift in Sources */,
 				859B9454268B9A37003F58F2 /* ExerciseModel.swift in Sources */,
 				85037C16268915D500EC344B /* UserModel.swift in Sources */,
 				85476A31267FC04100BA68A2 /* KeyboardResponder.swift in Sources */,

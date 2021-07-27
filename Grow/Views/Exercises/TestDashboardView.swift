@@ -80,16 +80,21 @@ List{
     }
 
 struct CircleView: View {
-    @State var progressValue: Float = 0.0
+    @ObservedObject var foodModel = FoodDataModel()
+    
+    init(){
+        self.foodModel.getTodaysIntake()
+    }
     
     var body: some View {
+    
         ZStack {
 //            Color.yellow
 //                .opacity(0.1)
 //                .edgesIgnoringSafeArea(.all)
             
             VStack {
-                ProgressBarCirle(progress: self.$progressValue)
+                ProgressBarCirle(progress: self.$foodModel.userIntake.kcal)
                     .frame(width: 125.0, height: 125.0)
 //                Button(action: {
 //                    self.incrementProgress()
@@ -106,18 +111,13 @@ struct CircleView: View {
 //                }
 //                Spacer()
                 }
-            }
-    }
-    
-    func incrementProgress() {
-        let randomValue = Float([0.012, 0.022, 0.034, 0.016, 0.11].randomElement()!)
-        self.progressValue += randomValue
+        }
     }
 }
 
 struct ProgressBarCirle: View {
-        @Binding var progress: Float
-        @EnvironmentObject var userModel: UserDataModel
+    @Binding var progress: Float
+    @EnvironmentObject var userModel: UserDataModel
         
         var body: some View {
             ZStack {
