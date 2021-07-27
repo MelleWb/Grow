@@ -13,16 +13,34 @@ import FirebaseFirestoreSwift
 class FoodDataModel: ObservableObject{
     
     @Published var userIntake =  UserIntake()
+    @Published var userIntakeLeftOvers = BudgetLeftOver()
     
-    
-    func getTodaysIntake(){
+    func getTodaysIntake(usersKcalBudget: Int){
         //Firbase call
-        self.userIntake.kcal = 0.3
+        self.userIntake.kcal = 2400
+        
+        self.userIntakeLeftOvers.kcal = self.userIntake.kcal / Float(usersKcalBudget)
+        
+        print (usersKcalBudget)
+        print (self.userIntakeLeftOvers.kcal)
+    }
+
+}
+
+struct BudgetLeftOver{
+    var kcal: Float
+    var carbs: Int?
+    var protein: Int?
+    var fat: Int?
+    var fiber: Int?
+    
+    init(kcal: Float = 0){
+        self.kcal = kcal
     }
 }
 
-
 struct UserIntake{
+    var date: Date?
     var kcal: Float
     var carbs: Int?
     var protein: Int?

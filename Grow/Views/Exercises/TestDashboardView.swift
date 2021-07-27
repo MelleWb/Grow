@@ -14,7 +14,7 @@ struct TestDashboard: View{
     var body: some View {
 List{
     HStack{
-        CircleView()
+        CircleView().environmentObject(userModel)
             .padding(.top, 20)
             .padding(.bottom, 20)
             VStack{
@@ -81,10 +81,13 @@ List{
 
 struct CircleView: View {
     @ObservedObject var foodModel = FoodDataModel()
-    
+    @EnvironmentObject var userModel: UserDataModel
+
     init(){
-        self.foodModel.getTodaysIntake()
+        self.foodModel.getTodaysIntake(usersKcalBudget: 3034)
     }
+    
+    
     
     var body: some View {
     
@@ -94,7 +97,7 @@ struct CircleView: View {
 //                .edgesIgnoringSafeArea(.all)
             
             VStack {
-                ProgressBarCirle(progress: self.$foodModel.userIntake.kcal)
+                ProgressBarCirle(progress: self.$foodModel.userIntakeLeftOvers.kcal)
                     .frame(width: 125.0, height: 125.0)
 //                Button(action: {
 //                    self.incrementProgress()
