@@ -11,7 +11,8 @@ import Firebase
 struct MenuView: View {
    
     var views = [aView(view: AnyView(TrainingOverview()), label: "Schemas", image: "dumbbell"),
-                 aView(view: AnyView(ExerciseOverview()), label: "Oefeningen", image: "lower")
+                 aView(view: AnyView(ExerciseOverview()), label: "Oefeningen", image: "lower"),
+                 aView(view: AnyView(TestDashboard()), label: "Oefeningen", image: "lower")
     ]
     var body: some View {
         

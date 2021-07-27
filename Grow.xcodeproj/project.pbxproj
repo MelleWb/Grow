@@ -43,6 +43,8 @@
 		85FC5F7F26826E5C00CAC57C /* UpdateProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FC5F7E26826E5B00CAC57C /* UpdateProfile.swift */; };
 		85FCCB552683807000D7FF03 /* DynamicViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FCCB542683807000D7FF03 /* DynamicViews.swift */; };
 		A6E001FFBE239836B521EE84 /* Pods_GrowTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A37F4C0892EF1E134FAE80A /* Pods_GrowTests.framework */; };
+		F08043EF26B0942F002D5C65 /* TestDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043EE26B0942F002D5C65 /* TestDashboardView.swift */; };
+		F08043F126B0944B002D5C65 /* FoodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043F026B0944B002D5C65 /* FoodView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -125,6 +127,8 @@
 		D2F1545A4D93566705ECD8C1 /* Pods-Grow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow.debug.xcconfig"; path = "Target Support Files/Pods-Grow/Pods-Grow.debug.xcconfig"; sourceTree = "<group>"; };
 		E5138FA79BC7CEA39171F1B9 /* Pods_Grow_GrowUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Grow_GrowUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED30685E6FCB1070B6129F05 /* Pods_Grow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Grow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F08043EE26B0942F002D5C65 /* TestDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDashboardView.swift; sourceTree = "<group>"; };
+		F08043F026B0944B002D5C65 /* FoodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -284,6 +288,8 @@
 				859B9451268B9A1B003F58F2 /* ExerciseOverview.swift */,
 				85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */,
 				85DF0606268C4CA400020559 /* AddExercise.swift */,
+				F08043EE26B0942F002D5C65 /* TestDashboardView.swift */,
+				F08043F026B0944B002D5C65 /* FoodView.swift */,
 			);
 			path = Exercises;
 			sourceTree = "<group>";
@@ -575,6 +581,7 @@
 				853918662693893B0045A1B5 /* StatefulPreviewWrapper.swift in Sources */,
 				8539186826938D290045A1B5 /* TrainingModel.swift in Sources */,
 				85DF0607268C4CA400020559 /* AddExercise.swift in Sources */,
+				F08043EF26B0942F002D5C65 /* TestDashboardView.swift in Sources */,
 				85D210682691EEA0002BA11C /* TrainingOverview.swift in Sources */,
 				85BACD86267B33BD00FD29D7 /* TrainingFunctions.swift in Sources */,
 				85F92EEA2694AD9F00698585 /* Routines.swift in Sources */,
@@ -589,6 +596,7 @@
 				859B9452268B9A1B003F58F2 /* ExerciseOverview.swift in Sources */,
 				8588C33C2681D0FA00535E68 /* SceneDelegate.swift in Sources */,
 				85476A2F267FBCE200BA68A2 /* LoginView.swift in Sources */,
+				F08043F126B0944B002D5C65 /* FoodView.swift in Sources */,
 				85F6FDCE2693A4E60051B60E /* PushNotificationSender.swift in Sources */,
 				857E622E2684B80900A3A9A4 /* ImagePicker.swift in Sources */,
 				85597D7726A2C166005375F7 /* DisableAutoDismiss.swift in Sources */,
