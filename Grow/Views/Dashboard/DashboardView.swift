@@ -24,7 +24,7 @@ extension UITabBarController {
 struct TabBarView: View {
     var body: some View {
         TabView {
-                DashboardView()
+            TestDashboard()
                        .tabItem {
                         Label("Dashboard", systemImage: "gauge").foregroundColor(Color.init("textColor"))
                        }

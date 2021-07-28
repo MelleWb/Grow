@@ -10,74 +10,94 @@ import Firebase
 
 struct TestDashboard: View{
     @StateObject var userModel = UserDataModel()
+    @State var showProfileSheetView: Bool = false
     
     var body: some View {
-List{
-    HStack{
-        CircleView().environmentObject(userModel)
-            .padding(.top, 20)
-            .padding(.bottom, 20)
-            VStack{
-                HStack{
-                ContentViewLinearKoolh()
-                ContentViewLinearEiwit()
-                    }
+        NavigationView{
+            List{
+                Section{
                     HStack{
-                        ContentViewLinearVet()
-                        ContentViewLinearVezel()
-                        }
-                    }.padding(.top, 10)
-                     .padding(.bottom, 20)
+                        CircleView().environmentObject(userModel)
+                            .padding(.top, 20)
+                            .padding(.bottom, 20)
+                            VStack{
+                                HStack{
+                                ContentViewLinearKoolh()
+                                ContentViewLinearEiwit()
+                                    }
+                                    HStack{
+                                        ContentViewLinearVet()
+                                        ContentViewLinearVezel()
+                                        }
+                                    }.padding(.top, 10)
+                                     .padding(.bottom, 20)
+                                }
                 }
-    
-        Spacer()
-            HStack{
-                ZStack{
-                    Button("") {}
-                        NavigationLink(destination: FoodView()){
-                        Image("food")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 30, height: 30, alignment: .leading)
-                            //.clipShape(Circle())
-                            //.shadow(radius: 10)
-                            .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
+                Section {
+                    Spacer()
+                        HStack{
+                            ZStack{
+                                Button("") {}
+                                    NavigationLink(destination: FoodView()){
+                                    Image("food")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 30, height: 30, alignment: .leading)
+                                        //.clipShape(Circle())
+                                        //.shadow(radius: 10)
+                                        .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
-                        VStack(alignment: .leading){
-                                Text("Voeding")
-                                Text("Vul je voeding in")
+                                    VStack(alignment: .leading){
+                                            Text("Voeding")
+                                            Text("Vul je voeding in")
+                                        }
+                                    }
+                                }
                             }
-                        }
+                
+                Spacer()
+                    HStack{
+                        ZStack{
+                            Button("") {}
+                                NavigationLink(destination: FoodView()){
+                                Image("upper")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 30, height: 30, alignment: .leading)
+                                    //.clipShape(Circle())
+                                    //.shadow(radius: 10)
+                                    .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
+
+                                VStack(alignment: .leading){
+                                        Text("Training")
+                                        Text("Start je training")
+                                    }
+                                }
+                            }
                     }
                 }
-    
-    Spacer()
-        HStack{
-            ZStack{
-                Button("") {}
-                    NavigationLink(destination: FoodView()){
-                    Image("upper")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 30, height: 30, alignment: .leading)
-                        //.clipShape(Circle())
-                        //.shadow(radius: 10)
-                        .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
-
-                    VStack(alignment: .leading){
-                            Text("Training")
-                            Text("Start je training")
-                        }
-                    }
+                    }.listStyle(InsetGroupedListStyle())
+                            .environmentObject(userModel)
+                            .onAppear(perform:{
+                            userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
+                            })
+                            .navigationTitle(Text("Dashboard"))
+                            .navigationBarItems(
+                            trailing: Button(action: {
+                                withAnimation {
+                                    self.showProfileSheetView.toggle()
+                                }
+                            }) {
+                                Image(uiImage: (userModel.userImages.userImage?.image ?? UIImage(named: "loadingImageCircle"))!)
+                                    .resizable()
+                                    .clipShape(Circle())
+                                    .frame(width: 25, height: 25, alignment: .center)
+                            }).sheet(isPresented: $showProfileSheetView) {
+                                UpdateProfile(showProfileSheetView: $showProfileSheetView, userModel: userModel, firstName: userModel.user.firstName ?? "", lastName: userModel.user.lastName ?? "", dateOfBirth: userModel.user.dateOfBirth ?? DateHelper.from(year: 1990, month: 1, day: 1), gender: userModel.user.gender ?? 0, weight: userModel.user.weight ?? 0, height: userModel.user.height ?? 0, plan: userModel.user.plan ?? 1, kcal: userModel.user.kcal ?? 0, palOption: userModel.user.pal ?? 0, originalImage: userModel.userImages.userImage?.image)
+                                }
                 }
             }
         }
-                .environmentObject(userModel)
-                .onAppear(perform:{
-                userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
-                })
-        }
-    }
 
 struct CircleView: View {
     @ObservedObject var foodModel = FoodDataModel()
@@ -92,27 +112,9 @@ struct CircleView: View {
     var body: some View {
     
         ZStack {
-//            Color.yellow
-//                .opacity(0.1)
-//                .edgesIgnoringSafeArea(.all)
-            
             VStack {
                 ProgressBarCirle(progress: self.$foodModel.userIntakeLeftOvers.kcal)
                     .frame(width: 125.0, height: 125.0)
-//                Button(action: {
-//                    self.incrementProgress()
-//                }) {
-//                    HStack {
-//                        Image(systemName: "plus.rectangle.fill")
-//                        Text("Increment")
-//                    }
-//                    .padding(15.0)
-//                    .overlay(
-//                        RoundedRectangle(cornerRadius: 15.0)
-//                            .stroke(lineWidth: 2.0)
-//                    )
-//                }
-//                Spacer()
                 }
         }
     }
@@ -129,13 +131,31 @@ struct ProgressBarCirle: View {
                     .opacity(0.3)
                     .foregroundColor(Color.gray)
                 
+                if self.progress <= 0.8 {
+                    Circle()
+                        .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
+                        .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
+                        .foregroundColor(Color.green)
+                        .rotationEffect(Angle(degrees: 270.0))
+                        .animation(.linear)
+                }
+                else if self.progress > 0.8 && self.progress < 1{
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
-                    .foregroundColor(Color.red)
+                    .foregroundColor(Color.orange)
                     .rotationEffect(Angle(degrees: 270.0))
                     .animation(.linear)
-//                Text(String(format: "%.0f %%", min(self.progress, 1.0)*100.0))
+                }
+                else {
+                    Circle()
+                        .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
+                        .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
+                        .foregroundColor(Color.red)
+                        .rotationEffect(Angle(degrees: 270.0))
+                        .animation(.linear)
+                    
+                }
                 VStack{
                     Text(String(userModel.user.kcal ?? 0))
                     Text("Kcal over")
@@ -171,37 +191,14 @@ struct ContentViewLinearKoolh: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(userModel.user.carbs ?? 0))
-                    Text("g")
+                    Text(String(userModel.user.carbs ?? 0)).font(.subheadline).bold()
+                    Text("g").font(.subheadline).bold()
                 }
-                Text("Koolh. over")
+                Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
             ProgressBarLinearKoolh(value: $progressValue).frame(height: 7.5)
-            
-//            Button(action: {
-//                self.startProgressBar()
-//            }) {
-//                Text("Start Progress")
-//            }.padding()
-//
-//            Button(action: {
-//                self.resetProgressBar()
-//            }) {
-//                Text("Reset")
-//            }
-            
-//            Spacer()
+
         }
-    }
-    
-    func startProgressBar() {
-        for _ in 0...80 {
-            self.progressValue += 0.015
-        }
-    }
-    
-    func resetProgressBar() {
-        self.progressValue = 0.0
     }
 }
 
@@ -231,26 +228,12 @@ struct ContentViewLinearEiwit: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(userModel.user.protein ?? 0))
-                    Text("g")
+                    Text(String(userModel.user.protein ?? 0)).font(.subheadline).bold()
+                    Text("g").font(.subheadline).bold()
                     }
-                Text("Eiwitten over")
+                Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
             ProgressBarLinearEiwit(value: $progressValue).frame(height: 7.5)
-            
-//            Button(action: {
-//                self.startProgressBar()
-//            }) {
-//                Text("Start Progress")
-//            }.padding()
-//
-//            Button(action: {
-//                self.resetProgressBar()
-//            }) {
-//                Text("Reset")
-//            }
-            
-//            Spacer()
         }
     }
     
@@ -291,37 +274,13 @@ struct ContentViewLinearVet: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(userModel.user.fat ?? 0))
-                    Text("g")
+                    Text(String(userModel.user.fat ?? 0)).font(.subheadline).bold()
+                    Text("g").font(.subheadline).bold()
                     }
-                Text("Vetten over")
+                Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
             ProgressBarLinearVet(value: $progressValue).frame(height: 7.5)
-            
-//            Button(action: {
-//                self.startProgressBar()
-//            }) {
-//                Text("Start Progress")
-//            }.padding()
-//
-//            Button(action: {
-//                self.resetProgressBar()
-//            }) {
-//                Text("Reset")
-//            }
-            
-//            Spacer()
         }
-    }
-    
-    func startProgressBar() {
-        for _ in 0...80 {
-            self.progressValue += 0.015
-        }
-    }
-    
-    func resetProgressBar() {
-        self.progressValue = 0.0
     }
 }
 
@@ -351,10 +310,10 @@ struct ContentViewLinearVezel: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(userModel.user.fiber ?? 0))
-                    Text("g")
+                    Text(String(userModel.user.fiber ?? 0)).font(.subheadline).bold()
+                    Text("g").font(.subheadline).bold()
                     }
-                Text("Vezels over")
+                Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
             ProgressBarLinearVezel(value: $progressValue).frame(height: 7.5)
             
