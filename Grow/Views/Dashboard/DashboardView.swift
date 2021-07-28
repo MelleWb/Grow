@@ -37,43 +37,44 @@ struct Dashboard: View{
         NavigationView{
             List{
                 Section{
-                    HStack{
-                        CircleView().environmentObject(userModel)
-                            .padding(.top, 20)
-                            .padding(.bottom, 20)
-                            VStack{
-                                HStack{
-                                ContentViewLinearKoolh()
-                                ContentViewLinearEiwit()
-                                    }
-                                    HStack{
-                                        ContentViewLinearVet()
-                                        ContentViewLinearVezel()
-                                        }
-                                    }.padding(.top, 10)
-                                     .padding(.bottom, 20)
-                                }
-                }
-                Section {
-                    Spacer()
+                    ZStack{
                         HStack{
-                            ZStack{
-                                Button("") {}
-                                    NavigationLink(destination: FoodView()){
-                                    Image("food")
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 30, height: 30, alignment: .leading)
-                                        .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
-
-                                    VStack(alignment: .leading){
-                                            Text("Voeding")
-                                            Text("Vul je voeding in")
+                            CircleView().environmentObject(userModel)
+                                .padding(.top, 20)
+                                .padding(.bottom, 20)
+                                VStack{
+                                    HStack{
+                                    ContentViewLinearKoolh()
+                                    ContentViewLinearEiwit()
                                         }
+                                        HStack{
+                                            ContentViewLinearVet()
+                                            ContentViewLinearVezel()
+                                            }
+                                        }.padding(.top, 10)
+                                         .padding(.bottom, 20)
                                     }
-                                }
-                            }
-                
+                        NavigationLink(destination:FoodView()){}.hidden()
+                    }
+                }
+                Section(header:Text("Trainingen van deze week")){
+                    HStack{
+                        Image(systemName:"star.fill")
+                            .frame(width: 50, height: 50, alignment: .leading)
+                            .foregroundColor(Color.init("textColor"))
+                        Image(systemName:"star.fill")
+                            .frame(width: 50, height: 50, alignment: .leading)
+                            .foregroundColor(Color.init("textColor"))
+                        Image(systemName:"star.fill")
+                            .frame(width: 50, height: 50, alignment: .leading)
+                            .foregroundColor(Color.init("textColor"))
+                        Image(systemName:"star")
+                            .frame(width: 50, height: 50, alignment: .leading)
+                            .foregroundColor(Color.init("textColor"))
+                        Image(systemName:"star")
+                            .frame(width: 50, height: 50, alignment: .leading)
+                            .foregroundColor(Color.init("textColor"))
+                    }.padding()
                     HStack{
                         ZStack{
                             Button("") {}
@@ -82,13 +83,10 @@ struct Dashboard: View{
                                     .resizable()
                                     .scaledToFill()
                                     .frame(width: 30, height: 30, alignment: .leading)
-                                    //.clipShape(Circle())
-                                    //.shadow(radius: 10)
                                     .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
                                 VStack(alignment: .leading){
-                                        Text("Training")
-                                        Text("Start je training")
+                                    Text("Start je training van vandaag").font(.subheadline).bold()
                                     }
                                 }
                             }
@@ -254,16 +252,6 @@ struct ContentViewLinearEiwit: View {
             ProgressBarLinearEiwit(value: $progressValue).frame(height: 7.5)
         }
     }
-    
-    func startProgressBar() {
-        for _ in 0...80 {
-            self.progressValue += 0.015
-        }
-    }
-    
-    func resetProgressBar() {
-        self.progressValue = 0.0
-    }
 }
 
 struct ProgressBarLinearVet: View {
@@ -336,16 +324,6 @@ struct ContentViewLinearVezel: View {
             ProgressBarLinearVezel(value: $progressValue).frame(height: 7.5)
             
         }
-    }
-    
-    func startProgressBar() {
-        for _ in 0...80 {
-            self.progressValue += 0.015
-        }
-    }
-    
-    func resetProgressBar() {
-        self.progressValue = 0.0
     }
 }
 
