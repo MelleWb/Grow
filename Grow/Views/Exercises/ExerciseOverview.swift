@@ -36,6 +36,7 @@ struct ExerciseOverview: View {
     }
     
     var body: some View{
+        NavigationView{
             VStack(alignment: .leading){
                 List {
                     SearchBar(searchText: $searchText, searching: $searching)
@@ -49,6 +50,7 @@ struct ExerciseOverview: View {
                                     }
                         }
                    }
+                    
                    .onDelete(perform: delete)
             }.gesture(DragGesture()
                         .onChanged({ _ in
@@ -56,7 +58,7 @@ struct ExerciseOverview: View {
                         })
             )
             }.onAppear(perform: exerciseModel.fetchData)
-            .navigationTitle("Oefeningen overzicht")
+            .navigationTitle("Oefeningen")
             .navigationBarItems(trailing: (
                             Button(action: {
                                 withAnimation {
@@ -68,9 +70,10 @@ struct ExerciseOverview: View {
                         )
         .sheet(isPresented: $showAddExerciseSheetView) {
             AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView, name: "", description: "", category: "")
-            }
+        }
         }
     }
+}
 
 extension UIApplication {
       func dismissKeyboard() {

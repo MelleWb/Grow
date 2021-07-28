@@ -13,6 +13,7 @@ struct TrainingOverview: View {
     @ObservedObject var schemas = TrainingDataModel()
     
     var body: some View {
+        NavigationView{
         VStack{
             List {
                 
@@ -31,7 +32,7 @@ struct TrainingOverview: View {
         }.onAppear(perform:{
             schemas.fetchData()
         })
-        .navigationBarTitle(Text("Schema overzicht"), displayMode: .inline)
+        .navigationBarTitle(Text("Schemas"), displayMode: .inline)
         .navigationBarItems(trailing:
                Button(action: {
                     self.showAddSchema = true
@@ -40,5 +41,6 @@ struct TrainingOverview: View {
                    Image(systemName: "plus")
                }
            )
+        }
     }
 }

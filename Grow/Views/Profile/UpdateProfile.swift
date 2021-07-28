@@ -24,6 +24,8 @@ struct UpdateProfile: View {
     @State var kcal: Int
     @State var palOption: Int
     @State var originalImage: UIImage?
+    
+     
 
     func calcKcal(weight: Double, height: Double, dateOfBirth: Date, gender: Int, palOption: Int) -> Int {
         
@@ -153,7 +155,8 @@ struct UpdateProfile: View {
                 }.padding()
                 .pickerStyle(DefaultPickerStyle())
                 }
-               .navigationBarTitle(Text("Profiel"), displayMode: .inline)
+                .accentColor(Color.init("textColor"))
+                .navigationBarTitle(Text("Profiel"), displayMode: .inline)
                    .navigationBarItems(trailing: Button(action: {
                     
                     if originalImage != nil {

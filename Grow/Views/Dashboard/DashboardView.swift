@@ -1,213 +1,351 @@
 //
-//  ContentView.swift
+//  TestDashboardView.swift
 //  Grow
 //
-//  Created by Swen Rolink on 11/06/2021.
+//  Created by Melle Wittebrood on 27/07/2021.
 //
 
 import SwiftUI
 import Firebase
 
-extension UITabBarController {
-    override open func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        let standardAppearance = UITabBarAppearance()
-        
-        standardAppearance.stackedLayoutAppearance.focused.titleTextAttributes = [.foregroundColor: UIColor.red]
-        standardAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.red]
-        standardAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.red]
-        
-        tabBar.standardAppearance = standardAppearance
-    }
-}
-
 struct TabBarView: View {
     var body: some View {
         TabView {
-            TestDashboard()
+                    Dashboard()
                        .tabItem {
-                        Label("Dashboard", systemImage: "gauge").foregroundColor(Color.init("textColor"))
+                        Label("Dashboard", systemImage: "gauge")
                        }
 
                    ExerciseOverview()
                        .tabItem {
-                        Label("Oefeningen", systemImage: "square.and.pencil").foregroundColor(Color.init("textColor"))
+                        Label("Oefeningen", systemImage: "square.and.pencil")
                        }
             
                     TrainingOverview()
                         .tabItem {
-                            Label("Schemas", systemImage: "list.dash").foregroundColor(Color.init("textColor"))
+                            Label("Schemas", systemImage: "list.dash")
                         }
-        }
+        }.accentColor(Color.init("textColor"))
     }
 }
 
-struct DashboardView: View {
-
-    
+struct Dashboard: View{
     @StateObject var userModel = UserDataModel()
-    
-    @State var showMenu = false
-    @State var showProfileSheetView = false
-    @State var viewToShow: String = "LandingPageView"
+    @State var showProfileSheetView: Bool = false
     
     var body: some View {
-        
-        let tap = TapGesture()
-            .onEnded {
-                withAnimation{
-                self.showMenu = false
+        NavigationView{
+            List{
+                Section{
+                    HStack{
+                        CircleView().environmentObject(userModel)
+                            .padding(.top, 20)
+                            .padding(.bottom, 20)
+                            VStack{
+                                HStack{
+                                ContentViewLinearKoolh()
+                                ContentViewLinearEiwit()
+                                    }
+                                    HStack{
+                                        ContentViewLinearVet()
+                                        ContentViewLinearVezel()
+                                        }
+                                    }.padding(.top, 10)
+                                     .padding(.bottom, 20)
+                                }
                 }
-            }
+                Section {
+                    Spacer()
+                        HStack{
+                            ZStack{
+                                Button("") {}
+                                    NavigationLink(destination: FoodView()){
+                                    Image("food")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 30, height: 30, alignment: .leading)
+                                        .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
-            NavigationView {
-        GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    MainView(viewToShow: $viewToShow, showMenu: self.$showMenu)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .offset(x: self.showMenu ? geometry.size.width/1.25 : 0)
-                        .disabled(self.showMenu ? true : false)
-                    if self.showMenu {
-                        MenuView()
-                            .frame(width: geometry.size.width/1.25)
-                            .transition(.move(edge: .leading))
-                        }
+                                    VStack(alignment: .leading){
+                                            Text("Voeding")
+                                            Text("Vul je voeding in")
+                                        }
+                                    }
+                                }
+                            }
+                
+                    HStack{
+                        ZStack{
+                            Button("") {}
+                                NavigationLink(destination: FoodView()){
+                                Image("upper")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 30, height: 30, alignment: .leading)
+                                    //.clipShape(Circle())
+                                    //.shadow(radius: 10)
+                                    .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
+
+                                VStack(alignment: .leading){
+                                        Text("Training")
+                                        Text("Start je training")
+                                    }
+                                }
+                            }
+                    }
                 }
-                .gesture(tap)
-        }
-        .environmentObject(userModel)
-        .onAppear(perform:{
-            userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
-            
-            let pushManager = PushNotificationManager(userID: Auth.auth().currentUser!.uid)
-            pushManager.registerForPushNotifications()
-        })
-        .navigationBarTitle("Dashboard", displayMode: .inline)
-        .navigationBarItems(leading: (
-                            Button(action: {
+                    }.listStyle(InsetGroupedListStyle())
+                            .environmentObject(userModel)
+                            .onAppear(perform:{
+                            userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
+                            })
+                            .navigationTitle(Text("Dashboard"))
+                            .navigationBarItems(
+                            trailing: Button(action: {
                                 withAnimation {
-                                    self.showMenu.toggle()
+                                    self.showProfileSheetView.toggle()
                                 }
                             }) {
-                                Image(systemName:"line.horizontal.3")
+                                Image(uiImage: (userModel.userImages.userImage?.image ?? UIImage(named: "loadingImageCircle"))!)
                                     .resizable()
-                                    .frame(width: 20, height: 20, alignment: .center)
-                                    .foregroundColor(Color.init("textColor"))
-                            }
-                        ),
-        trailing: Button(action: {
-            withAnimation {
-                self.showProfileSheetView.toggle()
+                                    .clipShape(Circle())
+                                    .frame(width: 25, height: 25, alignment: .center)
+                            }).sheet(isPresented: $showProfileSheetView) {
+                                UpdateProfile(showProfileSheetView: $showProfileSheetView, userModel: userModel, firstName: userModel.user.firstName ?? "", lastName: userModel.user.lastName ?? "", dateOfBirth: userModel.user.dateOfBirth ?? DateHelper.from(year: 1990, month: 1, day: 1), gender: userModel.user.gender ?? 0, weight: userModel.user.weight ?? 0, height: userModel.user.height ?? 0, plan: userModel.user.plan ?? 1, kcal: userModel.user.kcal ?? 0, palOption: userModel.user.pal ?? 0, originalImage: userModel.userImages.userImage?.image)
+                                }
+                }
             }
-        }) {
-            Image(uiImage: (userModel.userImages.userImage?.image ?? UIImage(named: "loadingImageCircle"))!)
-                .resizable()
-                .clipShape(Circle())
-                .frame(width: 25, height: 25, alignment: .center)
-        }).sheet(isPresented: $showProfileSheetView) {
-            UpdateProfile(showProfileSheetView: $showProfileSheetView, userModel: userModel, firstName: userModel.user.firstName ?? "", lastName: userModel.user.lastName ?? "", dateOfBirth: userModel.user.dateOfBirth ?? DateHelper.from(year: 1990, month: 1, day: 1), gender: userModel.user.gender ?? 0, weight: userModel.user.weight ?? 0, height: userModel.user.height ?? 0, plan: userModel.user.plan ?? 1, kcal: userModel.user.kcal ?? 0, palOption: userModel.user.pal ?? 0, originalImage: userModel.userImages.userImage?.image)
-            }
+        }
+
+struct CircleView: View {
+    @ObservedObject var foodModel = FoodDataModel()
+    @EnvironmentObject var userModel: UserDataModel
+
+    init(){
+        self.foodModel.getTodaysIntake(usersKcalBudget: 3034)
+    }
+    
+    
+    
+    var body: some View {
+    
+        ZStack {
+            VStack {
+                ProgressBarCirle(progress: self.$foodModel.userIntakeLeftOvers.kcal)
+                    .frame(width: 125.0, height: 125.0)
+                }
         }
     }
 }
 
-struct LandingPageView: View {
+struct ProgressBarCirle: View {
+    @Binding var progress: Float
     @EnvironmentObject var userModel: UserDataModel
-    
-    @State var frame: CGSize = .zero
-    var coachPicture: UIImage?
+        
+        var body: some View {
+            ZStack {
+                Circle()
+                    .stroke(lineWidth: 5.0)
+                    .opacity(0.3)
+                    .foregroundColor(Color.gray)
+                
+                if self.progress <= 0.8 {
+                    Circle()
+                        .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
+                        .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
+                        .foregroundColor(Color.green)
+                        .rotationEffect(Angle(degrees: 270.0))
+                        .animation(.linear)
+                }
+                else if self.progress > 0.8 && self.progress < 1{
+                Circle()
+                    .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
+                    .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
+                    .foregroundColor(Color.orange)
+                    .rotationEffect(Angle(degrees: 270.0))
+                    .animation(.linear)
+                }
+                else {
+                    Circle()
+                        .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
+                        .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
+                        .foregroundColor(Color.red)
+                        .rotationEffect(Angle(degrees: 270.0))
+                        .animation(.linear)
+                    
+                }
+                VStack{
+                    Text(String(userModel.user.kcal ?? 0))
+                    Text("Kcal over")
+                }
+            }
+        }
+    }
+
+struct ProgressBarLinearKoolh: View {
+    @Binding var value: Float
     
     var body: some View {
-        //Determine the size of the view
-        GeometryReader { (geometry) in
-                        self.makeView(geometry)
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
+                    .opacity(0.3)
+                    .foregroundColor(Color(UIColor.gray))
+                
+                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                    .foregroundColor(Color(UIColor.gray))
+                    .animation(.linear)
+            }.cornerRadius(45.0)
         }
+    }
+}
+
+struct ContentViewLinearKoolh: View {
+    @State var progressValue: Float = 0.0
+    @EnvironmentObject var userModel: UserDataModel
+
+    
+    var body: some View {
         VStack {
             VStack{
-                Text(userModel.user.firstName ?? "").font(.headline).foregroundColor(.white).frame(width: frame.width, height: frame.height, alignment: .bottom)
-            }.frame(width: frame.width, height: frame.height/4, alignment: .top)
-            .background(
-                    Image("barbellImage")
-                    .resizable()
-                    .shadow(radius: 10)
-                    .scaledToFill()
-                )
-            
-            HStack{
-                List{
-                    HStack{
-                        
-                        Image(uiImage: (userModel.userImages.coachImage?.image ?? UIImage(named: "loadingImageCircle"))!)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 75, height: 75, alignment: .leading)
-                            .clipShape(Circle())
-                            .shadow(radius: 10)
-                            .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 20))
-                            
-                        VStack{
-                            Text("Coach").padding(.init(top: 0, leading: 0, bottom: 0, trailing: 0)).foregroundColor(Color.init("textColor")).font(.largeTitle)
-                            //Text("Melle").padding(.init(top: 10, leading: 0, bottom: 10, trailing: 0)).foregroundColor(Color.init("textColor")).font(.headline)
-                            
-                        }
-                        Spacer()
-                    }.padding(.init(top: 5, leading: 5, bottom: 5, trailing: 5))
-                    HStack{
-                        VStack{
-                            Text("Kcal")
-                            Text(String(userModel.user.kcal ?? 0))
-                        }
-                        VStack{
-                            Text("Carbs")
-                            Text(String(userModel.user.carbs ?? 0))
-                        }
-                        VStack{
-                            Text("Protein")
-                            Text(String(userModel.user.protein ?? 0))
-                        }
-                        VStack{
-                            Text("Fats")
-                            Text(String(userModel.user.fat ?? 0))
-                        }
-                        VStack{
-                            Text("Fibers")
-                            Text(String(userModel.user.fiber ?? 0))
-                        }
-                    }
-                    HStack{
-                        NavigationLink(destination: ExerciseOverview(searchText: "")){
-                            //
-                        }
-                    }
+                HStack{
+                    Text(String(userModel.user.carbs ?? 0)).font(.subheadline).bold()
+                    Text("g").font(.subheadline).bold()
                 }
-                
-            }
-            
-        }.padding(.init(top: 12, leading: 0, bottom: 0, trailing: 0)).contentShape(Rectangle())
-    }
-    
-    func makeView(_ geometry: GeometryProxy) -> some View {
-            DispatchQueue.main.async { self.frame = geometry.size }
+                Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                }
+            ProgressBarLinearKoolh(value: $progressValue).frame(height: 7.5)
 
-        return Text("").frame(width:geometry.size.width)
         }
+    }
 }
 
-struct MainView: View {
-    @Binding var viewToShow: String
-    var view: AnyView?
-    @Binding var showMenu: Bool
-    @EnvironmentObject var userModel: UserDataModel
-    
-    @State var frame: CGSize = .zero
-    var coachPicture: UIImage?
+struct ProgressBarLinearEiwit: View {
+    @Binding var value: Float
     
     var body: some View {
-        if viewToShow == "LandingPageView"{
-            LandingPageView()
-        }
-        else if viewToShow == "Schemas"{
-            TrainingOverview()
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
+                    .opacity(0.3)
+                    .foregroundColor(Color(UIColor.gray))
+                
+                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                    .foregroundColor(Color(UIColor.gray))
+                    .animation(.linear)
+            }.cornerRadius(45.0)
         }
     }
 }
+
+struct ContentViewLinearEiwit: View {
+    @State var progressValue: Float = 0.0
+    @EnvironmentObject var userModel: UserDataModel
+    
+    var body: some View {
+        VStack {
+            VStack{
+                HStack{
+                    Text(String(userModel.user.protein ?? 0)).font(.subheadline).bold()
+                    Text("g").font(.subheadline).bold()
+                    }
+                Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                }
+            ProgressBarLinearEiwit(value: $progressValue).frame(height: 7.5)
+        }
+    }
+    
+    func startProgressBar() {
+        for _ in 0...80 {
+            self.progressValue += 0.015
+        }
+    }
+    
+    func resetProgressBar() {
+        self.progressValue = 0.0
+    }
+}
+
+struct ProgressBarLinearVet: View {
+    @Binding var value: Float
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
+                    .opacity(0.3)
+                    .foregroundColor(Color(UIColor.gray))
+                
+                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                    .foregroundColor(Color(UIColor.gray))
+                    .animation(.linear)
+            }.cornerRadius(45.0)
+        }
+    }
+}
+
+struct ContentViewLinearVet: View {
+    @State var progressValue: Float = 0.0
+    @EnvironmentObject var userModel: UserDataModel
+    
+    var body: some View {
+        VStack {
+            VStack{
+                HStack{
+                    Text(String(userModel.user.fat ?? 0)).font(.subheadline).bold()
+                    Text("g").font(.subheadline).bold()
+                    }
+                Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                }
+            ProgressBarLinearVet(value: $progressValue).frame(height: 7.5)
+        }
+    }
+}
+
+struct ProgressBarLinearVezel: View {
+    @Binding var value: Float
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
+                    .opacity(0.3)
+                    .foregroundColor(Color(UIColor.gray))
+                
+                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                    .foregroundColor(Color(UIColor.gray))
+                    .animation(.linear)
+            }.cornerRadius(45.0)
+        }
+    }
+}
+
+struct ContentViewLinearVezel: View {
+    @State var progressValue: Float = 0.0
+    @EnvironmentObject var userModel: UserDataModel
+    
+    var body: some View {
+        VStack {
+            VStack{
+                HStack{
+                    Text(String(userModel.user.fiber ?? 0)).font(.subheadline).bold()
+                    Text("g").font(.subheadline).bold()
+                    }
+                Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                }
+            ProgressBarLinearVezel(value: $progressValue).frame(height: 7.5)
+            
+        }
+    }
+    
+    func startProgressBar() {
+        for _ in 0...80 {
+            self.progressValue += 0.015
+        }
+    }
+    
+    func resetProgressBar() {
+        self.progressValue = 0.0
+    }
+}
+
