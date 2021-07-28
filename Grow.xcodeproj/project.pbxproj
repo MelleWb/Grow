@@ -15,7 +15,6 @@
 		851AFF4B2673D6DC0092DA9B /* GrowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF4A2673D6DC0092DA9B /* GrowTests.swift */; };
 		851AFF562673D6DC0092DA9B /* GrowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF552673D6DC0092DA9B /* GrowUITests.swift */; };
 		8521A2942685BDFC00400657 /* (null) in Embed Frameworks */ = {isa = PBXBuildFile; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		853918662693893B0045A1B5 /* StatefulPreviewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853918652693893B0045A1B5 /* StatefulPreviewWrapper.swift */; };
 		8539186826938D290045A1B5 /* TrainingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8539186726938D290045A1B5 /* TrainingModel.swift */; };
 		85476A2F267FBCE200BA68A2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85476A2E267FBCE200BA68A2 /* LoginView.swift */; };
 		85476A31267FC04100BA68A2 /* KeyboardResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85476A30267FC04100BA68A2 /* KeyboardResponder.swift */; };
@@ -40,7 +39,6 @@
 		85F6FDCE2693A4E60051B60E /* PushNotificationSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */; };
 		85F92EEA2694AD9F00698585 /* Routines.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F92EE92694AD9E00698585 /* Routines.swift */; };
 		85FC5F7F26826E5C00CAC57C /* UpdateProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FC5F7E26826E5B00CAC57C /* UpdateProfile.swift */; };
-		85FCCB552683807000D7FF03 /* DynamicViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FCCB542683807000D7FF03 /* DynamicViews.swift */; };
 		A6E001FFBE239836B521EE84 /* Pods_GrowTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A37F4C0892EF1E134FAE80A /* Pods_GrowTests.framework */; };
 		F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043EE26B0942F002D5C65 /* DashboardView.swift */; };
 		F08043F126B0944B002D5C65 /* FoodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043F026B0944B002D5C65 /* FoodView.swift */; };
@@ -92,7 +90,6 @@
 		851AFF512673D6DC0092DA9B /* GrowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GrowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		851AFF552673D6DC0092DA9B /* GrowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowUITests.swift; sourceTree = "<group>"; };
 		851AFF572673D6DC0092DA9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		853918652693893B0045A1B5 /* StatefulPreviewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatefulPreviewWrapper.swift; sourceTree = "<group>"; };
 		8539186726938D290045A1B5 /* TrainingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingModel.swift; sourceTree = "<group>"; };
 		85476A2E267FBCE200BA68A2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		85476A30267FC04100BA68A2 /* KeyboardResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardResponder.swift; sourceTree = "<group>"; };
@@ -117,7 +114,6 @@
 		85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationSender.swift; sourceTree = "<group>"; };
 		85F92EE92694AD9E00698585 /* Routines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routines.swift; sourceTree = "<group>"; };
 		85FC5F7E26826E5B00CAC57C /* UpdateProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateProfile.swift; sourceTree = "<group>"; };
-		85FCCB542683807000D7FF03 /* DynamicViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicViews.swift; sourceTree = "<group>"; };
 		87EF29623603D4645BA37018 /* Pods-Grow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow.release.xcconfig"; path = "Target Support Files/Pods-Grow/Pods-Grow.release.xcconfig"; sourceTree = "<group>"; };
 		C8DF0475DF192E1486887AF1 /* Pods-Grow-GrowUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow-GrowUITests.debug.xcconfig"; path = "Target Support Files/Pods-Grow-GrowUITests/Pods-Grow-GrowUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		CDB7AACCA6B2946A724EDEA0 /* Pods-Grow-GrowUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow-GrowUITests.release.xcconfig"; path = "Target Support Files/Pods-Grow-GrowUITests/Pods-Grow-GrowUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -237,10 +233,8 @@
 				854B05EB26820A8700A824CD /* UserDefaults.swift */,
 				85476A30267FC04100BA68A2 /* KeyboardResponder.swift */,
 				85BACD85267B33BD00FD29D7 /* TrainingFunctions.swift */,
-				85FCCB542683807000D7FF03 /* DynamicViews.swift */,
 				857E6229268472D600A3A9A4 /* Helpers.swift */,
 				857E622D2684B80900A3A9A4 /* ImagePicker.swift */,
-				853918652693893B0045A1B5 /* StatefulPreviewWrapper.swift */,
 				85887F8526939D050084B82E /* PushNotificationHelper.swift */,
 				85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */,
 				85597D7626A2C166005375F7 /* DisableAutoDismiss.swift */,
@@ -571,10 +565,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				85FCCB552683807000D7FF03 /* DynamicViews.swift in Sources */,
 				85FC5F7F26826E5C00CAC57C /* UpdateProfile.swift in Sources */,
 				854B05EA2681E81500A824CD /* ProgressIndicator.swift in Sources */,
-				853918662693893B0045A1B5 /* StatefulPreviewWrapper.swift in Sources */,
 				8539186826938D290045A1B5 /* TrainingModel.swift in Sources */,
 				85DF0607268C4CA400020559 /* AddExercise.swift in Sources */,
 				F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */,

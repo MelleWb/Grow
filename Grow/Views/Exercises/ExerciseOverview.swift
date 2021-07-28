@@ -52,11 +52,11 @@ struct ExerciseOverview: View {
                    }
                     
                    .onDelete(perform: delete)
-            }.gesture(DragGesture()
+            }/*.gesture(DragGesture()
                         .onChanged({ _ in
                             UIApplication.shared.dismissKeyboard()
                         })
-            )
+            )*/
             }.onAppear(perform: exerciseModel.fetchData)
             .navigationTitle("Oefeningen")
             .navigationBarItems(trailing: (
@@ -69,7 +69,7 @@ struct ExerciseOverview: View {
                             })
                         )
         .sheet(isPresented: $showAddExerciseSheetView) {
-            AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView, name: "", description: "", category: "")
+            AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView)
         }
         }
     }

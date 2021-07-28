@@ -31,6 +31,7 @@ struct TabBarView: View {
 
 struct Dashboard: View{
     @StateObject var userModel = UserDataModel()
+    @ObservedObject var foodModel = FoodDataModel()
     @State var showProfileSheetView: Bool = false
     
     var body: some View {
@@ -39,17 +40,19 @@ struct Dashboard: View{
                 Section{
                     ZStack{
                         HStack{
-                            CircleView().environmentObject(userModel)
+                            CircleView()
+                                .environmentObject(userModel)
+                                .environmentObject(foodModel)
                                 .padding(.top, 20)
                                 .padding(.bottom, 20)
                                 VStack{
                                     HStack{
-                                    ContentViewLinearKoolh()
-                                    ContentViewLinearEiwit()
+                                        ContentViewLinearKoolh().environmentObject(userModel).environmentObject(foodModel)
+                                    ContentViewLinearEiwit().environmentObject(userModel).environmentObject(foodModel)
                                         }
                                         HStack{
-                                            ContentViewLinearVet()
-                                            ContentViewLinearVezel()
+                                            ContentViewLinearVet().environmentObject(userModel).environmentObject(foodModel)
+                                            ContentViewLinearVezel().environmentObject(userModel).environmentObject(foodModel)
                                             }
                                         }.padding(.top, 10)
                                          .padding(.bottom, 20)
@@ -95,7 +98,8 @@ struct Dashboard: View{
                     }.listStyle(InsetGroupedListStyle())
                             .environmentObject(userModel)
                             .onAppear(perform:{
-                            userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
+                                self.userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
+                                self.foodModel.getTodaysIntake(for: userModel)
                             })
                             .navigationTitle(Text("Dashboard"))
                             .navigationBarItems(
@@ -116,14 +120,8 @@ struct Dashboard: View{
         }
 
 struct CircleView: View {
-    @ObservedObject var foodModel = FoodDataModel()
+    @EnvironmentObject var foodModel: FoodDataModel
     @EnvironmentObject var userModel: UserDataModel
-
-    init(){
-        self.foodModel.getTodaysIntake(usersKcalBudget: 3034)
-    }
-    
-    
     
     var body: some View {
     
@@ -180,7 +178,7 @@ struct ProgressBarCirle: View {
         }
     }
 
-struct ProgressBarLinearKoolh: View {
+struct ProgressBarLinearFood: View {
     @Binding var value: Float
     
     var body: some View {
@@ -190,18 +188,29 @@ struct ProgressBarLinearKoolh: View {
                     .opacity(0.3)
                     .foregroundColor(Color(UIColor.gray))
                 
+                if value <= 0.8 {
+                
                 Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                    .foregroundColor(Color(UIColor.gray))
+                    .foregroundColor(Color.green)
                     .animation(.linear)
+                }
+                else if value > 0.8 && value < 1 {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                        .foregroundColor(Color.orange)
+                        .animation(.linear)
+                } else {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                        .foregroundColor(Color.red)
+                        .animation(.linear)
+                }
             }.cornerRadius(45.0)
         }
     }
 }
 
 struct ContentViewLinearKoolh: View {
-    @State var progressValue: Float = 0.0
     @EnvironmentObject var userModel: UserDataModel
-
+    @EnvironmentObject var foodModel: FoodDataModel
     
     var body: some View {
         VStack {
@@ -212,32 +221,14 @@ struct ContentViewLinearKoolh: View {
                 }
                 Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearKoolh(value: $progressValue).frame(height: 7.5)
+            ProgressBarLinearFood(value: $foodModel.userIntakeLeftOvers.carbs).frame(height: 7.5)
 
-        }
-    }
-}
-
-struct ProgressBarLinearEiwit: View {
-    @Binding var value: Float
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
-                    .opacity(0.3)
-                    .foregroundColor(Color(UIColor.gray))
-                
-                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                    .foregroundColor(Color(UIColor.gray))
-                    .animation(.linear)
-            }.cornerRadius(45.0)
         }
     }
 }
 
 struct ContentViewLinearEiwit: View {
-    @State var progressValue: Float = 0.0
+    @EnvironmentObject var foodModel: FoodDataModel
     @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
@@ -249,31 +240,13 @@ struct ContentViewLinearEiwit: View {
                     }
                 Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearEiwit(value: $progressValue).frame(height: 7.5)
-        }
-    }
-}
-
-struct ProgressBarLinearVet: View {
-    @Binding var value: Float
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
-                    .opacity(0.3)
-                    .foregroundColor(Color(UIColor.gray))
-                
-                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                    .foregroundColor(Color(UIColor.gray))
-                    .animation(.linear)
-            }.cornerRadius(45.0)
+            ProgressBarLinearFood(value: $foodModel.userIntakeLeftOvers.protein).frame(height: 7.5)
         }
     }
 }
 
 struct ContentViewLinearVet: View {
-    @State var progressValue: Float = 0.0
+    @EnvironmentObject var foodModel: FoodDataModel
     @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
@@ -285,32 +258,14 @@ struct ContentViewLinearVet: View {
                     }
                 Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearVet(value: $progressValue).frame(height: 7.5)
-        }
-    }
-}
-
-struct ProgressBarLinearVezel: View {
-    @Binding var value: Float
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
-                    .opacity(0.3)
-                    .foregroundColor(Color(UIColor.gray))
-                
-                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                    .foregroundColor(Color(UIColor.gray))
-                    .animation(.linear)
-            }.cornerRadius(45.0)
+            ProgressBarLinearFood(value: $foodModel.userIntakeLeftOvers.fat).frame(height: 7.5)
         }
     }
 }
 
 struct ContentViewLinearVezel: View {
-    @State var progressValue: Float = 0.0
     @EnvironmentObject var userModel: UserDataModel
+    @EnvironmentObject var foodModel: FoodDataModel
     
     var body: some View {
         VStack {
@@ -321,7 +276,7 @@ struct ContentViewLinearVezel: View {
                     }
                 Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearVezel(value: $progressValue).frame(height: 7.5)
+            ProgressBarLinearFood(value: $foodModel.userIntakeLeftOvers.fiber).frame(height: 7.5)
             
         }
     }

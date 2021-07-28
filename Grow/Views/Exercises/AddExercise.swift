@@ -11,9 +11,9 @@ import Firebase
 struct AddExercise: View {
     
     @Binding var showAddExerciseSheetView: Bool
-    @State var name: String
-    @State var description: String
-    @State var category: String
+    @State var name: String = ""
+    @State var description: String = ""
+    @State var category: String = ""
     
     func hasEmtpyFields() -> Bool {
         if self.name.isEmpty || self.category.isEmpty {

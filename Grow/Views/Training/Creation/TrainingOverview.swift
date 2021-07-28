@@ -16,9 +16,7 @@ struct TrainingOverview: View {
         NavigationView{
         VStack{
             List {
-                
                 ForEach(Array(schemas.fetchedSchemas.enumerated()), id: \.1) { index, schema in
-                    
                     NavigationLink(destination: ReviewSchema(schema: schema).environmentObject(schemas)){
                         Text(schema.name)
                     }

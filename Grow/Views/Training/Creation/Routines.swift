@@ -15,7 +15,9 @@ struct ReviewSchema: View{
     var body: some View {
         VStack{
             SchemaBody().environmentObject(schemaModel)
-        }
+        }.onAppear(perform:{
+            self.schemaModel.setSingleSchemaFromFetchedSchemas(for: schema)
+        })
     }
 }
 
@@ -265,6 +267,7 @@ struct ExerciseDetail : View{
     var exerciseInfo: ExerciseInfo
     @State var searchText = ""
     @State var searching = false
+    @State var showAddExerciseSheetView = false
     
     init(routine: Routine, superset: Superset, exerciseInfo: ExerciseInfo, selectedExercise: String?, searchText:String = "", searching:Bool = false){
 
@@ -292,6 +295,18 @@ struct ExerciseDetail : View{
                         UIApplication.shared.dismissKeyboard()
                     })
         )
+        .navigationBarItems(trailing: (
+                        Button(action: {
+                            withAnimation {
+                                self.showAddExerciseSheetView.toggle()
+                            }
+                        }) {
+                            Image(systemName: "plus")
+                        })
+                    )
+        .sheet(isPresented: $showAddExerciseSheetView) {
+            AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView)
+        }
     }
 }
 

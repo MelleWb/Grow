@@ -31,7 +31,6 @@ struct LoginView : View {
         }
     
         var body: some View{
-            ProgressIndicator(isShowing: $isShowing) {
             VStack {
                 WelcomeText()
                 LoginImage()
@@ -59,7 +58,6 @@ struct LoginView : View {
             .environmentObject(fbAuth)
             }
         }
-}
     
 struct UsernameTextField : View {
     @Binding var username: String
