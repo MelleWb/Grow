@@ -16,23 +16,27 @@ struct TabBarView: View {
                         Label("Dashboard", systemImage: "gauge")
                        }
 
-                   ExerciseOverview()
+                   TrainingDashboardView()
                        .tabItem {
-                        Label("Oefeningen", systemImage: "square.and.pencil")
+                        Label("Training", systemImage: "bolt")
                        }
-            
-                    TrainingOverview()
+                    
+                    ChatView()
                         .tabItem {
-                            Label("Schemas", systemImage: "list.dash")
+                            Label("Chat", systemImage: "message")
                         }
         }.accentColor(Color.init("textColor"))
     }
 }
 
 struct Dashboard: View{
-    @StateObject var userModel = UserDataModel()
+    @ObservedObject var userModel = UserDataModel()
     @ObservedObject var foodModel = FoodDataModel()
     @State var showProfileSheetView: Bool = false
+    
+    init(){
+        self.userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
+    }
     
     var body: some View {
         NavigationView{
@@ -98,7 +102,6 @@ struct Dashboard: View{
                     }.listStyle(InsetGroupedListStyle())
                             .environmentObject(userModel)
                             .onAppear(perform:{
-                                self.userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
                                 self.foodModel.getTodaysIntake(for: userModel)
                             })
                             .navigationTitle(Text("Dashboard"))

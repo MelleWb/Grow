@@ -36,7 +36,6 @@ struct ExerciseOverview: View {
     }
     
     var body: some View{
-        NavigationView{
             VStack(alignment: .leading){
                 List {
                     SearchBar(searchText: $searchText, searching: $searching)
@@ -70,7 +69,6 @@ struct ExerciseOverview: View {
                         )
         .sheet(isPresented: $showAddExerciseSheetView) {
             AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView)
-        }
         }
     }
 }

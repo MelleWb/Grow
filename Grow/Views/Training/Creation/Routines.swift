@@ -11,6 +11,7 @@ import Firebase
 struct ReviewSchema: View{
     @EnvironmentObject var schemaModel: TrainingDataModel
     var schema: Schema
+    @State var showSuccessAlert: Bool = false
     
     var body: some View {
         VStack{

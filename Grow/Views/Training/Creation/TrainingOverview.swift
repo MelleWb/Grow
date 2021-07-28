@@ -7,13 +7,51 @@
 
 import SwiftUI
 
+struct TrainingDashboardView : View {
+    var body: some View {
+        NavigationView{
+            VStack{
+                List{
+                    Section(header:Text("Schemas en oefeningen")){
+                        NavigationLink(destination: ExerciseOverview()){
+                            HStack{
+                                Image(systemName: "list.bullet").foregroundColor(Color.init("textColor"))
+                                Text("Oefeningen").font(.subheadline)
+                            }
+                        }
+                        NavigationLink(destination: TrainingOverview()){
+                            HStack{
+                                Image(systemName: "square.and.pencil").foregroundColor(Color.init("textColor"))
+                                Text("Training schemas maken").font(.subheadline)
+                            }
+                        }
+                    }
+                    Section(header:Text("Trainingsdagen")){
+                        NavigationLink(destination: TrainingDaySelectionView()){
+                            HStack{
+                                Image(systemName: "calendar").foregroundColor(Color.init("textColor"))
+                                Text("Selecteer trainingsdagen").font(.subheadline)
+                            }
+                        }
+                    }
+                }
+            }.navigationTitle(Text("Trainingen"))
+        }
+    }
+}
+
+struct TrainingDaySelectionView: View {
+    var body: some View {
+        Text("Test")
+    }
+}
+
 struct TrainingOverview: View {
     
     @State private var showAddSchema = false
     @ObservedObject var schemas = TrainingDataModel()
     
     var body: some View {
-        NavigationView{
         VStack{
             List {
                 ForEach(Array(schemas.fetchedSchemas.enumerated()), id: \.1) { index, schema in
@@ -39,6 +77,5 @@ struct TrainingOverview: View {
                    Image(systemName: "plus")
                }
            )
-        }
     }
 }

@@ -201,7 +201,7 @@ class TrainingDataModel: ObservableObject{
         let newSchemaRef = db.collection("schemas").document()
         
         do {
-            try newSchemaRef.setData(from: saveSchema)
+            try newSchemaRef.setData(from: saveSchema, merge: true)
         }
         catch let error {
             print(error)
