@@ -5,8 +5,9 @@
 //  Created by Melle Wittebrood on 29/07/2021.
 //
 
+/*
 import SwiftUI
-import KeyboardToolbar
+//import KeyboardToolbar
 
 
 struct TrainingDetailView: View {
@@ -50,7 +51,7 @@ struct TrainingDetailView: View {
                             }
                         }
                     }
-            }.keyboardToolbar(toolbarItems)
+            }//.keyboardToolbar(toolbarItems)
         }
 }
 
@@ -134,3 +135,4 @@ struct TrainingDetailView: View {
             numbers.remove(atOffsets: offsets)
         }
     }
+*/

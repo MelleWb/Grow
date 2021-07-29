@@ -40,12 +40,6 @@ struct TrainingDashboardView : View {
     }
 }
 
-struct TrainingDaySelectionView: View {
-    var body: some View {
-        Text("Test")
-    }
-}
-
 struct TrainingOverview: View {
     
     @State private var showAddSchema = false
