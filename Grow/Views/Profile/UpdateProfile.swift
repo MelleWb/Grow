@@ -12,20 +12,8 @@ import FirebaseStorage
 struct UpdateProfile: View {
 
     @Binding var showProfileSheetView: Bool
-    @StateObject var userModel: UserDataModel
-    
-    @State var firstName:String
-    @State var lastName:String
-    @State var dateOfBirth:Date
-    @State var gender:Int
-    @State var weight: Int
-    @State var height: Int
-    @State var plan:Int
-    @State var kcal: Int
-    @State var palOption: Int
+    @EnvironmentObject var userModel: UserDataModel
     @State var originalImage: UIImage?
-    
-     
 
     func calcKcal(weight: Double, height: Double, dateOfBirth: Date, gender: Int, palOption: Int) -> Int {
         
@@ -57,10 +45,10 @@ struct UpdateProfile: View {
                 let calc1 = 66 + (13.7 * weight)
                 let kcal = calc1 + (5 * height) - (6.8 * Double(ageNumber))
                 
-                    if plan == 0{
+                if userModel.user.plan == 0{
                         return Int((kcal * palValue) * 0.82)
                     }
-                    else if plan == 1{
+                    else if userModel.user.plan == 1{
                         return Int(kcal * palValue)
                     }
                     else{
@@ -71,10 +59,10 @@ struct UpdateProfile: View {
                 let calc1 = 447.593 + (9.247 * weight)
                 let kcal = calc1 + (3.098 * height) - (4.33 * Double(ageNumber))
                 
-                    if plan == 0{
+                    if userModel.user.plan == 0{
                         return Int((kcal * palValue) * 0.82)
                     }
-                    else if plan == 1{
+                    else if userModel.user.plan == 1{
                         return Int(kcal * palValue)
                     }
                     else{
@@ -101,140 +89,65 @@ struct UpdateProfile: View {
         return Int(Double(kcal) * 0.014)
     }
     
-    func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage? {
-        let size = image.size
-        
-        let widthRatio  = targetSize.width  / size.width
-        let heightRatio = targetSize.height / size.height
-        
-        // Figure out what our orientation is, and use that to form the rectangle
-        var newSize: CGSize
-        if(widthRatio > heightRatio) {
-            newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
-        } else {
-            newSize = CGSize(width: size.width * widthRatio, height: size.height * widthRatio)
-        }
-        
-        // This is the rect that we've calculated out and this is what is actually used below
-        let rect = CGRect(origin: .zero, size: newSize)
-        
-        // Actually do the resizing to the rect using the ImageContext stuff
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
-        image.draw(in: rect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage
-    }
-    
     var body: some View {
         
         NavigationView {
             Form {
                 Section {
                     VStack(alignment: .leading){
-                        PersonalDetails(firstName: $firstName, lastName: $lastName, originalImage: $originalImage)
+                        PersonalDetails(originalImage: $originalImage).environmentObject(userModel)
                         }.padding()
                     }
                 Section {
-                    DateOfBirth(dateOfBirth: $dateOfBirth)
+                    DateOfBirth().environmentObject(userModel)
                 }.padding()
                 Section {
-                    WeightHeight(height: $height, weight: $weight)
+                    WeightHeight().environmentObject(userModel)
                 }.padding()
                 Section{
-                    Gender(gender: $gender)
+                    Gender().environmentObject(userModel)
                 }.padding()
                 .pickerStyle(DefaultPickerStyle())
                 Section {
-                    Plan(plan:$plan)
+                    Plan().environmentObject(userModel)
                 }.padding()
                 .pickerStyle(DefaultPickerStyle())
                 Section {
-                    PalValue(palOption: $palOption)
+                    PalValue().environmentObject(userModel)
                 }.padding()
+                Section {
+                    WorkOutSchema().environmentObject(userModel)
+                }.padding()
+                
                 .pickerStyle(DefaultPickerStyle())
+                .onAppear(perform:{self.originalImage = self.userModel.userImages.userImage?.image})
+                
                 }
                 .accentColor(Color.init("textColor"))
                 .navigationBarTitle(Text("Profiel"), displayMode: .inline)
                    .navigationBarItems(trailing: Button(action: {
                     
                     if originalImage != nil {
-                        let storageRef = Storage.storage().reference().child(userModel.user.id ?? "UserPicture \((UUID()))")
-                        
-                        let compressedImage: UIImage = self.resizeImage(image:originalImage!, targetSize: CGSize(width: 500, height: 500))!
-                        
-                        if let uploadData = compressedImage.pngData(){
-                            storageRef.putData(uploadData, metadata: nil, completion: {(metadata, error)in
-                                if error != nil {
-                                    print("error")
-                                    setUserObject()
-                                    return
-                                }
-                                else {
-                                    storageRef.downloadURL(completion: {(url, error) in
-                                        print("Image URL: \((url?.absoluteString)!)")
-                                        self.userModel.user.userImageURL = url?.absoluteString
-                                        setUserObject()
-                                    })
-                                }
-                            })
+                        self.userModel.uploadPicture(for: originalImage!)
                         }
-                    } else {
-                        print ("Nil")
-                        setUserObject()
-                    }
                     
-                    func setUserObject() {
-                        var updatedUserObject = User()
-                        updatedUserObject.id = userModel.user.id
-                        updatedUserObject.firstName = self.firstName
-                        updatedUserObject.lastName = self.lastName
-                        updatedUserObject.dateOfBirth = self.dateOfBirth
-                        updatedUserObject.gender = self.gender
-                        updatedUserObject.weight = self.weight
-                        updatedUserObject.height = self.height
-                        updatedUserObject.plan = self.plan
-                        updatedUserObject.gender = self.gender
-                        updatedUserObject.pal = self.palOption
-                        updatedUserObject.kcal = calcKcal(weight: Double(updatedUserObject.weight ?? 0), height: Double(updatedUserObject.height ?? 0), dateOfBirth: updatedUserObject.dateOfBirth ?? DateHelper.from(year: 1990, month: 1, day: 1), gender: updatedUserObject.gender ?? 0, palOption: updatedUserObject.pal ?? 0)
-                        updatedUserObject.protein = calcProtein(weight: updatedUserObject.weight ?? 0)
-                        updatedUserObject.fat = calcFat(kcal: updatedUserObject.kcal ?? 0)
-                        updatedUserObject.carbs = calcCarbs(kcal: updatedUserObject.kcal ?? 0, protein: updatedUserObject.protein ?? 0, fat: updatedUserObject.fat ?? 0)
-                        updatedUserObject.fiber = calcFiber(kcal: updatedUserObject.kcal ?? 0)
-                        updatedUserObject.userImageURL = userModel.user.userImageURL
-                        
-                        
-                        let settings = FirestoreSettings()
-                        settings.isPersistenceEnabled = true
-                        let db = Firestore.firestore()
-                        
-                        let docRef = db.collection("users").document(userModel.user.id!)
-                        do {
-                            try docRef.setData(from: updatedUserObject, merge: true)
-                            //Overwrite the user model with new data
-                            userModel.user = updatedUserObject
-
-                        }
-                        catch {
-                          print(error)
-                        }
-                    }
+                    //Update the user
                     
+                    self.userModel.updateUser()
                     //dismiss the sheet
                     self.showProfileSheetView = false
                    
                    }) {
-                    Text("Klaar").bold()
+                    Text("Klaar").bold().foregroundColor(Color.init("textColor"))
                    })
-            }
+        }
         }
 }
 
 
 struct PersonalDetails: View {
-    @Binding var firstName:String
-    @Binding var lastName:String
+    @EnvironmentObject var userModel : UserDataModel
+
     @State private var showingImagePicker = false
     @State private var inputImage: UIImage?
     @Binding var originalImage: UIImage?
@@ -246,7 +159,6 @@ struct PersonalDetails: View {
     
     var body: some View {
         HStack{
-            
             if originalImage != nil {
                 Image(uiImage: originalImage!)
                     .resizable()
@@ -269,8 +181,8 @@ struct PersonalDetails: View {
             }
 
             VStack{
-                FirstName(firstName: $firstName)
-                LastName(lastName: $lastName)
+                FirstName().environmentObject(userModel)
+                LastName().environmentObject(userModel)
             }
         }
         .sheet(isPresented: $showingImagePicker, onDismiss: loadImage) {
@@ -280,9 +192,17 @@ struct PersonalDetails: View {
 }
 
 struct FirstName : View {
-    @Binding var firstName: String
+    
+    @EnvironmentObject var userModel: UserDataModel
+
     var body: some View {
-        return TextField("Voornaam", text: $firstName)
+        
+        let firstName = Binding(
+            get: { self.userModel.user.firstName ?? "" },
+            set: { self.userModel.updateUserModel(for: "firstName", to: $0) }
+        )
+        
+        return TextField("Voornaam", text: firstName)
                 .padding()
                 .background(Color.init("textField"))
                 .cornerRadius(5.0)
@@ -291,9 +211,17 @@ struct FirstName : View {
 }
 
 struct LastName : View {
-    @Binding var lastName: String
+    
+    @EnvironmentObject var userModel: UserDataModel
+    
     var body: some View {
-        return TextField("Achternaam", text: $lastName)
+        
+        let lastName = Binding(
+            get: { self.userModel.user.lastName ?? "" },
+            set: { self.userModel.updateUserModel(for: "lastName", to: $0) }
+        )
+        
+        return TextField("Achternaam", text: lastName)
                 .padding()
                 .background(Color.init("textField"))
                 .cornerRadius(5.0)
@@ -303,11 +231,17 @@ struct LastName : View {
 
 struct DateOfBirth : View {
     
-    @Binding var dateOfBirth: Date
+    @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
+        
+        let dateOfBirth = Binding(
+            get: { self.userModel.user.dateOfBirth ?? DateHelper.from(year: 1970, month: 1, day: 1)},
+            set: { self.userModel.updateUserModel(for: "dateOfBirth", to: $0) }
+        )
+        
         return
-            DatePicker("Geboortedatum", selection: $dateOfBirth, displayedComponents: .date)
+            DatePicker("Geboortedatum", selection: dateOfBirth, displayedComponents: .date)
             .datePickerStyle(CompactDatePickerStyle())
                 .frame(maxHeight: 400)
     }
@@ -315,12 +249,18 @@ struct DateOfBirth : View {
 
 struct Gender : View {
     
-    @Binding var gender: Int
+    @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
+        
+        let gender = Binding(
+            get: { self.userModel.user.gender ?? 0 },
+            set: { self.userModel.updateUserModel(for: "gender", to: $0) }
+        )
+        
         return
             VStack{
-                Picker(selection: $gender, label: Text("Geslacht"), content:{
+                Picker(selection: gender, label: Text("Geslacht"), content:{
                                     Text("Man").tag(0)
                                     Text("Vrouw").tag(1)
                 }).padding()
@@ -330,26 +270,24 @@ struct Gender : View {
 
 struct WeightHeight : View {
     
-    
-    @Binding var height: Int
-    @Binding var weight: Int
+    @EnvironmentObject var userModel: UserDataModel
     
     var body: some View{
         
         let weightProxy = Binding<String>(
-            get: { String(Int(self.weight)) },
+            get: { String(self.userModel.user.weight ?? 0) },
             set: {
                 if let value = NumberFormatter().number(from: $0) {
-                    self.weight = value.intValue
+                    self.userModel.updateUserModel(for: "weight", to: value.intValue)
                 }
             }
         )
         
         let heightProxy = Binding<String>(
-            get: { String(Int(self.height)) },
+            get: { String(self.userModel.user.height ?? 0) },
             set: {
                 if let value = NumberFormatter().number(from: $0) {
-                    self.height = value.intValue
+                    self.userModel.updateUserModel(for: "height", to: value.intValue)
                 }
             }
         )
@@ -383,11 +321,17 @@ struct WeightHeight : View {
 
 struct Plan : View {
     
-    @Binding var plan: Int
+    @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
+        
+        let plan = Binding(
+            get: { self.userModel.user.plan ?? 0 },
+            set: { self.userModel.updateUserModel(for: "plan", to: $0) }
+        )
+        
         return
-            Picker(selection: $plan, label: Text("Plan")) {
+            Picker(selection: plan, label: Text("Plan")) {
                                 Text("Cut").tag(0)
                                 Text("Onderhoud").tag(1)
                                 Text("Bulk").tag(2)
@@ -398,18 +342,46 @@ struct Plan : View {
 
 struct PalValue : View {
     
-    @Binding var palOption: Int
+    @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
         
+        let palValue = Binding(
+            get: { self.userModel.user.pal ?? 0 },
+            set: { self.userModel.updateUserModel(for: "pal", to: $0) }
+        )
+        
         return
             Section {
-            Picker(selection: $palOption, label: Text("Trainingen")) {
+            Picker(selection: palValue, label: Text("Trainingen")) {
                                 Text("1 a 2 keer per week").tag(0)
                                 Text("3 a 4 keer per week").tag(1)
                                 Text("4 a 5 keer per week").tag(2)
                                 Text("6 a 7 keer per week").tag(3)
                         }.padding()
             }
+    }
+}
+
+struct WorkOutSchema : View {
+    
+    @EnvironmentObject var userModel: UserDataModel
+    @ObservedObject var schemaModel = TrainingDataModel()
+    
+    var body: some View {
+        
+        let schema = Binding(
+            get: { self.userModel.user.schema ?? "" },
+            set: { self.userModel.updateUserModel(for: "workoutSchema", to: $0) }
+        )
+        
+        return
+            Section {
+            Picker(selection: schema, label: Text("Trainingsschema")) {
+                ForEach(schemaModel.fetchedSchemas, id: \.self){ schema in
+                    Text(schema.name).tag(schema.name)
+                }
+                        }.padding()
+            }.onAppear(perform:{self.schemaModel.fetchData()})
     }
 }

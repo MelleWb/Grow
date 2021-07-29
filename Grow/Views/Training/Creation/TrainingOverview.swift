@@ -16,13 +16,13 @@ struct TrainingDashboardView : View {
                         NavigationLink(destination: ExerciseOverview()){
                             HStack{
                                 Image(systemName: "list.bullet").foregroundColor(Color.init("textColor"))
-                                Text("Oefeningen").font(.subheadline)
+                                Text("Bekijk alle oefeningen").font(.subheadline)
                             }
                         }
                         NavigationLink(destination: TrainingOverview()){
                             HStack{
                                 Image(systemName: "square.and.pencil").foregroundColor(Color.init("textColor"))
-                                Text("Training schemas maken").font(.subheadline)
+                                Text("Bekijk al onze trainingschemas").font(.subheadline)
                             }
                         }
                     }
@@ -30,7 +30,7 @@ struct TrainingDashboardView : View {
                         NavigationLink(destination: TrainingDaySelectionView()){
                             HStack{
                                 Image(systemName: "calendar").foregroundColor(Color.init("textColor"))
-                                Text("Selecteer trainingsdagen").font(.subheadline)
+                                Text("Selecteer je trainingsdagen").font(.subheadline)
                             }
                         }
                     }

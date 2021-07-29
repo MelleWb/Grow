@@ -53,7 +53,7 @@ struct DynamicTrainingDaysView: View {
                         Image(systemName: "powersleep").foregroundColor(Color.init("textColor"))
                     }
                     else {
-                        Image(systemName: "bolt").foregroundColor(Color.init("textColor"))
+                        Image(systemName: "bolt")
                     }
                     Text(day.type)
                 }

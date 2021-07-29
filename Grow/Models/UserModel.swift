@@ -31,6 +31,7 @@ struct User: Codable {
     var fiber: Int?
     var pal: Int?
     var fcmToken: String?
+    var schema: String?
     
     init(id: String? = nil,
          firstName: String? = nil,
@@ -49,7 +50,8 @@ struct User: Codable {
          fat: Int? = nil,
          fiber: Int? = nil,
          pal: Int? = nil,
-         fcmToken: String? = nil
+         fcmToken: String? = nil,
+         schema: String? = nil
     ) {
         self.id = id
         self.firstName = firstName
@@ -69,6 +71,7 @@ struct User: Codable {
         self.fiber = fiber
         self.pal = pal
         self.fcmToken = fcmToken
+        self.schema = schema
     }
 }
 
@@ -83,6 +86,12 @@ struct UserImages {
         self.coachImage = coachImage
         self.userImage = userImage
     }
+}
+
+struct trainingWeekSchema {
+    var routine: String?
+    var isTrainingDay: Bool?
+    var day: String?
 }
 
 class UserDataModel: ObservableObject{
@@ -136,7 +145,6 @@ class UserDataModel: ObservableObject{
                       } else {
                             self.userImages.userImage = ImageWrapper(image: UIImage(data: data!) ?? defaultImage)
                       }
-                        
                     }
                 }
             }
@@ -146,6 +154,83 @@ class UserDataModel: ObservableObject{
           }
         }
       }
+    }
+    
+    func updateUserModel(for key: String, to value: Any){
+        if key == "firstName"{
+            self.user.firstName = value as? String
+        }
+        if key == "lastName"{
+            self.user.lastName = value as? String
+        }
+        if key == "gender"{
+            self.user.lastName = value as? String
+        }
+        if key == "dateOfBirth"{
+            self.user.dateOfBirth = value as? Date
+        }
+        if key == "weight"{
+            self.user.weight = value as? Int
+        }
+        if key == "height"{
+            self.user.height = value as? Int
+        }
+        if key == "plan"{
+            self.user.plan = value as? Int
+        }
+        if key == "pal"{
+            self.user.pal = value as? Int
+        }
+        if key == "workoutSchema"{
+            self.user.schema = value as? String
+        }
+    }
+    
+    func uploadPicture(for image: UIImage){
+        let storageRef = Storage.storage().reference().child(self.user.id ?? "UserPicture \((UUID()))")
+        
+        let compressedImage: UIImage = resizeImage(image:image, targetSize: CGSize(width: 500, height: 500))!
+        
+        if let uploadData = compressedImage.pngData(){
+            storageRef.putData(uploadData, metadata: nil, completion: {(metadata, error)in
+                if error != nil {
+                    print("error")
+                    return
+                }
+                else {
+                    storageRef.downloadURL(completion: {(url, error) in
+                        print("Image URL: \((url?.absoluteString)!)")
+                        self.user.userImageURL = url?.absoluteString
+                    })
+                }
+            })
+        }
+    }
+        
+    func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage? {
+        let size = image.size
+        
+        let widthRatio  = targetSize.width  / size.width
+        let heightRatio = targetSize.height / size.height
+        
+        // Figure out what our orientation is, and use that to form the rectangle
+        var newSize: CGSize
+        if(widthRatio > heightRatio) {
+            newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
+        } else {
+            newSize = CGSize(width: size.width * widthRatio, height: size.height * widthRatio)
+        }
+        
+        // This is the rect that we've calculated out and this is what is actually used below
+        let rect = CGRect(origin: .zero, size: newSize)
+        
+        // Actually do the resizing to the rect using the ImageContext stuff
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+        image.draw(in: rect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
     
     func updateUser() {

@@ -116,7 +116,7 @@ struct Dashboard: View{
                                     .clipShape(Circle())
                                     .frame(width: 25, height: 25, alignment: .center)
                             }).sheet(isPresented: $showProfileSheetView) {
-                                UpdateProfile(showProfileSheetView: $showProfileSheetView, userModel: userModel, firstName: userModel.user.firstName ?? "", lastName: userModel.user.lastName ?? "", dateOfBirth: userModel.user.dateOfBirth ?? DateHelper.from(year: 1990, month: 1, day: 1), gender: userModel.user.gender ?? 0, weight: userModel.user.weight ?? 0, height: userModel.user.height ?? 0, plan: userModel.user.plan ?? 1, kcal: userModel.user.kcal ?? 0, palOption: userModel.user.pal ?? 0, originalImage: userModel.userImages.userImage?.image)
+                                UpdateProfile(showProfileSheetView: $showProfileSheetView).environmentObject(userModel)
                                 }
                 }
             }
