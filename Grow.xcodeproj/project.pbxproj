@@ -43,6 +43,7 @@
 		A6E001FFBE239836B521EE84 /* Pods_GrowTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A37F4C0892EF1E134FAE80A /* Pods_GrowTests.framework */; };
 		F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043EE26B0942F002D5C65 /* DashboardView.swift */; };
 		F08043F126B0944B002D5C65 /* FoodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043F026B0944B002D5C65 /* FoodView.swift */; };
+		F08043F326B3235E002D5C65 /* TrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043F226B3235E002D5C65 /* TrainingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -125,6 +126,7 @@
 		ED30685E6FCB1070B6129F05 /* Pods_Grow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Grow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F08043EE26B0942F002D5C65 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		F08043F026B0944B002D5C65 /* FoodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodView.swift; sourceTree = "<group>"; };
+		F08043F226B3235E002D5C65 /* TrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -283,6 +285,7 @@
 				85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */,
 				85DF0606268C4CA400020559 /* AddExercise.swift */,
 				F08043F026B0944B002D5C65 /* FoodView.swift */,
+				F08043F226B3235E002D5C65 /* TrainingView.swift */,
 			);
 			path = Exercises;
 			sourceTree = "<group>";
@@ -580,6 +583,7 @@
 				85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */,
 				85D21061268F8F32002BA11C /* SearchBar.swift in Sources */,
 				85E34872267504ED003C4311 /* StaticJson.swift in Sources */,
+				F08043F326B3235E002D5C65 /* TrainingView.swift in Sources */,
 				85C48AE326B0978100BFE48E /* FoodModel.swift in Sources */,
 				859B9454268B9A37003F58F2 /* ExerciseModel.swift in Sources */,
 				85037C16268915D500EC344B /* UserModel.swift in Sources */,
