@@ -32,6 +32,7 @@ struct User: Codable {
     var pal: Int?
     var fcmToken: String?
     var schema: String?
+    var weekPlan: [DayPlan]?
     
     init(id: String? = nil,
          firstName: String? = nil,
@@ -51,7 +52,8 @@ struct User: Codable {
          fiber: Int? = nil,
          pal: Int? = nil,
          fcmToken: String? = nil,
-         schema: String? = nil
+         schema: String? = nil,
+         weekPlan: [DayPlan]? = nil
     ) {
         self.id = id
         self.firstName = firstName
@@ -72,6 +74,7 @@ struct User: Codable {
         self.pal = pal
         self.fcmToken = fcmToken
         self.schema = schema
+        self.weekPlan = weekPlan
     }
 }
 
@@ -88,11 +91,14 @@ struct UserImages {
     }
 }
 
-struct trainingWeekSchema {
+struct DayPlan: Codable, Identifiable {
+    var id = UUID()
     var routine: String?
     var isTrainingDay: Bool?
     var day: String?
+    var dayNumber: Int?
 }
+
 
 class UserDataModel: ObservableObject{
     
@@ -102,9 +108,9 @@ class UserDataModel: ObservableObject{
     
     func fetchUser(uid: String) {
         
-    let settings = FirestoreSettings()
-    settings.isPersistenceEnabled = true
-    let db = Firestore.firestore()
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
         
       let docRef = db.collection("users").document(uid)
         
@@ -117,36 +123,9 @@ class UserDataModel: ObservableObject{
             do {
                 self.user = try document.data(as: User.self)!
                 
-                if self.user.coachPictureURL != nil {
-                    
-                    let storage = Storage.storage()
-                    let imageRef = storage.reference(forURL: self.user.coachPictureURL ?? "gs://")
-                    let defaultImage: UIImage = UIImage(named: "errorLoading")!
-
-                    // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
-                    imageRef.getData(maxSize: 1 * 4000 * 4000) { data, error in
-                        if error != nil {
-                            self.userImages.coachImage = ImageWrapper(image: defaultImage)
-                      } else {
-                            self.userImages.coachImage = ImageWrapper(image: UIImage(data: data!) ?? defaultImage)
-                      }
-                        
-                    }
-                }
-                if self.user.userImageURL != nil {
-                    let storage = Storage.storage()
-                    let imageRef = storage.reference(forURL: self.user.userImageURL ?? "gs://")
-                    let defaultImage: UIImage = UIImage(named: "errorLoading")!
-
-                    // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
-                    imageRef.getData(maxSize: 1 * 4000 * 4000) { data, error in
-                        if error != nil {
-                            self.userImages.userImage = ImageWrapper(image: defaultImage)
-                      } else {
-                            self.userImages.userImage = ImageWrapper(image: UIImage(data: data!) ?? defaultImage)
-                      }
-                    }
-                }
+                //Fetch User and Coach Image
+                self.fetchUserAndCoachImage()
+                
             }
             catch {
               print(error)
@@ -154,6 +133,61 @@ class UserDataModel: ObservableObject{
           }
         }
       }
+    }
+
+    func fetchUserAndCoachImage(){
+        if self.user.coachPictureURL != nil {
+            
+            let storage = Storage.storage()
+            let imageRef = storage.reference(forURL: self.user.coachPictureURL ?? "gs://")
+            let defaultImage: UIImage = UIImage(named: "errorLoading")!
+
+            // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
+            imageRef.getData(maxSize: 1 * 4000 * 4000) { data, error in
+                if error != nil {
+                    self.userImages.coachImage = ImageWrapper(image: defaultImage)
+              } else {
+                    self.userImages.coachImage = ImageWrapper(image: UIImage(data: data!) ?? defaultImage)
+              }
+                
+            }
+        }
+        if self.user.userImageURL != nil {
+            let storage = Storage.storage()
+            let imageRef = storage.reference(forURL: self.user.userImageURL ?? "gs://")
+            let defaultImage: UIImage = UIImage(named: "errorLoading")!
+
+            // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
+            imageRef.getData(maxSize: 1 * 4000 * 4000) { data, error in
+                if error != nil {
+                    self.userImages.userImage = ImageWrapper(image: defaultImage)
+              } else {
+                    self.userImages.userImage = ImageWrapper(image: UIImage(data: data!) ?? defaultImage)
+              }
+            }
+        }
+    }
+    
+    func getWeekSchema(){
+        
+        if user.weekPlan == nil{
+            //If nil, create a weekplan
+            if user.schema != nil {
+                //If trainingSchema is not nil, get it and work with it
+                let trainingSchema:Schema = TrainingDataModel().getTrainingSchema(for: user.schema!)
+                let amountOfRoutines:Int = trainingSchema.routines.count
+                let weekDays: [String] = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag", ]
+            }
+            
+        }
+    }
+    
+    func updateWeekSchema(for weekPlan: [DayPlan]){
+        //var updatedWeekPlan: [DayPlan]
+        
+        //for day in weekPlan{
+        
+        //}
     }
     
     func updateUserModel(for key: String, to value: Any){

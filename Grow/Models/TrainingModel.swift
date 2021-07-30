@@ -172,6 +172,30 @@ class TrainingDataModel: ObservableObject{
             }
         }
     
+    func getTrainingSchema(for schema: String) -> Schema{
+        var returnSchema = Schema()
+        
+        let docRef = db.collection("schema").document(schema)
+          
+        docRef.getDocument { document, error in
+          if (error as NSError?) != nil {
+              print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
+          }
+          else {
+            if let document = document {
+              do {
+                returnSchema = try document.data(as: Schema.self)!
+                  
+              }
+              catch {
+                print(error)
+              }
+            }
+          }
+        }
+        return returnSchema
+    }
+    
     func createTraining() -> Bool{
         
         // First create a proper schema name
