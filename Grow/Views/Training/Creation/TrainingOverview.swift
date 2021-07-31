@@ -64,6 +64,7 @@ struct TrainingOverview: View {
         }.onAppear(perform:{
             schemas.fetchData()
         })
+        .listStyle(InsetGroupedListStyle())
         .navigationBarTitle(Text("Schemas"), displayMode: .inline)
         .navigationBarItems(trailing:
                Button(action: {

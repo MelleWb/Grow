@@ -17,12 +17,41 @@ class TrainingDataModel: ObservableObject{
     
     private var db = Firestore.firestore()
     
-    func loadRoutineFromSchema(for routine: UUID){
+    func loadRoutineFromSchema(for schema: String, for routine: UUID){
+        if self.schema.name.isEmpty{
+            
+            let settings = FirestoreSettings()
+            settings.isPersistenceEnabled = true
+            let db = Firestore.firestore()
+            
+            let docRef = db.collection("schemas").document(schema)
+              
+            docRef.getDocument { document, error in
+              if (error as NSError?) != nil {
+                  print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
+              }
+              else {
+                if let document = document {
+                  do {
+                    self.schema = try document.data(as: Schema.self)!
+                    
+                    if let index = self.schema.routines.firstIndex(where: { $0.id == routine }) {
+                            self.routine = self.schema.routines[index]
+                        }
+                  }
+                  catch {
+                    print(error)
+                  }
+                }
+              }
+            }
+            
+        }
+        else {
             if let index = self.schema.routines.firstIndex(where: { $0.id == routine }) {
-                if index == -1 {
                     self.routine = self.schema.routines[index]
                 }
-            }
+        }
     }
     
     func setSingleSchemaFromFetchedSchemas(for schema:Schema) {

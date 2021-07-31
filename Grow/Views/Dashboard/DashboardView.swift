@@ -38,11 +38,6 @@ struct TabBarView: View {
                     Label("Chat", systemImage: "message")
                 }
         }.accentColor(Color.init("textColor"))
-        .onAppear(perform:{
-            if self.userModel.user.schema != nil {
-                self.trainingModel.getTrainingSchema(for: self.userModel.user.schema!)
-            }
-        })
     }
 }
 
@@ -93,7 +88,7 @@ struct Dashboard: View{
                         HStack{
                             ZStack{
                                 Button("") {}
-                                NavigationLink(destination: WorkoutOfTheDayView(routine: userModel.user.workoutOfTheDay!).environmentObject(trainingModel)){
+                                NavigationLink(destination: WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!).environmentObject(trainingModel)){
                                     Image("upper")
                                         .resizable()
                                         .scaledToFill()
@@ -108,25 +103,26 @@ struct Dashboard: View{
                         }
                     }
                 }
-                    }.listStyle(InsetGroupedListStyle())
+            }
+            .listStyle(InsetGroupedListStyle())
             .onAppear(perform:{
                 self.foodModel.getTodaysIntake(for: userModel)
             })
-                            .environmentObject(userModel)
-                            .navigationTitle(Text("Dashboard"))
-                            .navigationBarItems(
-                            trailing: Button(action: {
-                                withAnimation {
-                                    self.showProfileSheetView.toggle()
-                                }
-                            }) {
-                                Image(uiImage: (userModel.userImages.userImage?.image ?? UIImage(named: "loadingImageCircle"))!)
-                                    .resizable()
-                                    .clipShape(Circle())
-                                    .frame(width: 25, height: 25, alignment: .center)
-                            }).sheet(isPresented: $showProfileSheetView) {
-                                UpdateProfile(showProfileSheetView: $showProfileSheetView).environmentObject(userModel)
-                                }
+            .environmentObject(userModel)
+            .navigationTitle(Text("Dashboard"))
+            .navigationBarItems(
+                trailing: Button(action: {
+                    withAnimation {
+                        self.showProfileSheetView.toggle()
+                    }
+                }) {
+                    Image(uiImage: (userModel.userImages.userImage?.image ?? UIImage(named: "loadingImageCircle"))!)
+                        .resizable()
+                        .clipShape(Circle())
+                        .frame(width: 25, height: 25, alignment: .center)
+                }).sheet(isPresented: $showProfileSheetView) {
+                    UpdateProfile(showProfileSheetView: $showProfileSheetView).environmentObject(userModel)
+                    }
                 }
             }
         }
