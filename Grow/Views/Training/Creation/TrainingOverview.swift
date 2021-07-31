@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct TrainingDashboardView : View {
+    
+    @EnvironmentObject var userModel: UserDataModel
     var body: some View {
         NavigationView{
             VStack{
@@ -27,7 +29,7 @@ struct TrainingDashboardView : View {
                         }
                     }
                     Section(header:Text("Trainingsdagen")){
-                        NavigationLink(destination: TrainingDaySelectionView()){
+                        NavigationLink(destination: TrainingDaySelectionView().environmentObject(userModel)){
                             HStack{
                                 Image(systemName: "calendar").foregroundColor(Color.init("textColor"))
                                 Text("Selecteer je trainingsdagen").font(.subheadline)

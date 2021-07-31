@@ -144,6 +144,10 @@ class TrainingDataModel: ObservableObject{
         
     func fetchData() {
         
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
         db.collection("schemas").addSnapshotListener { (querySnapshot, error) in
                 guard let documents = querySnapshot?.documents else {
                     print("No documents")
@@ -172,10 +176,13 @@ class TrainingDataModel: ObservableObject{
             }
         }
     
-    func getTrainingSchema(for schema: String) -> Schema{
-        var returnSchema = Schema()
+    func getTrainingSchema(for schemaDocID: String){
         
-        let docRef = db.collection("schema").document(schema)
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let docRef = db.collection("schemas").document(schemaDocID)
           
         docRef.getDocument { document, error in
           if (error as NSError?) != nil {
@@ -184,8 +191,7 @@ class TrainingDataModel: ObservableObject{
           else {
             if let document = document {
               do {
-                returnSchema = try document.data(as: Schema.self)!
-                  
+                self.schema = try document.data(as: Schema.self)!
               }
               catch {
                 print(error)
@@ -193,7 +199,6 @@ class TrainingDataModel: ObservableObject{
             }
           }
         }
-        return returnSchema
     }
     
     func createTraining() -> Bool{
@@ -241,12 +246,14 @@ class TrainingDataModel: ObservableObject{
 
 
 struct Schema: Codable, Hashable, Identifiable  {
+    @DocumentID var docID: String?
     var id: UUID
     var type: String
     var name: String
     var routines: [Routine]
     
     init(id:UUID = UUID(),
+         docID: String? = nil,
          documentID: String? = nil,
          type: String = "",
          name: String = "",
@@ -254,7 +261,7 @@ struct Schema: Codable, Hashable, Identifiable  {
     )
     {
         self.id = id
-        //self.documentID = documentID
+        self.docID = docID
         self.type = type
         self.name = name
         self.routines = routines

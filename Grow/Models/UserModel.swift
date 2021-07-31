@@ -33,6 +33,7 @@ struct User: Codable {
     var fcmToken: String?
     var schema: String?
     var weekPlan: [DayPlan]?
+    var isTrainingDayToday: Bool?
     
     init(id: String? = nil,
          firstName: String? = nil,
@@ -53,7 +54,8 @@ struct User: Codable {
          pal: Int? = nil,
          fcmToken: String? = nil,
          schema: String? = nil,
-         weekPlan: [DayPlan]? = nil
+         weekPlan: [DayPlan]? = [DayPlan()],
+         isTrainingDayToday: Bool? = false
     ) {
         self.id = id
         self.firstName = firstName
@@ -75,6 +77,7 @@ struct User: Codable {
         self.fcmToken = fcmToken
         self.schema = schema
         self.weekPlan = weekPlan
+        self.isTrainingDayToday = isTrainingDayToday
     }
 }
 
@@ -91,12 +94,11 @@ struct UserImages {
     }
 }
 
-struct DayPlan: Codable, Identifiable {
+struct DayPlan: Codable, Identifiable, Hashable {
     var id = UUID()
-    var routine: String?
+    var trainingType: String?
+    var routine: UUID?
     var isTrainingDay: Bool?
-    var day: String?
-    var dayNumber: Int?
 }
 
 
@@ -125,6 +127,12 @@ class UserDataModel: ObservableObject{
                 
                 //Fetch User and Coach Image
                 self.fetchUserAndCoachImage()
+                
+                //Fetch weekplan
+                self.getWeekSchema()
+                
+                //Determine trainingday
+                self.isTrainingDayToday()
                 
             }
             catch {
@@ -174,20 +182,70 @@ class UserDataModel: ObservableObject{
             //If nil, create a weekplan
             if user.schema != nil {
                 //If trainingSchema is not nil, get it and work with it
-                let trainingSchema:Schema = TrainingDataModel().getTrainingSchema(for: user.schema!)
-                let amountOfRoutines:Int = trainingSchema.routines.count
-                let weekDays: [String] = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag", ]
+                var trainingSchema: Schema = Schema()
+                let settings = FirestoreSettings()
+                settings.isPersistenceEnabled = true
+                let db = Firestore.firestore()
+                
+                let docRef = db.collection("schemas").document(user.schema!)
+                  
+                docRef.getDocument { document, error in
+                  if (error as NSError?) != nil {
+                      print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
+                  }
+                  else {
+                    if let document = document {
+                      do {
+                        trainingSchema = try document.data(as: Schema.self)!
+                        let routineAmount:Int = trainingSchema.routines.count - 1
+                        print(routineAmount)
+                        let weekDays: [String] = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"]
+                        
+                        weekDays.enumerated().forEach( { (index,day) in
+                            var daySchema = DayPlan()
+                            if index > routineAmount{
+                                daySchema.isTrainingDay = false
+                            }
+                            else {
+                                daySchema.isTrainingDay = true
+                                daySchema.trainingType = trainingSchema.routines[index].type
+                                daySchema.routine = trainingSchema.routines[index].id
+                            }
+                            
+                            if self.user.weekPlan == nil{
+                                self.user.weekPlan = [daySchema]
+                            }
+                            else {
+                                self.user.weekPlan?.append(daySchema)
+                            }
+                        })
+                      }
+                      catch {
+                        print(error)
+                      }
+                    }
+                  }
+                }
             }
-            
         }
     }
     
-    func updateWeekSchema(for weekPlan: [DayPlan]){
-        //var updatedWeekPlan: [DayPlan]
+    func getDayForWeekPlan() -> Int{
+        let dayOfWeek = Calendar.current.component(.weekday, from: Date())
+        let dayOfWeekString:String = Calendar.current.weekdaySymbols[dayOfWeek-1]
         
-        //for day in weekPlan{
+        if dayOfWeekString == "Sunday"{
+            return 6
+        }
+        else {
+            return dayOfWeek - 2
+        }
         
-        //}
+    }
+    
+    func isTrainingDayToday() {
+        let dayOfWeek: Int = self.getDayForWeekPlan()
+        self.user.isTrainingDayToday = self.user.weekPlan?[dayOfWeek].isTrainingDay
     }
     
     func updateUserModel(for key: String, to value: Any){

@@ -132,7 +132,6 @@ struct UpdateProfile: View {
                         }
                     
                     //Update the user
-                    
                     self.userModel.updateUser()
                     //dismiss the sheet
                     self.showProfileSheetView = false
@@ -379,9 +378,9 @@ struct WorkOutSchema : View {
             Section {
             Picker(selection: schema, label: Text("Trainingsschema")) {
                 ForEach(schemaModel.fetchedSchemas, id: \.self){ schema in
-                    Text(schema.name).tag(schema.name)
+                    Text(schema.name).tag(schema.docID)
                 }
-                        }.padding()
-            }.onAppear(perform:{self.schemaModel.fetchData()})
+            }.padding()
+        }.onAppear(perform:{self.schemaModel.fetchData()})
     }
 }

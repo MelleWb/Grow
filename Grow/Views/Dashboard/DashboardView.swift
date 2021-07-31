@@ -9,36 +9,40 @@ import SwiftUI
 import Firebase
 
 struct TabBarView: View {
-    var body: some View {
-        TabView {
-                    Dashboard()
-                       .tabItem {
-                        Label("Dashboard", systemImage: "gauge")
-                       }
-
-                   TrainingDashboardView()
-                       .tabItem {
-                        Label("Training", systemImage: "bolt")
-                       }
-                    
-                    ChatView()
-                        .tabItem {
-                            Label("Chat", systemImage: "message")
-                        }
-        }.accentColor(Color.init("textColor"))
-    }
-}
-
-struct Dashboard: View{
+    
     @ObservedObject var userModel = UserDataModel()
-    @ObservedObject var foodModel = FoodDataModel()
-    @State var showProfileSheetView: Bool = false
     
     init(){
         self.userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
     }
     
     var body: some View {
+        TabView {
+            Dashboard().environmentObject(userModel)
+                .tabItem {
+                    Label("Dashboard", systemImage: "gauge")
+                }
+
+            TrainingDashboardView().environmentObject(userModel)
+                .tabItem {
+                    Label("Training", systemImage: "bolt")
+                }
+                    
+            ChatView().environmentObject(userModel)
+                .tabItem {
+                    Label("Chat", systemImage: "message")
+                }
+        }.accentColor(Color.init("textColor"))
+    }
+}
+
+struct Dashboard: View{
+    @EnvironmentObject var userModel : UserDataModel
+    @ObservedObject var foodModel = FoodDataModel()
+    @State var showProfileSheetView: Bool = false
+    
+    var body: some View {
+        
         NavigationView{
             List{
                 Section{
@@ -66,44 +70,38 @@ struct Dashboard: View{
                 }
                 Section(header:Text("Trainingen van deze week")){
                     HStack{
-                        Image(systemName:"star.fill")
-                            .frame(width: 50, height: 50, alignment: .leading)
-                            .foregroundColor(Color.init("textColor"))
-                        Image(systemName:"star.fill")
-                            .frame(width: 50, height: 50, alignment: .leading)
-                            .foregroundColor(Color.init("textColor"))
-                        Image(systemName:"star.fill")
-                            .frame(width: 50, height: 50, alignment: .leading)
-                            .foregroundColor(Color.init("textColor"))
-                        Image(systemName:"star")
-                            .frame(width: 50, height: 50, alignment: .leading)
-                            .foregroundColor(Color.init("textColor"))
-                        Image(systemName:"star")
-                            .frame(width: 50, height: 50, alignment: .leading)
-                            .foregroundColor(Color.init("textColor"))
+                        ForEach(userModel.user.weekPlan!, id:\.self){  day in
+                            if day.isTrainingDay ?? true {
+                                Image(systemName:"star.fill")
+                                    .frame(width: 50, height: 50, alignment: .leading)
+                                    .foregroundColor(Color.init("textColor"))
+                            }
+                        }
                     }.padding()
-                    HStack{
-                        ZStack{
-                            Button("") {}
-                                NavigationLink(destination: FoodView()){
-                                Image("upper")
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 30, height: 30, alignment: .leading)
-                                    .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
+                    if userModel.user.isTrainingDayToday ?? false {
+                        HStack{
+                            ZStack{
+                                Button("") {}
+                                    NavigationLink(destination: WorkoutOfTheDayView()){
+                                    Image("upper")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 30, height: 30, alignment: .leading)
+                                        .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
-                                VStack(alignment: .leading){
-                                    Text("Start je training van vandaag").font(.subheadline).bold()
+                                    VStack(alignment: .leading){
+                                        Text("Start je training van vandaag").font(.subheadline).bold()
+                                        }
                                     }
                                 }
-                            }
+                        }
                     }
                 }
                     }.listStyle(InsetGroupedListStyle())
+            .onAppear(perform:{
+                self.foodModel.getTodaysIntake(for: userModel)
+            })
                             .environmentObject(userModel)
-                            .onAppear(perform:{
-                                self.foodModel.getTodaysIntake(for: userModel)
-                            })
                             .navigationTitle(Text("Dashboard"))
                             .navigationBarItems(
                             trailing: Button(action: {

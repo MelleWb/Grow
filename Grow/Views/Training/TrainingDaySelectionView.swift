@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct TrainingDaySelectionView: View {
-    
+    @EnvironmentObject var userModel: UserDataModel
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 StaticWeekDaysView()
                     .frame(width: geometry.size.width/2, height: geometry.size.height)
                     .disabled(true)
-                DynamicTrainingDaysView()
+                DynamicTrainingDaysView().environmentObject(userModel)
                     .frame(width: geometry.size.width/1.5)
                     .offset(x: geometry.size.width/3.5)
             }
@@ -35,34 +35,31 @@ struct StaticWeekDaysView: View{
     }
 }
 
-struct dummyTrainingDays: Identifiable, Hashable{
-    var id = UUID()
-    var type: String
-}
-
 struct DynamicTrainingDaysView: View {
-    @State var trainingDays:[dummyTrainingDays] = [dummyTrainingDays(type: "Rust"), dummyTrainingDays(type: "Training"),dummyTrainingDays(type: "Training"),dummyTrainingDays(type: "Training"),dummyTrainingDays(type: "Rust"),dummyTrainingDays(type: "Training"),dummyTrainingDays(type: "Training")]
-    
+    @EnvironmentObject var userModel: UserDataModel
     @State var isEditMode: EditMode = .active
     
     var body: some View {
         List{
-            ForEach(trainingDays, id:\.self){ day in
+            ForEach(userModel.user.weekPlan!, id:\.self){ day in
                 HStack{
-                    if day.type == "Rust"{
-                        Image(systemName: "powersleep").foregroundColor(Color.init("textColor"))
+                    if day.isTrainingDay!{
+                        Image(systemName: "bolt").foregroundColor(Color.init("textColor"))
+                        Text(day.trainingType ?? "Training")
                     }
                     else {
-                        Image(systemName: "bolt")
+                        Image(systemName: "powersleep").foregroundColor(Color.init("textColor"))
+                        Text("Rust")
                     }
-                    Text(day.type)
                 }
             }.onMove(perform: moveRow)
         }.environment(\.editMode, self.$isEditMode)
     }
     
     private func moveRow(source: IndexSet, destination: Int){
-        self.trainingDays.move(fromOffsets: source, toOffset: destination)
+        self.userModel.user.weekPlan!.move(fromOffsets: source, toOffset: destination)
+        self.userModel.isTrainingDayToday()
+        self.userModel.updateUser()
         }
 }
 

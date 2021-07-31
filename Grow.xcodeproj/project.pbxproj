@@ -16,6 +16,7 @@
 		851AFF562673D6DC0092DA9B /* GrowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF552673D6DC0092DA9B /* GrowUITests.swift */; };
 		8521A2942685BDFC00400657 /* (null) in Embed Frameworks */ = {isa = PBXBuildFile; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8539186826938D290045A1B5 /* TrainingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8539186726938D290045A1B5 /* TrainingModel.swift */; };
+		8545E33226B542FC0083F69E /* WorkoutOfTheDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8545E33126B542FC0083F69E /* WorkoutOfTheDayView.swift */; };
 		85476A2F267FBCE200BA68A2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85476A2E267FBCE200BA68A2 /* LoginView.swift */; };
 		85476A31267FC04100BA68A2 /* KeyboardResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85476A30267FC04100BA68A2 /* KeyboardResponder.swift */; };
 		854B05EA2681E81500A824CD /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B05E92681E81500A824CD /* ProgressIndicator.swift */; };
@@ -94,6 +95,7 @@
 		851AFF552673D6DC0092DA9B /* GrowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowUITests.swift; sourceTree = "<group>"; };
 		851AFF572673D6DC0092DA9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8539186726938D290045A1B5 /* TrainingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingModel.swift; sourceTree = "<group>"; };
+		8545E33126B542FC0083F69E /* WorkoutOfTheDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutOfTheDayView.swift; sourceTree = "<group>"; };
 		85476A2E267FBCE200BA68A2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		85476A30267FC04100BA68A2 /* KeyboardResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardResponder.swift; sourceTree = "<group>"; };
 		854B05E92681E81500A824CD /* ProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
@@ -297,6 +299,7 @@
 			children = (
 				85D210662691EE55002BA11C /* Creation */,
 				85BC5E9226B3255500DBC821 /* TrainingDaySelectionView.swift */,
+				8545E33126B542FC0083F69E /* WorkoutOfTheDayView.swift */,
 			);
 			path = Training;
 			sourceTree = "<group>";
@@ -594,6 +597,7 @@
 				85476A31267FC04100BA68A2 /* KeyboardResponder.swift in Sources */,
 				854B05EC26820A8700A824CD /* UserDefaults.swift in Sources */,
 				859B9452268B9A1B003F58F2 /* ExerciseOverview.swift in Sources */,
+				8545E33226B542FC0083F69E /* WorkoutOfTheDayView.swift in Sources */,
 				8588C33C2681D0FA00535E68 /* SceneDelegate.swift in Sources */,
 				85476A2F267FBCE200BA68A2 /* LoginView.swift in Sources */,
 				F08043F126B0944B002D5C65 /* FoodView.swift in Sources */,
