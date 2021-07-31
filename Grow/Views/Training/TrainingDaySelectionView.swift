@@ -58,7 +58,7 @@ struct DynamicTrainingDaysView: View {
     
     private func moveRow(source: IndexSet, destination: Int){
         self.userModel.user.weekPlan!.move(fromOffsets: source, toOffset: destination)
-        self.userModel.isTrainingDayToday()
+        self.userModel.determineWorkoutOfTheDay()
         self.userModel.updateUser()
         }
 }

@@ -11,6 +11,7 @@ import Firebase
 struct TabBarView: View {
     
     @ObservedObject var userModel = UserDataModel()
+    @ObservedObject var trainingModel = TrainingDataModel()
     
     init(){
         self.userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
@@ -18,12 +19,16 @@ struct TabBarView: View {
     
     var body: some View {
         TabView {
-            Dashboard().environmentObject(userModel)
+            Dashboard()
+                .environmentObject(userModel)
+                .environmentObject(trainingModel)
                 .tabItem {
                     Label("Dashboard", systemImage: "gauge")
                 }
 
-            TrainingDashboardView().environmentObject(userModel)
+            TrainingDashboardView()
+                .environmentObject(userModel)
+                .environmentObject(trainingModel)
                 .tabItem {
                     Label("Training", systemImage: "bolt")
                 }
@@ -33,11 +38,17 @@ struct TabBarView: View {
                     Label("Chat", systemImage: "message")
                 }
         }.accentColor(Color.init("textColor"))
+        .onAppear(perform:{
+            if self.userModel.user.schema != nil {
+                self.trainingModel.getTrainingSchema(for: self.userModel.user.schema!)
+            }
+        })
     }
 }
 
 struct Dashboard: View{
     @EnvironmentObject var userModel : UserDataModel
+    @EnvironmentObject var trainingModel: TrainingDataModel
     @ObservedObject var foodModel = FoodDataModel()
     @State var showProfileSheetView: Bool = false
     
@@ -78,11 +89,11 @@ struct Dashboard: View{
                             }
                         }
                     }.padding()
-                    if userModel.user.isTrainingDayToday ?? false {
+                    if userModel.user.workoutOfTheDay != nil {
                         HStack{
                             ZStack{
                                 Button("") {}
-                                    NavigationLink(destination: WorkoutOfTheDayView()){
+                                NavigationLink(destination: WorkoutOfTheDayView(routine: userModel.user.workoutOfTheDay!).environmentObject(trainingModel)){
                                     Image("upper")
                                         .resizable()
                                         .scaledToFill()

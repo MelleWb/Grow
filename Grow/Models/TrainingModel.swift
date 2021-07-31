@@ -13,8 +13,17 @@ class TrainingDataModel: ObservableObject{
     
     @Published var schema = Schema()
     @Published var fetchedSchemas = [Schema]()
+    @Published var routine = Routine()
     
     private var db = Firestore.firestore()
+    
+    func loadRoutineFromSchema(for routine: UUID){
+            if let index = self.schema.routines.firstIndex(where: { $0.id == routine }) {
+                if index == -1 {
+                    self.routine = self.schema.routines[index]
+                }
+            }
+    }
     
     func setSingleSchemaFromFetchedSchemas(for schema:Schema) {
         if let index = self.fetchedSchemas.firstIndex(where: { $0.id == schema.id }) {

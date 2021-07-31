@@ -33,7 +33,7 @@ struct User: Codable {
     var fcmToken: String?
     var schema: String?
     var weekPlan: [DayPlan]?
-    var isTrainingDayToday: Bool?
+    var workoutOfTheDay: UUID?
     
     init(id: String? = nil,
          firstName: String? = nil,
@@ -55,8 +55,8 @@ struct User: Codable {
          fcmToken: String? = nil,
          schema: String? = nil,
          weekPlan: [DayPlan]? = [DayPlan()],
-         isTrainingDayToday: Bool? = false
-    ) {
+         workoutOfTheDay:UUID? = nil
+    ){
         self.id = id
         self.firstName = firstName
         self.lastName = lastName
@@ -77,7 +77,7 @@ struct User: Codable {
         self.fcmToken = fcmToken
         self.schema = schema
         self.weekPlan = weekPlan
-        self.isTrainingDayToday = isTrainingDayToday
+        self.workoutOfTheDay = workoutOfTheDay
     }
 }
 
@@ -131,8 +131,8 @@ class UserDataModel: ObservableObject{
                 //Fetch weekplan
                 self.getWeekSchema()
                 
-                //Determine trainingday
-                self.isTrainingDayToday()
+                //Determine workout of the day
+                self.determineWorkoutOfTheDay()
                 
             }
             catch {
@@ -243,9 +243,19 @@ class UserDataModel: ObservableObject{
         
     }
     
-    func isTrainingDayToday() {
+    func determineWorkoutOfTheDay() {
         let dayOfWeek: Int = self.getDayForWeekPlan()
-        self.user.isTrainingDayToday = self.user.weekPlan?[dayOfWeek].isTrainingDay
+        if self.user.weekPlan![dayOfWeek].isTrainingDay!{
+            self.user.workoutOfTheDay = self.user.weekPlan?[dayOfWeek].routine
+        }
+        else{
+            self.user.workoutOfTheDay = nil
+        }
+    }
+    
+    func getTodaysRoutine() -> UUID{
+        let dayOfWeek: Int = self.getDayForWeekPlan()
+        return self.user.weekPlan![dayOfWeek].routine!
     }
     
     func updateUserModel(for key: String, to value: Any){
