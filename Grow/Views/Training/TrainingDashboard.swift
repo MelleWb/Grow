@@ -69,7 +69,6 @@ struct TrainingOverview: View {
         .navigationBarItems(trailing:
                Button(action: {
                     self.showAddSchema = true
-                   
                }) {
                    Image(systemName: "plus")
                }

@@ -14,7 +14,7 @@ struct WorkoutOfTheDayView: View {
     
     func setOrSuperset(set: Superset) -> String{
         let setNumber: Int = self.trainingModel.getSupersetIndex(for: self.trainingModel.routine, for: set) + 1
-        if set.exercise!.count>1{
+        if set.exercises!.count>1{
             return "Superset \(setNumber)"
         }
         else{
@@ -32,9 +32,8 @@ struct WorkoutOfTheDayView: View {
                     Section(header: Text(self.setOrSuperset(set: set))){
                         HStack{
                             Text("Sets: \(set.sets)")
-                            Text("Reps: \(set.reprange)")
                         }
-                        ForEach(set.exercise!, id:\.self) {exercise in
+                        ForEach(set.exercises!, id:\.self) {exercise in
                             Text(exercise.name)
                         }
                     }

@@ -9,22 +9,28 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 
-struct Exercise: Codable, Hashable {
+struct Exercise: Codable, Hashable, Identifiable {
+    var id = UUID()
     @DocumentID var documentID: String?
     var name: String
+    var reps: Int?
     var category: String
     var imageURL: String?
     var description: String?
     
     init(
-        documentID: String?,
+        id: UUID = UUID(),
+        documentID: String,
         name: String? = nil,
+        reps: Int? = 0,
         category: String? = nil,
         imageURL: String? = nil,
         description: String? = nil) {
         
+        self.id = id
         self.documentID = documentID
         self.name = name ?? ""
+        self.reps = reps
         self.category = category ?? ""
         self.imageURL = imageURL ?? ""
         self.description = description ?? ""

@@ -4,14 +4,12 @@
 //
 //  Created by Swen Rolink on 06/07/2021.
 //
-
 import SwiftUI
 import Firebase
 
 struct ReviewSchema: View{
     @EnvironmentObject var schemaModel: TrainingDataModel
     var schema: Schema
-    @State var showSuccessAlert: Bool = false
     
     var body: some View {
         VStack{
@@ -163,34 +161,15 @@ struct AddRoutine : View{
                             ForEach(schemaModel.schema.routines[routineIndex].superset!){ superset in
                                 
                                 List{
-                                    Section(header: ShowSupersetHeader(routine: routine, superset: superset).environmentObject(schemaModel)
-
-                                    ){
+                                    Section(header: ShowSupersetHeader(routine: routine, superset: superset).environmentObject(schemaModel)){
                                         
-                                        SetsAndReps(routine: routine, superset: superset).environmentObject(schemaModel)
+                                        AmountOfSets(routine: routine, superset: superset).environmentObject(schemaModel)
                                         
                                         ExercisesInSuperset(routine: routine, superset: superset).environmentObject(schemaModel)
-                                        
-                                        Button(action:{
-                                        
-                                        //Do something
-                                        self.schemaModel.addExerciseToSuperset(for: routine, for: superset)
-                                    }){
-                                        HStack{
-                                            Image(systemName: "plus").foregroundColor(Color.init("textColor"))
-                                            Text("Voeg oefening toe").foregroundColor(Color.init("textColor"))
-                                        }
-                                    }
-                                        
                                 }
-
-                                    
                             }
-                                
                         }
                     }
-                        
-
                 }
                 Button(action: {
                     self.schemaModel.addSuperset(for: routine)
@@ -235,21 +214,48 @@ struct ExercisesInSuperset: View{
     @ObservedObject var exerciseModel = ExerciseDataModel()
     var routine: Routine
     var superset: Superset
+    @State var showExerciseSheetView: Bool = false
     
     var body: some View {
         
-        let routineIndex: Int = schemaModel.getRoutineIndex(for: routine)
-        let supersetIndex: Int = schemaModel.getSupersetIndex(for: routine, for: superset)
-        
-        if !(schemaModel.schema.routines[routineIndex].superset ?? []).isEmpty {
-            if !(schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercise ?? []).isEmpty {
-                ForEach(schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercise!){ exercise in
-                    NavigationLink(destination: ExerciseDetail(routine: routine, superset: superset, exerciseInfo: exercise, selectedExercise: exercise.name ).environmentObject(schemaModel)){
-                        Text(exercise.name)
-                    }
-                }.onDelete(perform:deleteExercise)
+        VStack(alignment: .leading){
+            let routineIndex: Int = schemaModel.getRoutineIndex(for: routine)
+            let supersetIndex: Int = schemaModel.getSupersetIndex(for: routine, for: superset)
+            
+            if schemaModel.schema.routines[routineIndex].superset != nil {
+                if schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercises != nil {
+                    ForEach(schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercises!){ exercise in
+                        
+                        let repsProxy = Binding<String>(
+                            get: { String(exercise.reps ?? 0) },
+                            set: {
+                                if let value = NumberFormatter().number(from: $0) {
+                                    self.schemaModel.updateExerciseReps(for: routine, for: superset, for: exercise, to: value.intValue)
+                                }
+                            }
+                        )
+                        
+                        HStack{
+                                TextField("Reps", text: repsProxy)
+                                    .frame(width: 60, height: 40)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                            Text(exercise.name).padding()
+                        }
+                    }.onDelete(perform:deleteExercise)
+                }
             }
-        }
+        }.sheet(isPresented: $showExerciseSheetView, content: {ExerciseSheetView(showExerciseSheetView: $showExerciseSheetView, routine: routine, superset: superset)})
+        
+            Button(action:{
+                self.showExerciseSheetView.toggle()
+            }){
+                HStack{
+                    Image(systemName: "checkmark.circle").foregroundColor(Color.init("textColor"))
+                    Text("Selecteer oefeningen").foregroundColor(Color.init("textColor"))
+                }
+            }
+        
     }
     func deleteExercise(at offsets: IndexSet) {
         let index: Int = offsets[offsets.startIndex]
@@ -257,56 +263,80 @@ struct ExercisesInSuperset: View{
     }
 }
 
-
-struct ExerciseDetail : View{
-    @ObservedObject var exerciseModel = ExerciseDataModel()
-    @EnvironmentObject var schemaModel: TrainingDataModel
-    @State var selectedExercise: String?
+struct ExerciseSheetView : View {
     
+    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var exerciseModel = ExerciseDataModel()
+    @Binding var showExerciseSheetView: Bool
     var routine: Routine
     var superset: Superset
-    var exerciseInfo: ExerciseInfo
+    
+    @State var selectedExercises: [Exercise]?
     @State var searchText = ""
     @State var searching = false
     @State var showAddExerciseSheetView = false
     
-    init(routine: Routine, superset: Superset, exerciseInfo: ExerciseInfo, selectedExercise: String?, searchText:String = "", searching:Bool = false){
-
+    init(showExerciseSheetView: Binding<Bool>, routine: Routine, superset: Superset, selectedExercises: [Exercise]? = [Exercise]()){
+        self._showExerciseSheetView = showExerciseSheetView
         self.routine = routine
         self.superset = superset
-        self.exerciseInfo = exerciseInfo
-        self.selectedExercise = selectedExercise
-        self.searchText = searchText
-        self.searching = searching
-        
-        exerciseModel.fetchData()
+        self.selectedExercises = selectedExercises
+        self.exerciseModel.fetchData()
     }
     
+    
     var body: some View {
-
-        List {
-            SearchBar(searchText: $searchText, searching: $searching)
-            ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
-                return exercise.name.hasPrefix(searchText) || searchText == ""
-            }), id: \.self) { exercise in
-            SelectionCell(exercise: exercise.name, routine: routine, superset: superset, exerciseInfo: exerciseInfo, selectedExercise: self.$selectedExercise).environmentObject(schemaModel)
-            }
-        }.gesture(DragGesture()
-                    .onChanged({ _ in
-                        UIApplication.shared.dismissKeyboard()
-                    })
-        )
-        .navigationBarItems(trailing: (
-                        Button(action: {
-                            withAnimation {
-                                self.showAddExerciseSheetView.toggle()
-                            }
-                        }) {
-                            Image(systemName: "plus")
+        NavigationView{
+            List {
+                SearchBar(searchText: $searchText, searching: $searching)
+                ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
+                    return exercise.name.hasPrefix(searchText) || searchText == ""
+                }), id: \.self) { exercise in
+                    SelectionCell(exercise: exercise, routine: routine, superset: superset, selectedExercises: self.$selectedExercises).environmentObject(schemaModel)
+                }
+            }.gesture(DragGesture()
+                        .onChanged({ _ in
+                            UIApplication.shared.dismissKeyboard()
                         })
-                    )
-        .sheet(isPresented: $showAddExerciseSheetView) {
-            AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView)
+            )
+            .navigationTitle(Text("Voeg oefeningen toe"))
+            .navigationBarItems(leading: (
+            Button(action: {
+                withAnimation {
+                    self.showExerciseSheetView.toggle()
+                }
+            }) {
+                Text("Annuleer").foregroundColor(Color.init("textColor"))
+            }),
+            trailing: (
+            HStack{
+                Button(action: {
+                    withAnimation {
+                        self.showAddExerciseSheetView.toggle()
+                    }
+                }) {
+                    Image(systemName: "plus.circle").foregroundColor(Color.init("textColor"))
+                }
+                Spacer()
+                Button(action: {
+                    withAnimation {
+                        if self.selectedExercises != nil && self.selectedExercises!.count > 0 {
+                            self.schemaModel.updateExercises(for: routine, for: superset, with: selectedExercises!)
+                        }
+                        self.showExerciseSheetView.toggle()
+                    }
+                }) {
+                    Text("Opslaan").foregroundColor(Color.init("textColor"))
+                }
+                
+            }))
+            .sheet(isPresented: $showAddExerciseSheetView) {
+                AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView)
+            }
+            .onAppear(perform:{
+                //Preselect the selectedExercises
+                self.selectedExercises = self.schemaModel.getExercises(routine: routine, for: superset)
+            })
         }
     }
 }
@@ -314,75 +344,79 @@ struct ExerciseDetail : View{
 struct SelectionCell: View {
     
     @EnvironmentObject var schemaModel: TrainingDataModel
-    let exercise: String
+    var exercise: Exercise
     var routine: Routine
     var superset: Superset
-    var exerciseInfo: ExerciseInfo
-    @Binding var selectedExercise: String?
+    @Binding var selectedExercises: [Exercise]?
 
     var body: some View {
         HStack {
-            if exercise == selectedExercise {
+            if selectedExercises != nil {
+                
+                let index = selectedExercises!.firstIndex(where: { $0.documentID == exercise.documentID})
+                
+                if index != nil {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(Color.init("textColor"))
+                }
+                else {
+                    Image(systemName: "circle")
+                        .foregroundColor(Color.init("textColor"))
+                }
             }
             else {
                 Image(systemName: "circle")
                     .foregroundColor(Color.init("textColor"))
             }
-            
-            Text(exercise)
-        }   .onTapGesture {
-                    self.selectedExercise = self.exercise
-                    self.schemaModel.updateExercise(for: routine, for: superset, for: exerciseInfo, to: exercise)
+            Text(exercise.name)
+        }
+        .onTapGesture {
+            if self.selectedExercises == nil {
+                self.selectedExercises = [exercise]
             }
+            else {
+                let index = selectedExercises!.firstIndex(where: { $0.documentID == exercise.documentID})
+                if index == nil {
+                    //Add to the selectedExercises
+                    self.selectedExercises?.append(exercise)
+                }
+                else{
+                    //Remove from the selectedExercises
+                    self.selectedExercises?.remove(at: index ?? 0)
+                }
+            }
+        }
     }
 }
 
 
-struct SetsAndReps : View {
+struct AmountOfSets : View {
     
     @EnvironmentObject var schemaModel: TrainingDataModel
     var routine: Routine
     var superset: Superset
-    
-    @State var reps: String = ""
-    @State var sets: String = ""
+
     
     var body: some View {
-        
-        
-        let setsProxy = Binding<String>(
-            get: { String(Int(self.superset.sets)) },
-            set: {
-                if let value = NumberFormatter().number(from: $0) {
-                    self.schemaModel.updateSets(for: routine, for: superset, to: value.intValue)
-                }
-            }
-        )
-        let repsProxy = Binding<String>(
-            get: { String(Int(self.superset.reprange)) },
-            set: {
-                if let value = NumberFormatter().number(from: $0) {
-                    self.schemaModel.updateReps(for: routine, for: superset, to: value.intValue)
-                    
-                }
-            }
-        )
-         
-        HStack{
-            VStack(alignment: .leading){
-                Text("Sets").font(.caption)
-                TextField("Sets", text: setsProxy)
-                    .frame(height: 30)
-                    .cornerRadius(13)
-                    .keyboardType(.numberPad)
-            }
-            VStack(alignment: .leading){
-                Text("Reps").font(.caption)
-                TextField("Reps", text: repsProxy)
-                    .frame(height: 30)
-                    .keyboardType(.numberPad)
+
+        VStack(alignment: .leading){
+            HStack{
+                Text("Sets").padding()
+                Text(String(self.schemaModel.getAmountOfSets(for: routine, for: superset)))
+                
+                Button(action: {
+                    self.schemaModel.updateSets(for: routine, for: superset, to: "plus")
+                },label: {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(Color.init("textColor"))
+                }).padding()
+                
+                
+                Button(action: {
+                        self.schemaModel.updateSets(for: routine, for: superset, to: "min")
+                }, label:{
+                    Image(systemName: "minus.circle.fill").foregroundColor(Color.init("textColor"))
+                }).padding()
             }
         }
     }

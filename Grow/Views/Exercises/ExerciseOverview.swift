@@ -20,13 +20,13 @@ struct ExerciseOverview: View {
     func delete(at offsets: IndexSet) {
         
         let index = offsets[offsets.startIndex]
-        let documentID = exerciseModel.exercises[index].documentID
+        let documentID = exerciseModel.exercises[index].documentID ?? ""
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
-        db.collection("exercises").document(documentID!).delete() { err in
+        db.collection("exercises").document(documentID).delete() { err in
             if let err = err {
                 print("Error removing document: \(err)")
             } else {
