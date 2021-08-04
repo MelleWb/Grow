@@ -245,11 +245,20 @@ class UserDataModel: ObservableObject{
     
     func determineWorkoutOfTheDay() {
         let dayOfWeek: Int = self.getDayForWeekPlan()
-        if self.user.weekPlan![dayOfWeek].isTrainingDay!{
-            self.user.workoutOfTheDay = self.user.weekPlan?[dayOfWeek].routine
-        }
-        else{
-            self.user.workoutOfTheDay = nil
+        if self.user.weekPlan == nil {
+            // don't determine the workout of today
+        } else {
+            if self.user.weekPlan![dayOfWeek].isTrainingDay != nil{
+                if self.user.weekPlan![dayOfWeek].isTrainingDay! {
+                    self.user.workoutOfTheDay = self.user.weekPlan?[dayOfWeek].routine
+                }
+                else{
+                    self.user.workoutOfTheDay = nil
+                }
+            }
+            else{
+                self.user.workoutOfTheDay = nil
+            }
         }
     }
     

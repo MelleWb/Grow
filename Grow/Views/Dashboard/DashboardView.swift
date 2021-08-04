@@ -37,7 +37,7 @@ struct TabBarView: View {
                 .tabItem {
                     Label("Chat", systemImage: "message")
                 }
-        }.accentColor(Color.init("textColor"))
+        }
     }
 }
 
@@ -76,7 +76,7 @@ struct Dashboard: View{
                 }
                 Section(header:Text("Trainingen van deze week")){
                     HStack{
-                        ForEach(userModel.user.weekPlan!, id:\.self){  day in
+                        ForEach(userModel.user.weekPlan ?? [], id:\.self){  day in
                             if day.isTrainingDay ?? true {
                                 Image(systemName:"star.fill")
                                     .frame(width: 50, height: 50, alignment: .leading)

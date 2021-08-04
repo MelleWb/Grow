@@ -95,16 +95,11 @@ class TrainingDataModel: ObservableObject{
         return 0
     }
     
-    func updateSets(for routine: Routine, for superset: Superset, to plusOrMin: String){
+    func updateSets(for routine: Routine, for superset: Superset, to amountOfSets: Int){
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
             if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-                if plusOrMin == "plus" {
-                    self.schema.routines[routineIndex].superset?[supersetIndex].sets += 1
-                    print(self.schema.routines[routineIndex].superset?[supersetIndex].sets)
-                }
-                else {
-                    self.schema.routines[routineIndex].superset?[supersetIndex].sets -= 1
-                }
+                    self.schema.routines[routineIndex].superset?[supersetIndex].sets = amountOfSets
+
             }
         }
     }
@@ -218,7 +213,7 @@ class TrainingDataModel: ObservableObject{
                     switch result {
                     case .success(let schema):
                         if let schema = schema {
-                            return Schema(id: schema.id, type: schema.type, name: schema.name, routines: schema.routines)
+                            return Schema(id: schema.id, docID: schema.docID, type: schema.type, name: schema.name, routines: schema.routines)
                         }
                         else {
                             print ("Document does not exists")
@@ -342,7 +337,7 @@ struct Routine: Codable, Hashable, Identifiable {
 
 struct Superset: Codable, Hashable, Identifiable {
     var id = UUID()
-    var sets: Int
+    var sets: Int?
     var exercises: [Exercise]?
     
     init(sets: Int = 0,exercises: [Exercise] = [Exercise]()){

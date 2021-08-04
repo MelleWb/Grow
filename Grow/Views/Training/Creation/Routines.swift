@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Firebase
+import KeyboardToolbar
 
 struct ReviewSchema: View{
     @EnvironmentObject var schemaModel: TrainingDataModel
@@ -77,7 +78,7 @@ struct SchemaBody: View{
                                     }
                                 }
                         }
-                    }
+                    }.modifier(AdaptsKeyboard())
             }
     func deleteRoutine(indexSet: IndexSet) {
         self.schemaModel.schema.routines.remove(atOffsets: indexSet)
@@ -97,7 +98,6 @@ struct AddSchema: View{
             VStack{
                 SchemaBody().environmentObject(schemaModel)
             }.navigationBarTitle(Text("Schema"), displayMode: .inline)
-        
         .navigationBarItems(leading:
                                 Button(action: {
                                 //dismiss the sheet & save the training
@@ -121,7 +121,7 @@ struct AddSchema: View{
                             Text("Opslaan").bold()
                            }
                     )
-        }
+        }.modifier(AdaptsKeyboard())
     }
     func deleteRoutine(indexSet: IndexSet) {
         self.schemaModel.schema.routines.remove(atOffsets: indexSet)
@@ -134,6 +134,8 @@ struct AddRoutine : View{
     @EnvironmentObject var schemaModel: TrainingDataModel
     var routine: Routine
     @State var routineType: String
+    
+    let toolbarItems: [KeyboardToolbarItem] = [.dismissKeyboard]
     
     var body: some View{
             VStack{
@@ -179,7 +181,8 @@ struct AddRoutine : View{
                         Text("Voeg superset toe").foregroundColor(Color.init("textColor"))
                     }
                 }
-            }
+                }
+                .keyboardToolbar(toolbarItems)
         }
     }
 }
@@ -218,45 +221,53 @@ struct ExercisesInSuperset: View{
     
     var body: some View {
         
-        VStack(alignment: .leading){
             let routineIndex: Int = schemaModel.getRoutineIndex(for: routine)
             let supersetIndex: Int = schemaModel.getSupersetIndex(for: routine, for: superset)
             
             if schemaModel.schema.routines[routineIndex].superset != nil {
                 if schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercises != nil {
-                    ForEach(schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercises!){ exercise in
-                        
-                        let repsProxy = Binding<String>(
-                            get: { String(exercise.reps ?? 0) },
-                            set: {
-                                if let value = NumberFormatter().number(from: $0) {
-                                    self.schemaModel.updateExerciseReps(for: routine, for: superset, for: exercise, to: value.intValue)
+                        ForEach(schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercises!){ exercise in
+                            
+                            NavigationLink(destination: ExerciseDetailView(exercise: exercise)){
+                                
+                                let repsProxy = Binding<String>(
+                                    get: { String(exercise.reps ?? 0) },
+                                    set: {
+                                        if let value = NumberFormatter().number(from: $0) {
+                                            self.schemaModel.updateExerciseReps(for: routine, for: superset, for: exercise, to: value.intValue)
+                                        }
+                                    }
+                                )
+                                
+                                HStack{
+                                    Text("Reps: ")
+                                        TextField("Reps", text: repsProxy)
+                                            .frame(width: 60, height: 40)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.numberPad)
+                                    Text(exercise.name).padding()
                                 }
                             }
-                        )
-                        
-                        HStack{
-                                TextField("Reps", text: repsProxy)
-                                    .frame(width: 60, height: 40)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .keyboardType(.numberPad)
-                            Text(exercise.name).padding()
-                        }
-                    }.onDelete(perform:deleteExercise)
+                        }.onDelete(perform:deleteExercise)
+                        .onMove(perform: moveRow)
                 }
             }
-        }.sheet(isPresented: $showExerciseSheetView, content: {ExerciseSheetView(showExerciseSheetView: $showExerciseSheetView, routine: routine, superset: superset)})
-        
-            Button(action:{
-                self.showExerciseSheetView.toggle()
-            }){
-                HStack{
-                    Image(systemName: "checkmark.circle").foregroundColor(Color.init("textColor"))
-                    Text("Selecteer oefeningen").foregroundColor(Color.init("textColor"))
-                }
+        Button(action:{
+            self.showExerciseSheetView.toggle()
+        }){
+            HStack{
+                Text("Selecteer oefeningen").foregroundColor(Color.init("textColor"))
             }
-        
+        }
+        .modifier(AdaptsKeyboard())
+        .sheet(isPresented: $showExerciseSheetView, content: {ExerciseSheetView(showExerciseSheetView: $showExerciseSheetView, routine: routine, superset: superset)})
     }
+
+    func moveRow(source: IndexSet, destination: Int){
+        print("I get here")
+        self.schemaModel.schema.routines[0].superset![0].exercises!.move(fromOffsets: source, toOffset: destination)
+            }
+        
     func deleteExercise(at offsets: IndexSet) {
         let index: Int = offsets[offsets.startIndex]
         self.schemaModel.removeExercise(for: routine, for: superset, for: index)
@@ -294,11 +305,7 @@ struct ExerciseSheetView : View {
                 }), id: \.self) { exercise in
                     SelectionCell(exercise: exercise, routine: routine, superset: superset, selectedExercises: self.$selectedExercises).environmentObject(schemaModel)
                 }
-            }.gesture(DragGesture()
-                        .onChanged({ _ in
-                            UIApplication.shared.dismissKeyboard()
-                        })
-            )
+            }
             .navigationTitle(Text("Voeg oefeningen toe"))
             .navigationBarItems(leading: (
             Button(action: {
@@ -357,16 +364,16 @@ struct SelectionCell: View {
                 
                 if index != nil {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(Color.init("textColor"))
+                    .foregroundColor(.accentColor)
                 }
                 else {
                     Image(systemName: "circle")
-                        .foregroundColor(Color.init("textColor"))
+                        .foregroundColor(.accentColor)
                 }
             }
             else {
                 Image(systemName: "circle")
-                    .foregroundColor(Color.init("textColor"))
+                    .foregroundColor(.accentColor)
             }
             Text(exercise.name)
         }
@@ -395,29 +402,30 @@ struct AmountOfSets : View {
     @EnvironmentObject var schemaModel: TrainingDataModel
     var routine: Routine
     var superset: Superset
-
     
-    var body: some View {
-
+    @State var reps: String = ""
+       @State var sets: String = ""
+       
+       var body: some View {
+           
+           
+           let setsProxy = Binding<String>(
+            get: { String(self.superset.sets ?? 0)},
+               set: {
+                   if let value = NumberFormatter().number(from: $0) {
+                       self.schemaModel.updateSets(for: routine, for: superset, to: value.intValue)
+                   }
+               }
+           )
+            
         VStack(alignment: .leading){
-            HStack{
-                Text("Sets").padding()
-                Text(String(self.schemaModel.getAmountOfSets(for: routine, for: superset)))
-                
-                Button(action: {
-                    self.schemaModel.updateSets(for: routine, for: superset, to: "plus")
-                },label: {
-                    Image(systemName: "plus.circle.fill")
-                        .foregroundColor(Color.init("textColor"))
-                }).padding()
-                
-                
-                Button(action: {
-                        self.schemaModel.updateSets(for: routine, for: superset, to: "min")
-                }, label:{
-                    Image(systemName: "minus.circle.fill").foregroundColor(Color.init("textColor"))
-                }).padding()
-            }
+               HStack{
+                   Text("Sets: ")
+                   TextField("Sets", text: setsProxy)
+                        .frame(width: 60, height: 40)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.numberPad)
+               }
         }
     }
 }

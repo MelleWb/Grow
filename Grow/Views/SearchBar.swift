@@ -16,7 +16,7 @@ struct SearchBar: View {
     var body: some View {
             ZStack{
                 HStack {
-                     Image(systemName: "magnifyingglass")
+                    Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
                     TextField("Search ..", text: $searchText) { startedEditing in
                          if startedEditing {
                              withAnimation {
@@ -28,6 +28,7 @@ struct SearchBar: View {
                              searching = false
                          }
                      }
+                    /*
                     if searching {
                                     Button("Annuleer") {
                                         searchText = ""
@@ -36,7 +37,7 @@ struct SearchBar: View {
                                             UIApplication.shared.dismissKeyboard()
                                         }
                                     }
-                                }
+                                }*/
                  }
                      .foregroundColor(.gray)
                      .padding(.leading, 13)
@@ -45,5 +46,5 @@ struct SearchBar: View {
             }.frame(height: 40)
             .cornerRadius(13)
             .padding()
-        }
+    }
 }

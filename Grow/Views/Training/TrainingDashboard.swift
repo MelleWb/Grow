@@ -54,7 +54,7 @@ struct TrainingOverview: View {
                     NavigationLink(destination: ReviewSchema(schema: schema).environmentObject(schemas)){
                         Text(schema.name)
                     }
-                }
+                }.onDelete(perform:deleteSchema)
                  
             }.sheet(isPresented:$showAddSchema) {
                 AddSchema()
@@ -73,5 +73,8 @@ struct TrainingOverview: View {
                    Image(systemName: "plus")
                }
            )
+    }
+    func deleteSchema(indexSet: IndexSet){
+            self.schemas.fetchedSchemas.remove(atOffsets: indexSet)
     }
 }

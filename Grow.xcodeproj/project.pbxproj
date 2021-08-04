@@ -3,12 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		66DCCA41E695FC061C97932F /* Pods_Grow_GrowUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5138FA79BC7CEA39171F1B9 /* Pods_Grow_GrowUITests.framework */; };
 		85037C16268915D500EC344B /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85037C15268915D500EC344B /* UserModel.swift */; };
+		8512512326B944650006D304 /* KeyboardToolbar in Frameworks */ = {isa = PBXBuildFile; productRef = 8512512226B944650006D304 /* KeyboardToolbar */; };
+		8512512B26B9D9350006D304 /* AdaptsKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8512512A26B9D9350006D304 /* AdaptsKeyboard.swift */; };
 		851AFF392673D6D70092DA9B /* GrowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF382673D6D70092DA9B /* GrowApp.swift */; };
 		851AFF3D2673D6DB0092DA9B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 851AFF3C2673D6DB0092DA9B /* Assets.xcassets */; };
 		851AFF402673D6DB0092DA9B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 851AFF3F2673D6DB0092DA9B /* Preview Assets.xcassets */; };
@@ -83,6 +85,7 @@
 		74B64DB1C2B74BA9D0648D65 /* Pods-GrowTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GrowTests.release.xcconfig"; path = "Target Support Files/Pods-GrowTests/Pods-GrowTests.release.xcconfig"; sourceTree = "<group>"; };
 		7A37F4C0892EF1E134FAE80A /* Pods_GrowTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GrowTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		85037C15268915D500EC344B /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
+		8512512A26B9D9350006D304 /* AdaptsKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptsKeyboard.swift; sourceTree = "<group>"; };
 		851AFF352673D6D70092DA9B /* Grow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		851AFF382673D6D70092DA9B /* GrowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowApp.swift; sourceTree = "<group>"; };
 		851AFF3C2673D6DB0092DA9B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -139,6 +142,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				85BA4E60268A6D5700D71521 /* Pods_Grow.framework in Frameworks */,
+				8512512326B944650006D304 /* KeyboardToolbar in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +250,7 @@
 				85887F8526939D050084B82E /* PushNotificationHelper.swift */,
 				85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */,
 				85597D7626A2C166005375F7 /* DisableAutoDismiss.swift */,
+				8512512A26B9D9350006D304 /* AdaptsKeyboard.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -357,6 +362,9 @@
 			dependencies = (
 			);
 			name = Grow;
+			packageProductDependencies = (
+				8512512226B944650006D304 /* KeyboardToolbar */,
+			);
 			productName = Grow;
 			productReference = 851AFF352673D6D70092DA9B /* Grow.app */;
 			productType = "com.apple.product-type.application";
@@ -431,6 +439,9 @@
 				Base,
 			);
 			mainGroup = 851AFF2C2673D6D70092DA9B;
+			packageReferences = (
+				8512512126B944650006D304 /* XCRemoteSwiftPackageReference "KeyboardToolbar" */,
+			);
 			productRefGroup = 851AFF362673D6D70092DA9B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -585,6 +596,7 @@
 				85C48AE526B1E32400BFE48E /* ChatView.swift in Sources */,
 				F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */,
 				85D210682691EEA0002BA11C /* TrainingDashboard.swift in Sources */,
+				8512512B26B9D9350006D304 /* AdaptsKeyboard.swift in Sources */,
 				85BACD86267B33BD00FD29D7 /* TrainingFunctions.swift in Sources */,
 				85F92EEA2694AD9F00698585 /* Routines.swift in Sources */,
 				85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */,
@@ -1034,6 +1046,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8512512126B944650006D304 /* XCRemoteSwiftPackageReference "KeyboardToolbar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/cameronshemilt/KeyboardToolbar";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8512512226B944650006D304 /* KeyboardToolbar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8512512126B944650006D304 /* XCRemoteSwiftPackageReference "KeyboardToolbar" */;
+			productName = KeyboardToolbar;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 851AFF2D2673D6D70092DA9B /* Project object */;
 }
