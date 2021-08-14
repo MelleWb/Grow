@@ -10,18 +10,16 @@ import Firebase
 
 struct TabBarView: View {
     
-    @ObservedObject var userModel = UserDataModel()
+    @StateObject var userModel = UserDataModel()
     @ObservedObject var trainingModel = TrainingDataModel()
-    
-    init(){
-        self.userModel.fetchUser(uid: Auth.auth().currentUser!.uid)
-    }
+    @ObservedObject var statisticsModel = StatisticsDataModel()
     
     var body: some View {
         TabView {
             Dashboard()
                 .environmentObject(userModel)
                 .environmentObject(trainingModel)
+                .environmentObject(statisticsModel)
                 .tabItem {
                     Label("Dashboard", systemImage: "gauge")
                 }
@@ -29,6 +27,7 @@ struct TabBarView: View {
             TrainingDashboardView()
                 .environmentObject(userModel)
                 .environmentObject(trainingModel)
+                .environmentObject(statisticsModel)
                 .tabItem {
                     Label("Training", systemImage: "bolt")
                 }
@@ -44,11 +43,14 @@ struct TabBarView: View {
 struct Dashboard: View{
     @EnvironmentObject var userModel : UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
-    @ObservedObject var foodModel = FoodDataModel()
+    @EnvironmentObject var statisticsModel: StatisticsDataModel
     @State var showProfileSheetView: Bool = false
+    @State var showWorkoutView: Bool = false
     
     var body: some View {
         
+        ProgressIndicator(isShowing: self.$userModel.queryRunning, loadingText: "Profiel laden", content:{
+            
         NavigationView{
             List{
                 Section{
@@ -56,17 +58,16 @@ struct Dashboard: View{
                         HStack{
                             CircleView()
                                 .environmentObject(userModel)
-                                .environmentObject(foodModel)
                                 .padding(.top, 20)
                                 .padding(.bottom, 20)
                                 VStack{
                                     HStack{
-                                        ContentViewLinearKoolh().environmentObject(userModel).environmentObject(foodModel)
-                                    ContentViewLinearEiwit().environmentObject(userModel).environmentObject(foodModel)
+                                        ContentViewLinearKoolh().environmentObject(userModel)
+                                        ContentViewLinearEiwit().environmentObject(userModel)
                                         }
-                                        HStack{
-                                            ContentViewLinearVet().environmentObject(userModel).environmentObject(foodModel)
-                                            ContentViewLinearVezel().environmentObject(userModel).environmentObject(foodModel)
+                                    HStack{
+                                            ContentViewLinearVet().environmentObject(userModel)
+                                            ContentViewLinearVezel().environmentObject(userModel)
                                             }
                                         }.padding(.top, 10)
                                          .padding(.bottom, 20)
@@ -74,21 +75,18 @@ struct Dashboard: View{
                         NavigationLink(destination:FoodView()){}.hidden()
                     }
                 }
-                Section(header:Text("Trainingen van deze week")){
+                Section(header:Text("Trainingen deze week")){
                     HStack{
-                        ForEach(userModel.user.weekPlan ?? [], id:\.self){  day in
-                            if day.isTrainingDay ?? true {
-                                Image(systemName:"star.fill")
-                                    .frame(width: 50, height: 50, alignment: .leading)
-                                    .foregroundColor(Color.init("textColor"))
-                            }
-                        }
-                    }.padding()
+                        TrainingCircle().environmentObject(userModel)
+                        let percentage = (self.userModel.workoutDonePercentage * 100).rounded()
+                        Text("\(percentage) %")
+                    }
+                    HStack{
                     if userModel.user.workoutOfTheDay != nil {
                         HStack{
                             ZStack{
                                 Button("") {}
-                                NavigationLink(destination: WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!).environmentObject(trainingModel)){
+                                NavigationLink(destination: WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!, showWorkoutView: $showWorkoutView).environmentObject(trainingModel), isActive: $showWorkoutView){
                                     Image("upper")
                                         .resizable()
                                         .scaledToFill()
@@ -100,14 +98,12 @@ struct Dashboard: View{
                                         }
                                     }
                                 }
+                            }
                         }
                     }
                 }
             }
             .listStyle(InsetGroupedListStyle())
-            .onAppear(perform:{
-                self.foodModel.getTodaysIntake(for: userModel)
-            })
             .environmentObject(userModel)
             .navigationTitle(Text("Dashboard"))
             .navigationBarItems(
@@ -125,17 +121,38 @@ struct Dashboard: View{
                     }
                 }
             }
-        }
+        )}
+}
+
+struct TrainingCircle: View {
+    @EnvironmentObject var userModel: UserDataModel
+    
+    var body: some View {
+        
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
+                    .opacity(0.1)
+                    .foregroundColor(.accentColor)
+                    
+                
+                Rectangle().frame(width: min(CGFloat(self.userModel.workoutDonePercentage)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                    .foregroundColor(.accentColor)
+                    .animation(.linear)
+            }
+        }.cornerRadius(45.0).padding()
+    }
+}
 
 struct CircleView: View {
-    @EnvironmentObject var foodModel: FoodDataModel
     @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
     
         ZStack {
             VStack {
-                ProgressBarCirle(progress: self.$foodModel.userIntakeLeftOvers.kcal)
+                ProgressBarCirle()
+                    .environmentObject(userModel)
                     .frame(width: 125.0, height: 125.0)
                 }
         }
@@ -143,8 +160,10 @@ struct CircleView: View {
 }
 
 struct ProgressBarCirle: View {
-    @Binding var progress: Float
+    //@Binding var progress: Float
+    @EnvironmentObject var foodModel: FoodDataModel
     @EnvironmentObject var userModel: UserDataModel
+
         
         var body: some View {
             ZStack {
@@ -153,17 +172,17 @@ struct ProgressBarCirle: View {
                     .opacity(0.3)
                     .foregroundColor(Color.gray)
                 
-                if self.progress <= 0.8 {
+                if self.userModel.userIntakeLeftOvers.kcal <= 0.8 {
                     Circle()
-                        .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
+                        .trim(from: 0.0, to: CGFloat(min(self.userModel.userIntakeLeftOvers.kcal, 1.0)))
                         .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                         .foregroundColor(Color.green)
                         .rotationEffect(Angle(degrees: 270.0))
                         .animation(.linear)
                 }
-                else if self.progress > 0.8 && self.progress < 1{
+                else if self.userModel.userIntakeLeftOvers.kcal > 0.8 && self.userModel.userIntakeLeftOvers.kcal < 1{
                 Circle()
-                    .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
+                    .trim(from: 0.0, to: CGFloat(min(self.userModel.userIntakeLeftOvers.kcal, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                     .foregroundColor(Color.orange)
                     .rotationEffect(Angle(degrees: 270.0))
@@ -171,7 +190,7 @@ struct ProgressBarCirle: View {
                 }
                 else {
                     Circle()
-                        .trim(from: 0.0, to: CGFloat(min(self.progress, 1.0)))
+                        .trim(from: 0.0, to: CGFloat(min(self.userModel.userIntakeLeftOvers.kcal, 1.0)))
                         .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                         .foregroundColor(Color.red)
                         .rotationEffect(Angle(degrees: 270.0))
@@ -179,7 +198,7 @@ struct ProgressBarCirle: View {
                     
                 }
                 VStack{
-                    Text(String(userModel.user.kcal ?? 0))
+                    Text(String(self.userModel.userIntakeLeftOvers.kcal))
                     Text("Kcal over")
                 }
             }
@@ -218,7 +237,6 @@ struct ProgressBarLinearFood: View {
 
 struct ContentViewLinearKoolh: View {
     @EnvironmentObject var userModel: UserDataModel
-    @EnvironmentObject var foodModel: FoodDataModel
     
     var body: some View {
         VStack {
@@ -229,7 +247,7 @@ struct ContentViewLinearKoolh: View {
                 }
                 Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.userIntakeLeftOvers.carbs).frame(height: 7.5)
+            ProgressBarLinearFood(value: $userModel.userIntakeLeftOvers.carbs).frame(height: 7.5)
 
         }
     }
@@ -248,13 +266,12 @@ struct ContentViewLinearEiwit: View {
                     }
                 Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.userIntakeLeftOvers.protein).frame(height: 7.5)
+            ProgressBarLinearFood(value: $userModel.userIntakeLeftOvers.protein).frame(height: 7.5)
         }
     }
 }
 
 struct ContentViewLinearVet: View {
-    @EnvironmentObject var foodModel: FoodDataModel
     @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
@@ -266,14 +283,13 @@ struct ContentViewLinearVet: View {
                     }
                 Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.userIntakeLeftOvers.fat).frame(height: 7.5)
+            ProgressBarLinearFood(value: $userModel.userIntakeLeftOvers.fat).frame(height: 7.5)
         }
     }
 }
 
 struct ContentViewLinearVezel: View {
     @EnvironmentObject var userModel: UserDataModel
-    @EnvironmentObject var foodModel: FoodDataModel
     
     var body: some View {
         VStack {
@@ -284,7 +300,7 @@ struct ContentViewLinearVezel: View {
                     }
                 Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.userIntakeLeftOvers.fiber).frame(height: 7.5)
+            ProgressBarLinearFood(value: $userModel.userIntakeLeftOvers.fiber).frame(height: 7.5)
             
         }
     }

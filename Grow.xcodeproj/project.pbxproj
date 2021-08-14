@@ -35,11 +35,11 @@
 		85BC5E9326B3255500DBC821 /* TrainingDaySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85BC5E9226B3255500DBC821 /* TrainingDaySelectionView.swift */; };
 		85C48AE326B0978100BFE48E /* FoodModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C48AE226B0978000BFE48E /* FoodModel.swift */; };
 		85C48AE526B1E32400BFE48E /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C48AE426B1E32400BFE48E /* ChatView.swift */; };
+		85CB7FA026C1C0A700025736 /* StatisticsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CB7F9F26C1C0A700025736 /* StatisticsModel.swift */; };
 		85D21061268F8F32002BA11C /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D21060268F8F32002BA11C /* SearchBar.swift */; };
 		85D210682691EEA0002BA11C /* TrainingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D210672691EEA0002BA11C /* TrainingDashboard.swift */; };
 		85DF0607268C4CA400020559 /* AddExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DF0606268C4CA400020559 /* AddExercise.swift */; };
 		85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */; };
-		85E34872267504ED003C4311 /* StaticJson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E34871267504ED003C4311 /* StaticJson.swift */; };
 		85F6FDCC2693A3D70051B60E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 85F6FDCB2693A3D70051B60E /* GoogleService-Info.plist */; };
 		85F6FDCE2693A4E60051B60E /* PushNotificationSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */; };
 		85F92EEA2694AD9F00698585 /* Routines.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F92EE92694AD9E00698585 /* Routines.swift */; };
@@ -115,11 +115,11 @@
 		85BC5E9226B3255500DBC821 /* TrainingDaySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDaySelectionView.swift; sourceTree = "<group>"; };
 		85C48AE226B0978000BFE48E /* FoodModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodModel.swift; sourceTree = "<group>"; };
 		85C48AE426B1E32400BFE48E /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		85CB7F9F26C1C0A700025736 /* StatisticsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsModel.swift; sourceTree = "<group>"; };
 		85D21060268F8F32002BA11C /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		85D210672691EEA0002BA11C /* TrainingDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDashboard.swift; sourceTree = "<group>"; };
 		85DF0606268C4CA400020559 /* AddExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExercise.swift; sourceTree = "<group>"; };
 		85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDetailView.swift; sourceTree = "<group>"; };
-		85E34871267504ED003C4311 /* StaticJson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticJson.swift; sourceTree = "<group>"; };
 		85F6FDCB2693A3D70051B60E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationSender.swift; sourceTree = "<group>"; };
 		85F92EE92694AD9E00698585 /* Routines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routines.swift; sourceTree = "<group>"; };
@@ -322,10 +322,10 @@
 			isa = PBXGroup;
 			children = (
 				85037C15268915D500EC344B /* UserModel.swift */,
-				85E34871267504ED003C4311 /* StaticJson.swift */,
 				859B9453268B9A37003F58F2 /* ExerciseModel.swift */,
 				8539186726938D290045A1B5 /* TrainingModel.swift */,
 				85C48AE226B0978000BFE48E /* FoodModel.swift */,
+				85CB7F9F26C1C0A700025736 /* StatisticsModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -600,8 +600,8 @@
 				85BACD86267B33BD00FD29D7 /* TrainingFunctions.swift in Sources */,
 				85F92EEA2694AD9F00698585 /* Routines.swift in Sources */,
 				85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */,
+				85CB7FA026C1C0A700025736 /* StatisticsModel.swift in Sources */,
 				85D21061268F8F32002BA11C /* SearchBar.swift in Sources */,
-				85E34872267504ED003C4311 /* StaticJson.swift in Sources */,
 				F08043F326B3235E002D5C65 /* TrainingView.swift in Sources */,
 				85C48AE326B0978100BFE48E /* FoodModel.swift in Sources */,
 				859B9454268B9A37003F58F2 /* ExerciseModel.swift in Sources */,
@@ -779,7 +779,7 @@
 				CODE_SIGN_ENTITLEMENTS = Grow/Grow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
 				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_PREVIEWS = YES;
@@ -855,7 +855,7 @@
 				CODE_SIGN_ENTITLEMENTS = Grow/Grow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
 				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_PREVIEWS = YES;
@@ -928,7 +928,10 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = GrowTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -938,6 +941,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.GrowTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Grow.app/Grow";
@@ -950,7 +955,10 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = GrowTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -960,6 +968,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.GrowTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Grow.app/Grow";
@@ -972,6 +982,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
 				INFOPLIST_FILE = GrowUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -992,6 +1003,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
 				INFOPLIST_FILE = GrowUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

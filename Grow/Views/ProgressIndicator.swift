@@ -10,6 +10,7 @@ import SwiftUI
 struct ProgressIndicator<Content>: View where Content: View {
 
     @Binding var isShowing: Bool
+    var loadingText: String
     var content: () -> Content
 
     var body: some View {
@@ -21,7 +22,7 @@ struct ProgressIndicator<Content>: View where Content: View {
                     .blur(radius: self.isShowing ? 3 : 0)
 
                 VStack {
-                    ProgressView("Loading...")
+                    ProgressView(loadingText)
                 }
                 .frame(width: geometry.size.width / 2,
                        height: geometry.size.height / 5)

@@ -107,6 +107,17 @@ class UserDataModel: ObservableObject{
     @Published var user = User()
     @Published var userImages = UserImages()
     @Published var errorMessage: String?
+    @Published var queryRunning: Bool = true
+    @Published var userIntake =  UserIntake()
+    @Published var userIntakeLeftOvers = BudgetLeftOver()
+    @Published var workoutDonePercentage: Float = 0.0
+    
+    init(){
+        if Auth.auth().currentUser?.uid != nil{
+            self.fetchUser(uid: Auth.auth().currentUser!.uid)
+        }
+    }
+
     
     func fetchUser(uid: String) {
         
@@ -134,6 +145,15 @@ class UserDataModel: ObservableObject{
                 //Determine workout of the day
                 self.determineWorkoutOfTheDay()
                 
+                //Get todays intake
+                self.getTodaysIntake()
+                
+                //Get training statistics
+                self.getTrainingStatsForCurrentWeek()
+                
+                //Update query Running
+                self.queryRunning = false
+                
             }
             catch {
               print(error)
@@ -141,6 +161,22 @@ class UserDataModel: ObservableObject{
           }
         }
       }
+    }
+    
+    func getTodaysIntake(){
+
+        //Firbase call but for now some hardcoding
+        self.userIntake.kcal = 2040
+        self.userIntake.carbs = 325
+        self.userIntake.protein = 125
+        self.userIntake.fat = 20
+        self.userIntake.fiber = 30
+        
+        self.userIntakeLeftOvers.kcal = self.userIntake.kcal / Float(user.kcal ?? 0)
+        self.userIntakeLeftOvers.carbs = self.userIntake.carbs / Float(user.carbs ?? 0)
+        self.userIntakeLeftOvers.protein = self.userIntake.protein / Float(user.protein ?? 0)
+        self.userIntakeLeftOvers.fat = self.userIntake.fat / Float(user.fat ?? 0)
+        self.userIntakeLeftOvers.fiber = self.userIntake.fiber / Float(user.fiber ?? 0)
     }
 
     func fetchUserAndCoachImage(){
@@ -243,6 +279,19 @@ class UserDataModel: ObservableObject{
         
     }
     
+    func getAmountOfWorkOuts() -> Int {
+        var count: Int = 0
+        
+        if user.weekPlan != nil{
+            for plan in user.weekPlan! {
+                if plan.isTrainingDay ?? false {
+                    count += 1
+                }
+            }
+        }
+        return count
+    }
+    
     func determineWorkoutOfTheDay() {
         let dayOfWeek: Int = self.getDayForWeekPlan()
         if self.user.weekPlan == nil {
@@ -265,6 +314,43 @@ class UserDataModel: ObservableObject{
     func getTodaysRoutine() -> UUID{
         let dayOfWeek: Int = self.getDayForWeekPlan()
         return self.user.weekPlan![dayOfWeek].routine!
+    }
+    
+    func getTrainingStatsForCurrentWeek(){
+        
+        //Count routines
+        var amountOfRoutines:Int = 0
+        if self.user.weekPlan != nil {
+            for day in self.user.weekPlan! {
+                if day.isTrainingDay ?? false {
+                    amountOfRoutines += 1
+                }
+            }
+        }
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let dateArray: [Date] = DateHelper.calcWeekDates()
+
+        let docRef = db.collection("users").document(user.id!).collection("trainingStatistics")
+            .whereField("trainingDate", isGreaterThanOrEqualTo: dateArray[0])
+            .whereField("trainingDate", isLessThanOrEqualTo: dateArray[1])
+        
+        docRef.getDocuments() { (querySnapshot, err) in
+                    if let err = err {
+                        print("Error getting documents: \(err)")
+                    } else {
+                        var workoutsDone: Int = 0
+                        for _ in querySnapshot!.documents {
+                            workoutsDone += 1
+                        }
+                        
+                        //calculate the progress
+                        self.workoutDonePercentage = Float(workoutsDone)/Float(amountOfRoutines)
+                    }
+            }
     }
     
     func updateUserModel(for key: String, to value: Any){

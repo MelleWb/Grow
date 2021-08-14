@@ -31,6 +31,32 @@ class DateHelper {
         let date = dateFormatter.date(from: string)!
         return date
     }
+    
+    class func calcWeekDates() -> [Date]{
+        
+        var DateArray: [Date]
+        
+        let cal = Calendar.current
+        //weekday
+        let weekday = cal.component(.weekday, from: Date())
+
+        var dateComp = cal.dateComponents([.hour, .minute, .second, .day, .month, .year], from: Date())
+        //Start Date of the week - Monday
+        dateComp.day = dateComp.day! - (weekday - 2)// start date of week
+        
+        DateArray = [(cal.date(from: dateComp)!)]
+
+        //End Date of the Week - Zondag
+        dateComp = cal.dateComponents([.hour, .minute, .second, .day, .month, .year], from: Date())
+
+        dateComp.day = dateComp.day! + (7 - (weekday - 1))
+
+        DateArray.append(cal.date(from: dateComp)!)
+        
+        print(DateArray)
+        
+        return DateArray
+    }
 }
 
 class NumbersOnly: ObservableObject {

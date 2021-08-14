@@ -45,7 +45,6 @@ class TrainingDataModel: ObservableObject{
                 }
               }
             }
-            
         }
         else {
             if let index = self.schema.routines.firstIndex(where: { $0.id == routine }) {
@@ -344,9 +343,4 @@ struct Superset: Codable, Hashable, Identifiable {
         self.sets = sets
         self.exercises = exercises
     }
-}
-
-struct Set: Codable, Hashable {
-    var reps: Int
-    var weight: Int
 }

@@ -14,23 +14,6 @@ class FoodDataModel: ObservableObject{
     
     @Published var userIntake =  UserIntake()
     @Published var userIntakeLeftOvers = BudgetLeftOver()
-    
-    func getTodaysIntake(for budget: UserDataModel){
-        
-        
-        //Firbase call but for now some hardcoding
-        self.userIntake.kcal = 2040
-        self.userIntake.carbs = 325
-        self.userIntake.protein = 125
-        self.userIntake.fat = 20
-        self.userIntake.fiber = 30
-        
-        self.userIntakeLeftOvers.kcal = self.userIntake.kcal / Float(budget.user.kcal ?? 0)
-        self.userIntakeLeftOvers.carbs = self.userIntake.carbs / Float(budget.user.carbs ?? 0)
-        self.userIntakeLeftOvers.protein = self.userIntake.protein / Float(budget.user.protein ?? 0)
-        self.userIntakeLeftOvers.fat = self.userIntake.fat / Float(budget.user.fat ?? 0)
-        self.userIntakeLeftOvers.fiber = self.userIntake.fiber / Float(budget.user.fiber ?? 0)
-    }
 
 }
 
