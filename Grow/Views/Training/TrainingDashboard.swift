@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct TrainingDashboardView : View {
     
     @EnvironmentObject var userModel: UserDataModel
+    @EnvironmentObject var statisticsModel: StatisticsDataModel
+    
     var body: some View {
+        
         NavigationView{
             VStack{
                 List{
@@ -51,8 +55,12 @@ struct TrainingOverview: View {
         VStack{
             List {
                 ForEach(Array(schemas.fetchedSchemas.enumerated()), id: \.1) { index, schema in
-                    NavigationLink(destination: ReviewSchema(schema: schema).environmentObject(schemas)){
-                        Text(schema.name)
+                    ZStack{
+                        Button(""){}
+                        NavigationLink(destination: ReviewSchema(schema: schema).environmentObject(schemas)){
+                            
+                            Text(schema.name)
+                        }
                     }
                 }.onDelete(perform:deleteSchema)
                  
@@ -74,7 +82,21 @@ struct TrainingOverview: View {
                }
            )
     }
-    func deleteSchema(indexSet: IndexSet){
-            self.schemas.fetchedSchemas.remove(atOffsets: indexSet)
+    func deleteSchema(at offsets: IndexSet){
+        let index = offsets[offsets.startIndex]
+        
+        let documentID = schemas.fetchedSchemas[index].docID ?? ""
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        db.collection("schemas").document(documentID).delete() { err in
+            if let err = err {
+                print("Error removing document: \(err)")
+            } else {
+                self.schemas.fetchedSchemas.remove(atOffsets: offsets)
+            }
+        }
     }
 }

@@ -15,7 +15,14 @@ struct ReviewSchema: View{
     var body: some View {
         VStack{
             SchemaBody().environmentObject(schemaModel)
-        }.onAppear(perform:{
+        }
+        .navigationBarItems(trailing:
+                                Button(action: {
+                                    self.schemaModel.updateTraining()
+                                   }) {
+                                      Text("Opslaan")
+                                   })
+        .onAppear(perform:{
             self.schemaModel.setSingleSchemaFromFetchedSchemas(for: schema)
         })
     }
@@ -118,7 +125,7 @@ struct AddSchema: View{
                             
                                 
                            }) {
-                            Text("Opslaan").bold()
+                            Text("Voeg toe").bold()
                            }
                     )
         }.modifier(AdaptsKeyboard())

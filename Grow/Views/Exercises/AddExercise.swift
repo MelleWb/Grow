@@ -40,6 +40,7 @@ struct AddExercise: View {
                             Text("Schouders").tag("Schouders")
                             Text("Quadriceps").tag("Quadriceps")
                             Text("Hamstrings").tag("Hamstrings")
+                            Text("Billen").tag("Billen")
                             Text("Kuiten").tag("Kuiten")
                             Text("Buikspieren").tag("Buikspieren")
                         }.padding()

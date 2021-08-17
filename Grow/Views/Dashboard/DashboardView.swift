@@ -11,8 +11,8 @@ import Firebase
 struct TabBarView: View {
     
     @StateObject var userModel = UserDataModel()
-    @ObservedObject var trainingModel = TrainingDataModel()
-    @ObservedObject var statisticsModel = StatisticsDataModel()
+    @StateObject var trainingModel = TrainingDataModel()
+    @StateObject var statisticsModel = StatisticsDataModel()
     
     var body: some View {
         TabView {
@@ -79,7 +79,8 @@ struct Dashboard: View{
                     HStack{
                         TrainingCircle().environmentObject(userModel)
                         let percentage = (self.userModel.workoutDonePercentage * 100).rounded()
-                        Text("\(percentage) %")
+                        let roundedPercentage = Int(round(percentage))
+                        Text("\(roundedPercentage) %")
                     }
                     HStack{
                     if userModel.user.workoutOfTheDay != nil {

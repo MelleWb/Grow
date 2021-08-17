@@ -8,86 +8,15 @@
 import SwiftUI
 import Firebase
 import FirebaseStorage
+import KeyboardToolbar
 
 struct UpdateProfile: View {
 
     @Binding var showProfileSheetView: Bool
     @EnvironmentObject var userModel: UserDataModel
     @State var originalImage: UIImage?
-
-    func calcKcal(weight: Double, height: Double, dateOfBirth: Date, gender: Int, palOption: Int) -> Int {
-        
-            let today = Date()
     
-            let yearCompOfToday = Calendar.current.dateComponents([.year], from: today)
-            let yearOfToday = yearCompOfToday.year ?? 0
-            
-            let yearCompOfUser = Calendar.current.dateComponents([.year], from: dateOfBirth)
-            let yearOfUser = yearCompOfUser.year ?? 0
-            
-            let ageNumber = yearOfToday - yearOfUser
-            
-            var palValue: Double
-            
-            if   palOption == 0 {
-                palValue = 1.2
-            } else if palOption == 1 {
-                palValue = 1.375
-            } else if palOption == 2 {
-                palValue = 1.55
-            } else if palOption == 3 {
-                palValue = 1.725
-            } else {
-                palValue = 1.4
-            }
-            
-            if gender == 0 {
-                let calc1 = 66 + (13.7 * weight)
-                let kcal = calc1 + (5 * height) - (6.8 * Double(ageNumber))
-                
-                if userModel.user.plan == 0{
-                        return Int((kcal * palValue) * 0.82)
-                    }
-                    else if userModel.user.plan == 1{
-                        return Int(kcal * palValue)
-                    }
-                    else{
-                        return Int((kcal * palValue) * 1.1)
-                    }
-            }
-            else {
-                let calc1 = 447.593 + (9.247 * weight)
-                let kcal = calc1 + (3.098 * height) - (4.33 * Double(ageNumber))
-                
-                    if userModel.user.plan == 0{
-                        return Int((kcal * palValue) * 0.82)
-                    }
-                    else if userModel.user.plan == 1{
-                        return Int(kcal * palValue)
-                    }
-                    else{
-                        return Int((kcal * palValue) * 1.2)
-                    }
-                }
-        }
-    
-    func calcProtein(weight: Int) -> Int{
-        return Int(Double(weight) * 1.9)
-    }
-    
-    func calcFat(kcal: Int) -> Int {
-        return Int(Double(kcal) * 0.3/9)
-    }
-    
-    func calcCarbs(kcal: Int, protein: Int, fat: Int) -> Int {
-        let proteinKcal = protein * 4
-        let fatKcal = fat * 9
-        return Int((kcal - proteinKcal - fatKcal)/4)
-    }
-    
-    func calcFiber(kcal: Int) -> Int {
-        return Int(Double(kcal) * 0.014)
-    }
+    let toolbarItems: [KeyboardToolbarItem] = [.dismissKeyboard]
     
     var body: some View {
         
@@ -120,10 +49,12 @@ struct UpdateProfile: View {
                 }.padding()
                 
                 .pickerStyle(DefaultPickerStyle())
+                .modifier(AdaptsKeyboard())
                 .onAppear(perform:{self.originalImage = self.userModel.userImages.userImage?.image})
                 
                 }
-                .accentColor(Color.init("textColor"))
+            .accentColor(.accentColor)
+            .keyboardToolbar(toolbarItems)
                 .navigationBarTitle(Text("Profiel"), displayMode: .inline)
                    .navigationBarItems(trailing: Button(action: {
                     
@@ -365,22 +296,73 @@ struct PalValue : View {
 struct WorkOutSchema : View {
     
     @EnvironmentObject var userModel: UserDataModel
-    @ObservedObject var schemaModel = TrainingDataModel()
-    
     var body: some View {
-        
-        let schema = Binding(
-            get: { self.userModel.user.schema ?? "" },
-            set: { self.userModel.updateUserModel(for: "workoutSchema", to: $0) }
-        )
-        
+
         return
-            Section {
-            Picker(selection: schema, label: Text("Trainingsschema")) {
-                ForEach(schemaModel.fetchedSchemas, id: \.self){ schema in
-                    Text(schema.name).tag(schema.docID)
+            Section() {
+                List{
+                    NavigationLink(destination: SelectWorkOutSchema().environmentObject(userModel)){
+                        Text("Selecteer een trainingsschema")
+                    }
                 }
-            }.padding()
-        }.onAppear(perform:{self.schemaModel.fetchData()})
+        }
     }
 }
+
+struct SelectWorkOutSchema:View {
+    
+    @EnvironmentObject var userModel: UserDataModel
+    @ObservedObject var schemaModel = TrainingDataModel()
+    @State var searchText = ""
+    @State var searching = false
+    @State var selectedSchema: String?
+    
+    var body: some View {
+        List{
+            SearchBar(searchText: $searchText, searching: $searching)
+            ForEach(schemaModel.fetchedSchemas.filter({ (schema: Schema) -> Bool in
+                return schema.name.hasPrefix(searchText) || searchText == ""
+            }), id: \.self){ schema in
+                SelectWorkoutCell(schema: schema, selectedSchema: self.$selectedSchema).environmentObject(userModel).environmentObject(schemaModel)
+                }
+            }.onAppear(perform:{
+                self.schemaModel.fetchData()
+                self.selectedSchema = userModel.user.schema
+            })
+        .onDisappear(perform: {
+            if self.selectedSchema != nil {
+                self.userModel.updateUserModel(for: "workoutSchema", to: selectedSchema!)
+            }
+            print("onDisAppear")
+        })
+        .navigationTitle(Text("Selecteer een schema"))
+    }
+    }
+
+
+struct SelectWorkoutCell:View{
+    
+    var schema: Schema
+    @Binding var selectedSchema: String?
+    @EnvironmentObject var userModel: UserDataModel
+    @EnvironmentObject var schemaModel: TrainingDataModel
+
+    var body: some View {
+        HStack {
+            if selectedSchema == schema.docID  {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.accentColor)
+                }
+            else {
+                Image(systemName: "circle")
+                    .foregroundColor(.accentColor)
+            }
+            
+            Text(schema.name).font(.headline)
+
+        }
+        .onTapGesture {
+                self.selectedSchema = schema.docID
+                }
+            }
+        }

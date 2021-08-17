@@ -58,7 +58,7 @@ struct WorkoutOfTheDayView: View {
                                         print("some error")
                                     }
                                 }){
-                                Image(systemName: "externaldrive.badge.plus").foregroundColor(.accentColor)
+                                Text("Opslaan").foregroundColor(.accentColor)
                                 }
         )
     }
@@ -72,9 +72,16 @@ struct ExerciseRow:View{
     
     var body: some View{
         VStack(alignment: .leading){
-                    Text(exercise.name).font(.headline)
-                    Text("\(String(amountOfSets)) sets van \(String(exercise.reps ?? 0)) reps").font(.subheadline)
-            }.padding(10)
+            ZStack{
+                Button(""){}
+                NavigationLink(destination:ExerciseDetailView(exercise: exercise)){
+                    VStack(alignment: .leading){
+                        Text(exercise.name).font(.headline)
+                        Text("\(String(amountOfSets)) sets van \(String(exercise.reps ?? 0)) reps").font(.subheadline)
+                    }.padding(10)
+                }
+            }
+        }.padding(10)
         
         VStack(alignment: .leading){
             HStack{
@@ -141,7 +148,7 @@ struct WeightRow:View{
             } },
             set: {
                 if let value = NumberFormatter().number(from: $0) {
-                    self.statisticsModel.createUpdateWeight(for: exercise, for: set, with: value.intValue)
+                    self.statisticsModel.createUpdateWeight(for: exercise, for: set, with: value.doubleValue)
                 }
             }
         )

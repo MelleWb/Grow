@@ -35,25 +35,19 @@ class DateHelper {
     class func calcWeekDates() -> [Date]{
         
         var DateArray: [Date]
+
+        var customCalendar = Calendar(identifier: .gregorian)
+        customCalendar.firstWeekday = 2
         
-        let cal = Calendar.current
-        //weekday
-        let weekday = cal.component(.weekday, from: Date())
-
-        var dateComp = cal.dateComponents([.hour, .minute, .second, .day, .month, .year], from: Date())
-        //Start Date of the week - Monday
-        dateComp.day = dateComp.day! - (weekday - 2)// start date of week
+        var startDate = Date()
+        var interval = TimeInterval()
+        let dateInterval = customCalendar.dateInterval(of: .weekOfMonth, start: &startDate, interval: &interval, for: Date())
+        let endDate = startDate.addingTimeInterval(interval - 2)
+        print(startDate, endDate)
         
-        DateArray = [(cal.date(from: dateComp)!)]
-
-        //End Date of the Week - Zondag
-        dateComp = cal.dateComponents([.hour, .minute, .second, .day, .month, .year], from: Date())
-
-        dateComp.day = dateComp.day! + (7 - (weekday - 1))
-
-        DateArray.append(cal.date(from: dateComp)!)
-        
-        print(DateArray)
+        DateArray = [startDate]
+        DateArray.append(endDate)
+        //print(DateArray)
         
         return DateArray
     }

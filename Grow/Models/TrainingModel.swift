@@ -293,7 +293,41 @@ class TrainingDataModel: ObservableObject{
     }
     
     func updateTraining(){
-        //Do Something
+        // First create a proper schema name
+        var schemaName: String = ""
+        var volume: Double = 0.0
+        let routineCount = self.schema.routines.count
+        
+        schemaName += "\(routineCount)x-"
+        
+        for routines in self.schema.routines {
+            let routineSubstring = routines.type?.prefix(1) ?? "?"
+            schemaName += routineSubstring
+            
+            for set in routines.superset ?? []{
+                let exerciseCount: Double = Double(set.exercises?.count ?? 0)
+                for exercise in set.exercises ?? [] {
+                    volume += (exerciseCount * Double(exercise.reps ?? 0))
+                }
+            }
+        }
+        
+        schemaName += "-Volume:\(volume)"
+        self.schema.name = schemaName
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let saveSchema: Schema = self.schema
+        let newSchemaRef = db.collection("schemas").document(schema.docID!)
+        
+        do {
+            try newSchemaRef.setData(from: saveSchema, merge: true)
+        }
+        catch let error {
+            print(error)
+        }
     }
 }
 

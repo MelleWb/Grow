@@ -318,16 +318,6 @@ class UserDataModel: ObservableObject{
     
     func getTrainingStatsForCurrentWeek(){
         
-        //Count routines
-        var amountOfRoutines:Int = 0
-        if self.user.weekPlan != nil {
-            for day in self.user.weekPlan! {
-                if day.isTrainingDay ?? false {
-                    amountOfRoutines += 1
-                }
-            }
-        }
-        
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
@@ -348,7 +338,7 @@ class UserDataModel: ObservableObject{
                         }
                         
                         //calculate the progress
-                        self.workoutDonePercentage = Float(workoutsDone)/Float(amountOfRoutines)
+                        self.workoutDonePercentage = Float(workoutsDone)/Float(self.getAmountOfWorkOuts())
                     }
             }
     }
@@ -380,7 +370,21 @@ class UserDataModel: ObservableObject{
         }
         if key == "workoutSchema"{
             self.user.schema = value as? String
+            self.user.weekPlan = nil
+            
+            //Recreate week schema
+            self.getWeekSchema()
+            
+            //Determine workout of the day
+            self.determineWorkoutOfTheDay()
         }
+        
+        self.calcKcal()
+        self.calcProtein()
+        self.calcFat()
+        self.calcCarbs()
+        self.calcFiber()
+        
     }
     
     func uploadPicture(for image: UIImage){
@@ -445,6 +449,80 @@ class UserDataModel: ObservableObject{
           print(error)
         }
       }
+    }
+    
+    func calcKcal() {
+        
+            let today = Date()
+    
+            let yearCompOfToday = Calendar.current.dateComponents([.year], from: today)
+            let yearOfToday = yearCompOfToday.year ?? 0
+            
+        let yearCompOfUser = Calendar.current.dateComponents([.year], from: self.user.dateOfBirth ?? DateHelper.from(year: 1970, month: 1, day: 1))
+            let yearOfUser = yearCompOfUser.year ?? 0
+            
+            let ageNumber = yearOfToday - yearOfUser
+        
+            var palValue: Double
+                   
+                   if   (self.user.pal ?? 0) == 0 {
+                       palValue = 1.2
+                   } else if (self.user.pal ?? 0) == 1 {
+                       palValue = 1.375
+                   } else if (self.user.pal ?? 0) == 2 {
+                       palValue = 1.55
+                   } else if (self.user.pal ?? 0) == 3 {
+                       palValue = 1.725
+                   } else {
+                       palValue = 1.4
+                   }
+            
+            if self.user.gender == 0 {
+                let calc1 = 66 + (13.7 * Double(self.user.weight ?? 1))
+                let kcal = calc1 + (5 * Double(self.user.height ?? 1)) - (6.8 * Double(ageNumber))
+                if self.user.plan == 0{
+                    self.user.kcal = Int((kcal * palValue) * 0.82)
+                }
+                else if self.user.plan == 1{
+                    self.user.kcal = Int(kcal * palValue)
+                    }
+                    else{
+                        self.user.kcal = Int((kcal * palValue) * 1.1)
+                    }
+            }
+            else {
+                let calc1 = 447.593 + (9.247 * Double(self.user.weight ?? 1))
+                let kcal = calc1 + (3.098 * Double(self.user.height ?? 1)) - (4.33 * Double(ageNumber))
+                
+                    if self.user.plan == 0{
+                        self.user.kcal = Int((kcal * palValue) * 0.82)
+                    }
+                    else if self.user.plan == 1{
+                        self.user.kcal = Int(kcal * palValue)
+                    }
+                    else{
+                        self.user.kcal = Int((kcal * palValue) * 1.2)
+                    }
+                }
+        }
+    
+    func calcProtein(){
+        self.user.protein = Int(Double(self.user.weight ?? 1) * 1.9)
+    }
+    
+    func calcFat() {
+        self.user.fat = Int(Double(self.user.kcal ?? 1) * 0.3/9)
+    
+    }
+    
+    func calcCarbs() {
+        let proteinKcal = (self.user.protein ?? 1) * 4
+        let fatKcal = (self.user.fat ?? 1) * 9
+        self.user.carbs = Int(((self.user.kcal ?? 1) - proteinKcal - fatKcal)/4)
+    }
+    
+    func calcFiber() {
+        self.user.fiber = Int(Double(self.user.kcal ?? 1) * 0.014)
     }
     
    
