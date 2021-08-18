@@ -12,7 +12,7 @@ struct WorkoutOfTheDayView: View {
     
     @EnvironmentObject var userModel: UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
-    @StateObject var statisticsModel  = StatisticsDataModel()
+    @EnvironmentObject var statisticsModel: StatisticsDataModel
     var schema: String
     var routine:UUID
     @State var amountOfSets: Int = 0
@@ -83,7 +83,7 @@ struct ExerciseRow:View{
             }
         }.padding(10)
         
-        VStack(alignment: .leading){
+        VStack(alignment: .center){
             HStack{
                 ForEach(0..<amountOfSets, id: \.self) { index in
                     WeightRow(set: index, exercise: exercise).environmentObject(statisticsModel)
@@ -95,7 +95,7 @@ struct ExerciseRow:View{
                     RepsRow(set: index, exercise: exercise).environmentObject(statisticsModel)
                 }
             }
-        }.padding()
+        }
     }
 }
 
@@ -103,30 +103,25 @@ struct RepsRow:View{
     
     var set: Int
     var exercise: Exercise
-    @State var reps: Int?
-    @State var input: String = ""
+    @State var repsInput: String = ""
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     
     var body: some View{
-        
-        let repsProxy = Binding<String>(
-            get: { if self.statisticsModel.getRepsForSet(for: exercise, for: set)==0{
-                return ""
-            } else {
-                return String(self.statisticsModel.getRepsForSet(for: exercise, for: set))
-            } },
-            set: {
-                if let value = NumberFormatter().number(from: $0) {
+        VStack{
+            TextField("reps", text: $repsInput, onEditingChanged: { _ in
+                if let value = NumberFormatter().number(from: repsInput) {
                     self.statisticsModel.createUpdateReps(for: exercise, for: set, with: value.intValue)
                 }
+            })
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(width: 55, height: 40, alignment: .leading)
+                .multilineTextAlignment(.center)
+                .keyboardType(.numberPad)
+        }.onAppear(perform: {
+            if self.statisticsModel.getRepsForSet(for: exercise, for: set) != 0 {
+                self.repsInput = String(self.statisticsModel.getRepsForSet(for: exercise, for: set))
             }
-        )
-
-        TextField("reps", text: repsProxy)
-        
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .frame(width: 50, height: 40, alignment: .leading)
-            .keyboardType(.numberPad)
+        })
     }
 }
 
@@ -135,28 +130,33 @@ struct WeightRow:View{
     var set: Int
     var exercise: Exercise
     @State var weight: Double?
-    @State var input: String = ""
+    @State var weightInput: String = ""
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     
     var body: some View{
-        
-        let weightProxy = Binding<String>(
-            get: {if self.statisticsModel.getWeightForSet(for: exercise, for: set)==0{
-                return ""
-            } else {
-                return String(self.statisticsModel.getWeightForSet(for: exercise, for: set))
-            } },
-            set: {
-                if let value = NumberFormatter().number(from: $0) {
-                    self.statisticsModel.createUpdateWeight(for: exercise, for: set, with: value.doubleValue)
+        VStack{
+            TextField("kg", text: $weightInput, onEditingChanged: { _ in
+                      if let value = NumberFormatter().number(from: weightInput) {
+                          self.statisticsModel.createUpdateWeight(for: exercise, for: set, with: value.doubleValue)
+                      }
+                  })
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(width: 55, height: 40, alignment: .leading)
+                .multilineTextAlignment(.center)
+                .keyboardType(.decimalPad)
+        }.onAppear(perform: {
+            if self.statisticsModel.getWeightForSet(for: exercise, for: set) != 0 {
+                
+                self.weightInput = String(self.statisticsModel.getWeightForSet(for: exercise, for: set))
+                if let range =  self.weightInput.range(of: ".") {
+                    
+                    let decimal = String(self.weightInput[range.lowerBound..<self.weightInput.endIndex])
+                    
+                    if decimal == ".0"{
+                        self.weightInput = String(self.weightInput[self.weightInput.startIndex..<range.lowerBound])
+                    }
                 }
             }
-        )
-
-        TextField("kg", text: weightProxy)
-        
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .frame(width: 50, height: 40, alignment: .leading)
-            .keyboardType(.numberPad)
+        })
     }
 }

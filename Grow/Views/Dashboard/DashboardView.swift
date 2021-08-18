@@ -82,21 +82,17 @@ struct Dashboard: View{
                         let roundedPercentage = Int(round(percentage))
                         Text("\(roundedPercentage) %")
                     }
-                    HStack{
                     if userModel.user.workoutOfTheDay != nil {
                         HStack{
                             ZStack{
                                 Button("") {}
-                                NavigationLink(destination: WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!, showWorkoutView: $showWorkoutView).environmentObject(trainingModel), isActive: $showWorkoutView){
-                                    Image("upper")
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 30, height: 30, alignment: .leading)
+                                NavigationLink(destination: WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!, showWorkoutView: $showWorkoutView).environmentObject(trainingModel).environmentObject(statisticsModel), isActive: $showWorkoutView){
+                                    Image(systemName: "bolt")
+                                        .foregroundColor(.accentColor)
                                         .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
                                     VStack(alignment: .leading){
                                         Text("Start je training van vandaag").font(.subheadline).bold()
-                                        }
                                     }
                                 }
                             }

@@ -52,7 +52,6 @@ class StatisticsDataModel: ObservableObject {
             if exerciseStats.count > 0 {
                 
             self.maxWeight = exerciseStats[0]
-            print(self.maxWeight)
             
             let oneRepMax:Double = self.getEstimatedOneRepMax(given: self.maxWeight.reps ?? 1, weight: Double(self.maxWeight.weight ?? 1))
             
@@ -247,7 +246,16 @@ class StatisticsDataModel: ObservableObject {
         
         //Calculate volume
         for stats in exerciseStatistics{
+            
             volume += (Double(stats.reps ?? 0) * Double(stats.weight ?? 0))
+            
+            let estimatedOneRepMax:Double = self.getEstimatedOneRepMax(given: stats.reps ?? 1, weight: stats.weight ?? 1)
+            
+            let estimatedWeightForReps: Double = self.getEstimatedWeightForReps(oneRepMax: estimatedOneRepMax, reps: stats.reps ?? 1)
+            
+            if let index = self.exerciseStatistics.firstIndex(where: { $0.id ==  stats.id }){
+                self.exerciseStatistics[index].estimatedOneRepMax = estimatedWeightForReps
+                }
             }
         
         self.trainingStatistics = TrainingStatistics(routineID: routineID, trainingDate: date, trainingVolume: volume)
@@ -302,16 +310,16 @@ class StatisticsDataModel: ObservableObject {
         print(exercise)
         //check if self.exerciseStatistics is empty
         if self.exerciseStatistics.isEmpty {
-            self.exerciseStatistics = [ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, set: set, reps: reps, weight: 0)]
+            self.exerciseStatistics = [ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, date: Date(), set: set, reps: reps, weight: 0)]
         } else {
             if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID ==  exercise.id && $0.set == set}) {
 
                     let weight:Double = self.exerciseStatistics[index].weight ?? 0
-                    self.exerciseStatistics[index] = ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, set: set, reps: reps, weight: weight)
+                    self.exerciseStatistics[index] = ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, date: Date(), set: set, reps: reps, weight: weight)
 
             } else {
                 //Initialize the stat
-                self.exerciseStatistics.append(ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, set: set, reps: reps, weight: 0))
+                self.exerciseStatistics.append(ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, date: Date(), set: set, reps: reps, weight: 0))
             }
         }
     }
@@ -320,16 +328,16 @@ class StatisticsDataModel: ObservableObject {
         
         //check if self.exerciseStatistics is empty
         if self.exerciseStatistics.isEmpty {
-            self.exerciseStatistics = [ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, set: set, reps: 0, weight: weight)]
+            self.exerciseStatistics = [ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, date: Date(), set: set, reps: 0, weight: weight)]
         } else {
             if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID ==  exercise.id && $0.set == set}) {
                 
                     //Update the stat
                     let reps:Int = self.exerciseStatistics[index].reps ?? 0
-                    self.exerciseStatistics[index] = ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, set: set, reps: reps, weight: weight)
+                    self.exerciseStatistics[index] = ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, date: Date(), set: set, reps: reps, weight: weight)
             } else {
                 //Initialize the stat
-                self.exerciseStatistics.append(ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, set: set, reps: 0, weight: weight))
+                self.exerciseStatistics.append(ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, date: Date(), set: set, reps: 0, weight: weight))
             }
         }
     }
@@ -365,8 +373,9 @@ struct ExerciseStatistics : Codable, Identifiable, Hashable {
     var set: Int
     var reps: Int?
     var weight: Double?
+    var estimatedOneRepMax: Double?
     
-    init(id: UUID = UUID(), documentID: String = "", exerciseID: UUID = UUID(), exerciseName:String = "", date:Date = DateHelper.from(year: 1970, month: 1, day: 1),set:Int = 0, reps:Int? = 0, weight:Double? = 0 ){
+    init(id: UUID = UUID(), documentID: String = "", exerciseID: UUID = UUID(), exerciseName:String = "", date:Date = DateHelper.from(year: 1970, month: 1, day: 1),set:Int = 0, reps:Int? = 0, weight:Double? = 0, estimatedOneRepMax:Double? = 0 ){
         self.id = id
         self.documentID = documentID
         self.exerciseID = exerciseID
@@ -375,6 +384,7 @@ struct ExerciseStatistics : Codable, Identifiable, Hashable {
         self.set = set
         self.reps = reps
         self.weight = weight
+        self.estimatedOneRepMax = estimatedOneRepMax
     }
 }
 

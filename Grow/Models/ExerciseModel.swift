@@ -17,6 +17,7 @@ struct Exercise: Codable, Hashable, Identifiable {
     var category: String
     var imageURL: String?
     var description: String?
+    var statistics: [ExerciseStatistics]?
     
     init(
         id: UUID = UUID(),
@@ -25,7 +26,8 @@ struct Exercise: Codable, Hashable, Identifiable {
         reps: Int? = 0,
         category: String? = nil,
         imageURL: String? = nil,
-        description: String? = nil) {
+        description: String? = nil,
+        statistics: [ExerciseStatistics]? = nil) {
         
         self.id = id
         self.documentID = documentID
@@ -34,6 +36,7 @@ struct Exercise: Codable, Hashable, Identifiable {
         self.category = category ?? ""
         self.imageURL = imageURL ?? ""
         self.description = description ?? ""
+        self.statistics = statistics
     }
 }
 
