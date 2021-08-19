@@ -13,6 +13,7 @@ struct TabBarView: View {
     @StateObject var userModel = UserDataModel()
     @StateObject var trainingModel = TrainingDataModel()
     @StateObject var statisticsModel = StatisticsDataModel()
+    @StateObject var foodModel = FoodDataModel()
     
     var body: some View {
         TabView {
@@ -20,6 +21,7 @@ struct TabBarView: View {
                 .environmentObject(userModel)
                 .environmentObject(trainingModel)
                 .environmentObject(statisticsModel)
+                .environmentObject(foodModel)
                 .tabItem {
                     Label("Dashboard", systemImage: "gauge")
                 }
@@ -44,6 +46,7 @@ struct Dashboard: View{
     @EnvironmentObject var userModel : UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
+    @EnvironmentObject var foodModel: FoodDataModel
     @State var showProfileSheetView: Bool = false
     @State var showWorkoutView: Bool = false
     
@@ -72,7 +75,7 @@ struct Dashboard: View{
                                         }.padding(.top, 10)
                                          .padding(.bottom, 20)
                                     }
-                        NavigationLink(destination:FoodView()){}.hidden()
+                        NavigationLink(destination:FoodView().environmentObject(foodModel)){}.hidden()
                     }
                 }
                 Section(header:Text("Trainingen deze week")){

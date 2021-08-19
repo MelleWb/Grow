@@ -66,8 +66,6 @@ List{
             HStack{
                 Image(systemName: "plus").foregroundColor(Color.init("textColor"))
                 Text("Voeg Maaltijd toe").foregroundColor(Color.init("textColor"))
-//                NavigationLink(destination:AddMealView(showAddMealView: $showAddMealView).environmentObject(foodModel),
-//                            isActive: $showAddMealView){}.hidden()
                         }
                     }
             }
