@@ -114,7 +114,7 @@ struct RepsRow:View{
                 }
             })
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 55, height: 40, alignment: .leading)
+                .frame(width: 58, height: 40, alignment: .leading)
                 .multilineTextAlignment(.center)
                 .keyboardType(.numberPad)
         }.onAppear(perform: {
@@ -141,20 +141,30 @@ struct WeightRow:View{
                       }
                   })
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 55, height: 40, alignment: .leading)
+                .frame(width: 58, height: 40, alignment: .leading)
                 .multilineTextAlignment(.center)
                 .keyboardType(.decimalPad)
-        }.onAppear(perform: {
+        }
+        .onAppear(perform: {
+            
             if self.statisticsModel.getWeightForSet(for: exercise, for: set) != 0 {
                 
-                self.weightInput = String(self.statisticsModel.getWeightForSet(for: exercise, for: set))
-                if let range =  self.weightInput.range(of: ".") {
+                let formatter = NumberFormatter()
+                formatter.numberStyle = .decimal
+                formatter.maximumFractionDigits = 2
+
+                let number = NSNumber(value: self.statisticsModel.getWeightForSet(for: exercise, for: set))
+                let formattedValue = formatter.string(from: number)!
+                
+                self.weightInput = formattedValue
+                if let range =  formattedValue.range(of: ".") {
                     
-                    let decimal = String(self.weightInput[range.lowerBound..<self.weightInput.endIndex])
+                    let decimal = formattedValue[range.lowerBound..<self.weightInput.endIndex]
                     
                     if decimal == ".0"{
-                        self.weightInput = String(self.weightInput[self.weightInput.startIndex..<range.lowerBound])
+                        self.weightInput = String(formattedValue[formattedValue.startIndex..<range.lowerBound])
                     }
+                    
                 }
             }
         })
