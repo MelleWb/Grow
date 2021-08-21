@@ -15,7 +15,37 @@ class StatisticsDataModel: ObservableObject {
     @Published var schemaStatistics = SchemaStatistics()
     @Published var maxWeight = ExerciseStatistics()
     @Published var estimatedWeights = [EstimatedWeights()]
-    var trainingStatistics = TrainingStatistics()
+    @Published var trainingStatistics = TrainingStatistics()
+    var user = User()
+    
+    init(){
+        self.initiateStatistics()
+    }
+    
+    func initiateStatistics(){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid)
+
+        docRef.getDocument(source: .cache) { (document, error) in
+          if let document = document {
+            do{
+                self.user = try document.data(as: User.self)!
+                
+                // Perform other calls
+                self.getStatisticsForCurrentSchema()
+            }
+            catch {
+              print(error)
+            }
+          } else {
+            print("Document does not exist in cache")
+          }
+        }
+    }
     
     func calcEstimatedWeights(for exerciseName: String){
         
@@ -141,8 +171,9 @@ class StatisticsDataModel: ObservableObject {
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
+        
     db.collection("users").document(Auth.auth().currentUser!.uid).collection("exerciseStatistics")
-        .whereField("exerciseName", isEqualTo: exerciseName).order(by: "weight", descending: true).limit(to: 50).addSnapshotListener { (querySnapshot, error) in
+        .whereField("exerciseName", isEqualTo: exerciseName).order(by: "estimatedOneRepMax", descending: true).limit(to: 1).addSnapshotListener { (querySnapshot, error) in
 
                 guard let documents = querySnapshot?.documents else {
                         print("No documents")
@@ -157,7 +188,7 @@ class StatisticsDataModel: ObservableObject {
                     switch result {
                     case .success(let stats):
                         if let stats = stats {
-                            return ExerciseStatistics(id: stats.id, documentID: stats.documentID ?? "", exerciseID: stats.exerciseID, exerciseName: stats.exerciseName, date: stats.date, set: stats.set, reps: stats.reps, weight: stats.weight)
+                            return stats
                         }
                         else {
                             print ("Document does not exists")
@@ -169,16 +200,74 @@ class StatisticsDataModel: ObservableObject {
                 }
             }
     }
+    
+    func getRepsPlaceholder(for exercise: Exercise, for set:Int) -> Int{
+        var value: Int = 0
         
-    func getStatisticsForCurrentSchema(for user: String, for schemaString: String){
+        if let exerciseID = self.trainingStatistics.exerciceStatistics?.firstIndex(where: {$0.exerciseName == exercise.name && $0.set == set}){
+            value = self.trainingStatistics.exerciceStatistics![exerciseID].reps ?? 0
+        }
+        return value
+    }
+    
+    func getWeightPlaceholder(for exercise: Exercise, for set:Int) -> Double{
+        var value: Double = 0
         
+        if let exerciseID = self.trainingStatistics.exerciceStatistics?.firstIndex(where: {$0.exerciseName == exercise.name && $0.set == set}){
+            value = self.trainingStatistics.exerciceStatistics![exerciseID].weight ?? 0
+        }
+        return value
+    }
+    
+    func getStatisticsForCurrentRoutine(for routineID: UUID){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let routine = routineID.uuidString
+        
+    db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics")
+        .whereField("routineID", isEqualTo: routine).order(by: "trainingDate", descending: true).limit(to: 1).addSnapshotListener { (querySnapshot, error) in
+
+                guard let documents = querySnapshot?.documents else {
+                        print("No documents")
+                    return
+                }
+                
+            let trainingStatistics:[TrainingStatistics] = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
+                    
+                    let result = Result {
+                        try queryDocumentSnapshot.data(as: TrainingStatistics.self)
+                    }
+                    switch result {
+                    case .success(let stats):
+                        if let stats = stats {
+                            return stats
+                        }
+                        else {
+                            print ("Document does not exists")
+                        }
+                    case .failure(let error):
+                        print("error decoding schema: \(error)")
+                    }
+                    return TrainingStatistics(id: UUID(), routineID: UUID(), documentID: "", trainingDate: Date(), trainingVolume: 0, volumePercentage: 0)
+                }
+                if !trainingStatistics.isEmpty {
+                    self.trainingStatistics = trainingStatistics[0]
+                }
+            }
+    }
+        
+    func getStatisticsForCurrentSchema(){
+        if self.schemaStatistics.routineStats == nil {
         var schema:Schema = Schema()
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
-        let docRef = db.collection("schemas").document(schemaString)
+            let docRef = db.collection("schemas").document(self.user.schema!)
         
         docRef.getDocument { document, error in
           if (error as NSError?) != nil {
@@ -188,6 +277,50 @@ class StatisticsDataModel: ObservableObject {
             if let document = document {
               do {
                 schema = try document.data(as: Schema.self)!
+                
+                //Get routines for current schema
+                for routine in schema.routines {
+                    
+                    var routineStats: RoutineStatistics = RoutineStatistics(type: routine.type ?? "")
+                    
+                    let routineString:String = routine.id.uuidString
+                    
+                    db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics")
+                        .whereField("routineID", isEqualTo: routineString).order(by: "trainingDate", descending: true).limit(to: 10).addSnapshotListener { (querySnapshot, error) in
+                            
+                            guard let documents = querySnapshot?.documents else {
+                                print("No documents")
+                                return
+                            }
+                            
+                            routineStats.trainingStats = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
+                                
+                                let result = Result {
+                                    try queryDocumentSnapshot.data(as: TrainingStatistics.self)
+                                }
+                                switch result {
+                                case .success(let stats):
+                                    if let stats = stats {
+                                        return stats
+                                    }
+                                    else {
+                                        print ("Document does not exists")
+                                    }
+                                case .failure(let error):
+                                    print("error decoding schema: \(error)")
+                                }
+                                return TrainingStatistics(routineID: UUID(), trainingDate: Date(), trainingVolume: 0)
+                            }
+                            if self.schemaStatistics.routineStats != nil {
+                                self.schemaStatistics.routineStats?.append(routineStats)
+                                } else {
+                                    self.schemaStatistics.routineStats = [routineStats]
+                                }
+                            //Calculate the percentages now
+                            self.getSchemaStatisticsInPercentages()
+                        }
+                }
+                
               }
               catch {
                 print(error)
@@ -195,48 +328,34 @@ class StatisticsDataModel: ObservableObject {
             }
           }
         }
+        }
+    }
+    
+    func getSchemaStatisticsInPercentages(){
         
-        //Get routines for current schema
-        for routine in schema.routines {
-            
-            var routineStats: RoutineStatistics = RoutineStatistics(type: routine.type ?? "")
-            
-            let routineString:String = routine.id.uuidString
-            
-            db.collection("users").document(user).collection("trainingStatistics")
-                .whereField("routine", isEqualTo: routineString).addSnapshotListener { (querySnapshot, error) in
-                    
-                    guard let documents = querySnapshot?.documents else {
-                        print("No documents")
-                        return
-                    }
-                    
-                    routineStats.trainingStats = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
-                        
-                        let result = Result {
-                            try queryDocumentSnapshot.data(as: TrainingStatistics.self)
-                        }
-                        switch result {
-                        case .success(let stats):
-                            if let stats = stats {
-                                return TrainingStatistics(id: stats.id, routineID: stats.routineID, documentID: stats.documentID, trainingDate: stats.trainingDate, trainingVolume: stats.trainingVolume)
-                            }
-                            else {
-                                print ("Document does not exists")
-                            }
-                        case .failure(let error):
-                            print("error decoding schema: \(error)")
-                        }
-                        return TrainingStatistics(routineID: UUID(), trainingDate: DateHelper.from(year: 1970, month: 1, day: 1), trainingVolume: 0)
-                    }
+        if self.schemaStatistics.routineStats != nil {
+            for routineStats in self.schemaStatistics.routineStats!{
+                let routineStatsId = routineStats.id
+                
+                var volumeArray:[Double] = []
+                
+                for trainingStats in routineStats.trainingStats{
+                    volumeArray.append(trainingStats.trainingVolume)
                 }
-            if self.schemaStatistics.routineStats != nil {
-                self.schemaStatistics.routineStats?.append(routineStats)
-                } else {
-                    self.schemaStatistics.routineStats = [routineStats]
+                let highestVolumeTraining:Double = volumeArray.max() ?? 0
+                
+                //loop again and set the value
+                for trainingStats in routineStats.trainingStats{
+                    
+                    if let routineStatsIndex = self.schemaStatistics.routineStats!.firstIndex(where: { $0.id ==  routineStatsId }){
+                        if let trainingStatsIndex = self.schemaStatistics.routineStats![routineStatsIndex].trainingStats.firstIndex(where: { $0.id == trainingStats.id }){
+                            self.schemaStatistics.routineStats![routineStatsIndex].trainingStats[trainingStatsIndex].volumePercentage = Float( self.schemaStatistics.routineStats![routineStatsIndex].trainingStats[trainingStatsIndex].trainingVolume / highestVolumeTraining)
+                            }
+                        }
                 }
             }
         }
+    }
     
     func saveTraining(for user: String, for routineID: UUID) -> Bool{
 
@@ -251,14 +370,13 @@ class StatisticsDataModel: ObservableObject {
             
             let estimatedOneRepMax:Double = self.getEstimatedOneRepMax(given: stats.reps ?? 1, weight: stats.weight ?? 1)
             
-            let estimatedWeightForReps: Double = self.getEstimatedWeightForReps(oneRepMax: estimatedOneRepMax, reps: stats.reps ?? 1)
-            
             if let index = self.exerciseStatistics.firstIndex(where: { $0.id ==  stats.id }){
-                self.exerciseStatistics[index].estimatedOneRepMax = estimatedWeightForReps
+                self.exerciseStatistics[index].estimatedOneRepMax = estimatedOneRepMax
                 }
+            
             }
         
-        self.trainingStatistics = TrainingStatistics(routineID: routineID, trainingDate: date, trainingVolume: volume)
+        let trainingStatisticsObject: TrainingStatistics = TrainingStatistics(routineID: routineID, trainingDate: date, trainingVolume: volume, exerciceStatistics: exerciseStatistics)
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
@@ -283,7 +401,7 @@ class StatisticsDataModel: ObservableObject {
             let trainingStats = db.collection("users").document(user).collection("trainingStatistics").document()
             
             do {
-                try trainingStats.setData(from: trainingStatistics, merge: true)
+                try trainingStats.setData(from: trainingStatisticsObject, merge: true)
             }
             catch {
                 success = false
@@ -349,18 +467,24 @@ struct TrainingStatistics: Codable, Identifiable, Hashable {
     @DocumentID var documentID: String?
     var trainingDate: Date
     var trainingVolume: Double
+    var volumePercentage: Float?
+    var exerciceStatistics: [ExerciseStatistics]?
     
     init(id: UUID = UUID(),
          routineID: UUID = UUID(),
          documentID: String? = "",
-         trainingDate: Date = DateHelper.from(year: 1, month: 1, day: 1970),
-         trainingVolume: Double = 0)
+         trainingDate: Date = Date(),
+         trainingVolume: Double = 0,
+         volumePercentage:Float? = 0,
+         exerciceStatistics:[ExerciseStatistics]? = nil)
         {
         self.id = id
         self.routineID = routineID
         self.documentID = documentID
         self.trainingDate = trainingDate
         self.trainingVolume = trainingVolume
+        self.volumePercentage = volumePercentage
+        self.exerciceStatistics = exerciceStatistics
     }
 }
 
@@ -392,7 +516,7 @@ struct SchemaStatistics: Codable, Identifiable, Hashable {
     var id = UUID()
     var routineStats: [RoutineStatistics]?
     
-    init(id:UUID = UUID(), routineStats: [RoutineStatistics] = [RoutineStatistics()]){
+    init(id:UUID = UUID(), routineStats: [RoutineStatistics]? = nil){
         self.id = id
         self.routineStats = routineStats
     }
