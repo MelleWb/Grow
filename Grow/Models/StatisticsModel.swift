@@ -34,9 +34,6 @@ class StatisticsDataModel: ObservableObject {
           if let document = document {
             do{
                 self.user = try document.data(as: User.self)!
-                
-                // Perform other calls
-                self.getStatisticsForCurrentSchema()
             }
             catch {
               print(error)

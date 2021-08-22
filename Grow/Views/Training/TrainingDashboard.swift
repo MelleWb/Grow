@@ -18,39 +18,30 @@ struct TrainingDashboardView : View {
         NavigationView{
             VStack{
                 List{
-                    if self.statisticsModel.schemaStatistics.routineStats != nil {
-                        Section(header:Text("Volume per training")){
-                            ForEach(self.statisticsModel.schemaStatistics.routineStats!, id:\.self){routineStats in
-                                VStack(alignment:.leading){
-                                    Text(routineStats.type).font(.headline).foregroundColor(.accentColor)
-                                        HStack{
-                                            ForEach(routineStats.trainingStats, id:\.self){ trainingStats in
-                                                ProgressBarVertical(value: trainingStats.volumePercentage ?? 0, label: String(trainingStats.trainingVolume))
-                                            }
-                                        }
-                                    }
-                            }
-                        }
-                    }
-                    
-                    Section(header:Text("Schemas en oefeningen")){
+                    Section(header:Text("Schemas, oefeningen en statistieken")){
                         NavigationLink(destination: ExerciseOverview()){
                             HStack{
-                                Image(systemName: "list.bullet").foregroundColor(Color.init("textColor"))
-                                Text("Bekijk alle oefeningen").font(.subheadline)
+                                Image(systemName: "list.bullet").foregroundColor(.accentColor)
+                                Text("Oefeningen en statistieken").font(.subheadline)
+                            }
+                        }
+                        NavigationLink(destination: TrainingVolumeView()){
+                            HStack{
+                                Image(systemName: "chart.bar").foregroundColor(.accentColor)
+                                Text("Trainingsvolume per trainingsdag").font(.subheadline)
                             }
                         }
                         NavigationLink(destination: TrainingOverview()){
                             HStack{
-                                Image(systemName: "square.and.pencil").foregroundColor(Color.init("textColor"))
-                                Text("Bekijk al onze trainingschemas").font(.subheadline)
+                                Image(systemName: "square.and.pencil").foregroundColor(.accentColor)
+                                Text("Bekijk of maak trainingschemas").font(.subheadline)
                             }
                         }
                     }
                     Section(header:Text("Trainingsdagen")){
                         NavigationLink(destination: TrainingDaySelectionView()){
                             HStack{
-                                Image(systemName: "calendar").foregroundColor(Color.init("textColor"))
+                                Image(systemName: "calendar").foregroundColor(.accentColor)
                                 Text("Selecteer je trainingsdagen").font(.subheadline)
                             }
                         }
@@ -73,7 +64,7 @@ struct TrainingOverview: View {
                 ForEach(Array(schemas.fetchedSchemas.enumerated()), id: \.1) { index, schema in
                     ZStack{
                         Button(""){}
-                        NavigationLink(destination: ReviewSchema(schema: schema).environmentObject(schemas)){
+                        NavigationLink(destination: ReviewSchema(newSchema: schemas, schema: schema)){
                             
                             Text(schema.name)
                         }

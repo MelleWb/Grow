@@ -18,6 +18,7 @@
 		851AFF4B2673D6DC0092DA9B /* GrowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF4A2673D6DC0092DA9B /* GrowTests.swift */; };
 		851AFF562673D6DC0092DA9B /* GrowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851AFF552673D6DC0092DA9B /* GrowUITests.swift */; };
 		8521A2942685BDFC00400657 /* (null) in Embed Frameworks */ = {isa = PBXBuildFile; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8534D7C926D27F0300FB41EE /* TrainingVolumeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8534D7C826D27F0300FB41EE /* TrainingVolumeView.swift */; };
 		8539186826938D290045A1B5 /* TrainingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8539186726938D290045A1B5 /* TrainingModel.swift */; };
 		8545E33226B542FC0083F69E /* WorkoutOfTheDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8545E33126B542FC0083F69E /* WorkoutOfTheDayView.swift */; };
 		85476A2F267FBCE200BA68A2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85476A2E267FBCE200BA68A2 /* LoginView.swift */; };
@@ -101,6 +102,7 @@
 		851AFF512673D6DC0092DA9B /* GrowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GrowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		851AFF552673D6DC0092DA9B /* GrowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowUITests.swift; sourceTree = "<group>"; };
 		851AFF572673D6DC0092DA9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8534D7C826D27F0300FB41EE /* TrainingVolumeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingVolumeView.swift; sourceTree = "<group>"; };
 		8539186726938D290045A1B5 /* TrainingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingModel.swift; sourceTree = "<group>"; };
 		8545E33126B542FC0083F69E /* WorkoutOfTheDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutOfTheDayView.swift; sourceTree = "<group>"; };
 		85476A2E267FBCE200BA68A2 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -321,6 +323,7 @@
 			children = (
 				85D210662691EE55002BA11C /* Creation */,
 				85D210672691EEA0002BA11C /* TrainingDashboard.swift */,
+				8534D7C826D27F0300FB41EE /* TrainingVolumeView.swift */,
 				85BC5E9226B3255500DBC821 /* TrainingDaySelectionView.swift */,
 				8545E33126B542FC0083F69E /* WorkoutOfTheDayView.swift */,
 			);
@@ -610,6 +613,7 @@
 				854B05EA2681E81500A824CD /* ProgressIndicator.swift in Sources */,
 				8539186826938D290045A1B5 /* TrainingModel.swift in Sources */,
 				85DF0607268C4CA400020559 /* AddExercise.swift in Sources */,
+				8534D7C926D27F0300FB41EE /* TrainingVolumeView.swift in Sources */,
 				85C48AE526B1E32400BFE48E /* ChatView.swift in Sources */,
 				F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */,
 				85D210682691EEA0002BA11C /* TrainingDashboard.swift in Sources */,

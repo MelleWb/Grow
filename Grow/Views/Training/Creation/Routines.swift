@@ -9,21 +9,21 @@ import Firebase
 import KeyboardToolbar
 
 struct ReviewSchema: View{
-    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var newSchema: TrainingDataModel
     var schema: Schema
     
     var body: some View {
         VStack{
-            SchemaBody().environmentObject(schemaModel)
+            SchemaBody(newSchema: newSchema)
         }
         .navigationBarItems(trailing:
                                 Button(action: {
-                                    self.schemaModel.updateTraining()
+                                    self.newSchema.updateTraining()
                                    }) {
                                       Text("Opslaan")
                                    })
         .onAppear(perform:{
-            self.schemaModel.setSingleSchemaFromFetchedSchemas(for: schema)
+            self.newSchema.setSingleSchemaFromFetchedSchemas(for: schema)
         })
     }
 }
@@ -33,22 +33,22 @@ struct SchemaBody: View{
     @Environment(\.presentationMode) private var presentationMode
     @State var showAddRoutine: Bool = false
     @State var routine: Routine?
-    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var newSchema: TrainingDataModel
     var schema: Schema?
     
     var body: some View{
             
                 if showAddRoutine {
                     NavigationLink(
-                        destination: AddRoutine(routine: routine ?? Routine(), routineType: ""),
+                        destination: AddRoutine(newSchema: newSchema, routine: routine ?? Routine(), routineType: ""),
                                 isActive: $showAddRoutine
                             ) {
-                        AddRoutine(routine: routine ?? Routine(), routineType: "")
+                        AddRoutine(newSchema: newSchema, routine: routine ?? Routine(), routineType: "")
                     }.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
                 }
         Form{
             HStack{
-                Picker(selection: $schemaModel.schema.type, label: Text("Kies trainingstype")) {
+                Picker(selection: $newSchema.schema.type, label: Text("Kies trainingstype")) {
                                     Text("Strength").tag("Strength")
                                     Text("Hypertrofie").tag("Hypertrofie")
                                     Text("Strength/Hypertrofie").tag("Strength/Hypertrofie")
@@ -60,12 +60,12 @@ struct SchemaBody: View{
                 
                 
                     List{
-                        if !(schemaModel.schema.routines).isEmpty {
-                            ForEach(schemaModel.schema.routines) { routine in
+                        if !(newSchema.schema.routines).isEmpty {
+                            ForEach(newSchema.schema.routines) { routine in
                                 
                                 ZStack{
                                     Button("", action:{})
-                                    NavigationLink(destination: AddRoutine(routine: routine, routineType: routine.type ?? "")){
+                                    NavigationLink(destination: AddRoutine(newSchema: newSchema, routine: routine, routineType: routine.type ?? "")){
                                         VStack{
                                             Text(routine.type!).font(.headline)
                                             }
@@ -77,7 +77,7 @@ struct SchemaBody: View{
                                     self.showAddRoutine = true
                                     self.routine = Routine()
                                     //Call function in schemaModel to add the routine
-                                    self.schemaModel.addRoutine(for: self.routine!)
+                                    self.newSchema.addRoutine(for: self.routine!)
                                 }) {
                                     HStack{
                                         Image(systemName: "plus").foregroundColor(Color.init("textColor"))
@@ -88,7 +88,7 @@ struct SchemaBody: View{
                     }.modifier(AdaptsKeyboard())
             }
     func deleteRoutine(indexSet: IndexSet) {
-        self.schemaModel.schema.routines.remove(atOffsets: indexSet)
+        self.newSchema.schema.routines.remove(atOffsets: indexSet)
     }
 }
 
@@ -97,13 +97,13 @@ struct AddSchema: View{
     @Environment(\.presentationMode) private var presentationMode
     @State var showAddRoutine: Bool = false
     @State var routine: Routine?
-    @StateObject var schemaModel = TrainingDataModel()
+    @StateObject var newSchema = TrainingDataModel()
     var schema: Schema?
     
     var body: some View{
         NavigationView{
             VStack{
-                SchemaBody().environmentObject(schemaModel)
+                SchemaBody(newSchema: newSchema)
             }.navigationBarTitle(Text("Schema"), displayMode: .inline)
         .navigationBarItems(leading:
                                 Button(action: {
@@ -115,7 +115,7 @@ struct AddSchema: View{
                               , trailing:
                             Button(action: {
                             //dismiss the sheet & save the training
-                                let success: Bool = self.schemaModel.createTraining()
+                                let success: Bool = self.newSchema.createTraining()
                                 if success{
                                     presentationMode.wrappedValue.dismiss()
                                 }
@@ -131,14 +131,14 @@ struct AddSchema: View{
         }.modifier(AdaptsKeyboard())
     }
     func deleteRoutine(indexSet: IndexSet) {
-        self.schemaModel.schema.routines.remove(atOffsets: indexSet)
+        self.newSchema.schema.routines.remove(atOffsets: indexSet)
     }
 }
 
 
 struct AddRoutine : View{
     
-    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var newSchema: TrainingDataModel
     var routine: Routine
     @State var routineType: String
     
@@ -161,27 +161,27 @@ struct AddRoutine : View{
                                     
                     }
                     .onChange(of: routineType) { tag in
-                        schemaModel.updateRoutineType(for: routine, to: routineType)
+                        newSchema.updateRoutineType(for: routine, to: routineType)
                     }
                     .pickerStyle(DefaultPickerStyle())
                      
-                    if let routineIndex = schemaModel.getRoutineIndex(for: routine) {
-                        if !(schemaModel.schema.routines[routineIndex].superset ?? []).isEmpty {
-                            ForEach(schemaModel.schema.routines[routineIndex].superset!){ superset in
+                    if let routineIndex = newSchema.getRoutineIndex(for: routine) {
+                        if !(newSchema.schema.routines[routineIndex].superset ?? []).isEmpty {
+                            ForEach(newSchema.schema.routines[routineIndex].superset!){ superset in
                                 
                                 List{
-                                    Section(header: ShowSupersetHeader(routine: routine, superset: superset)){
+                                    Section(header: ShowSupersetHeader(newSchema: newSchema, routine: routine, superset: superset)){
                                         
-                                        AmountOfSets(routine: routine, superset: superset)
+                                        AmountOfSets(newSchema: newSchema, routine: routine, superset: superset)
                                         
-                                        ExercisesInSuperset(routine: routine, superset: superset)
+                                        ExercisesInSuperset(newSchema: newSchema, routine: routine, superset: superset)
                                 }
                             }
                         }
                     }
                 }
                 Button(action: {
-                    self.schemaModel.addSuperset(for: routine)
+                    self.newSchema.addSuperset(for: routine)
                 }) {
                     HStack{
                         Image(systemName: "plus").foregroundColor(Color.init("textColor"))
@@ -196,16 +196,16 @@ struct AddRoutine : View{
 
 struct ShowSupersetHeader: View {
     
-    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var newSchema: TrainingDataModel
     var routine: Routine
     var superset: Superset
     
     var body: some View{
-        let supersetIndex: Int = schemaModel.getSupersetIndex(for: routine, for: superset) + 1
+        let supersetIndex: Int = newSchema.getSupersetIndex(for: routine, for: superset) + 1
         HStack{Text("Superset \(supersetIndex)").font(.headline).padding()
             
             Button (action: {
-                schemaModel.removeSuperset(for: superset, for: routine)
+                newSchema.removeSuperset(for: superset, for: routine)
                 
             }, label: {
                 Image(systemName: "trash")
@@ -220,7 +220,7 @@ struct ShowSupersetHeader: View {
 
 struct ExercisesInSuperset: View{
     
-    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var newSchema: TrainingDataModel
     @ObservedObject var exerciseModel = ExerciseDataModel()
     var routine: Routine
     var superset: Superset
@@ -228,12 +228,12 @@ struct ExercisesInSuperset: View{
     
     var body: some View {
         
-            let routineIndex: Int = schemaModel.getRoutineIndex(for: routine)
-            let supersetIndex: Int = schemaModel.getSupersetIndex(for: routine, for: superset)
+            let routineIndex: Int = newSchema.getRoutineIndex(for: routine)
+            let supersetIndex: Int = newSchema.getSupersetIndex(for: routine, for: superset)
             
-            if schemaModel.schema.routines[routineIndex].superset != nil {
-                if schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercises != nil {
-                        ForEach(schemaModel.schema.routines[routineIndex].superset![supersetIndex].exercises!){ exercise in
+            if newSchema.schema.routines[routineIndex].superset != nil {
+                if newSchema.schema.routines[routineIndex].superset![supersetIndex].exercises != nil {
+                        ForEach(newSchema.schema.routines[routineIndex].superset![supersetIndex].exercises!){ exercise in
                             
                             NavigationLink(destination: ExerciseDetailView(exercise: exercise)){
                                 
@@ -241,7 +241,7 @@ struct ExercisesInSuperset: View{
                                     get: { String(exercise.reps ?? 0) },
                                     set: {
                                         if let value = NumberFormatter().number(from: $0) {
-                                            self.schemaModel.updateExerciseReps(for: routine, for: superset, for: exercise, to: value.intValue)
+                                            self.newSchema.updateExerciseReps(for: routine, for: superset, for: exercise, to: value.intValue)
                                         }
                                     }
                                 )
@@ -267,23 +267,23 @@ struct ExercisesInSuperset: View{
             }
         }
         .modifier(AdaptsKeyboard())
-        .sheet(isPresented: $showExerciseSheetView, content: {ExerciseSheetView(showExerciseSheetView: $showExerciseSheetView, routine: routine, superset: superset)})
+        .sheet(isPresented: $showExerciseSheetView, content: {ExerciseSheetView(newSchema: newSchema, showExerciseSheetView: $showExerciseSheetView, routine: routine, superset: superset)})
     }
 
     func moveRow(source: IndexSet, destination: Int){
         print("I get here")
-        self.schemaModel.schema.routines[0].superset![0].exercises!.move(fromOffsets: source, toOffset: destination)
+        self.newSchema.schema.routines[0].superset![0].exercises!.move(fromOffsets: source, toOffset: destination)
             }
         
     func deleteExercise(at offsets: IndexSet) {
         let index: Int = offsets[offsets.startIndex]
-        self.schemaModel.removeExercise(for: routine, for: superset, for: index)
+        self.newSchema.removeExercise(for: routine, for: superset, for: index)
     }
 }
 
 struct ExerciseSheetView : View {
     
-    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var newSchema: TrainingDataModel
     @ObservedObject var exerciseModel = ExerciseDataModel()
     @Binding var showExerciseSheetView: Bool
     var routine: Routine
@@ -294,7 +294,8 @@ struct ExerciseSheetView : View {
     @State var searching = false
     @State var showAddExerciseSheetView = false
     
-    init(showExerciseSheetView: Binding<Bool>, routine: Routine, superset: Superset, selectedExercises: [Exercise]? = [Exercise]()){
+    init(newSchema: TrainingDataModel, showExerciseSheetView: Binding<Bool>, routine: Routine, superset: Superset, selectedExercises: [Exercise]? = [Exercise]()){
+        self.newSchema = newSchema
         self._showExerciseSheetView = showExerciseSheetView
         self.routine = routine
         self.superset = superset
@@ -310,7 +311,7 @@ struct ExerciseSheetView : View {
                 ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
                     return exercise.name.hasPrefix(searchText) || searchText == ""
                 }), id: \.self) { exercise in
-                    SelectionCell(exercise: exercise, routine: routine, superset: superset, selectedExercises: self.$selectedExercises).environmentObject(schemaModel)
+                    SelectionCell(newSchema: newSchema, exercise: exercise, routine: routine, superset: superset, selectedExercises: self.$selectedExercises)
                 }
             }
             .navigationTitle(Text("Voeg oefeningen toe"))
@@ -335,7 +336,7 @@ struct ExerciseSheetView : View {
                 Button(action: {
                     withAnimation {
                         if self.selectedExercises != nil && self.selectedExercises!.count > 0 {
-                            self.schemaModel.updateExercises(for: routine, for: superset, with: selectedExercises!)
+                            self.newSchema.updateExercises(for: routine, for: superset, with: selectedExercises!)
                         }
                         self.showExerciseSheetView.toggle()
                     }
@@ -349,7 +350,7 @@ struct ExerciseSheetView : View {
             }
             .onAppear(perform:{
                 //Preselect the selectedExercises
-                self.selectedExercises = self.schemaModel.getExercises(routine: routine, for: superset)
+                self.selectedExercises = self.newSchema.getExercises(routine: routine, for: superset)
             })
         }
     }
@@ -357,7 +358,7 @@ struct ExerciseSheetView : View {
 
 struct SelectionCell: View {
     
-    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var newSchema: TrainingDataModel
     var exercise: Exercise
     var routine: Routine
     var superset: Superset
@@ -406,7 +407,7 @@ struct SelectionCell: View {
 
 struct AmountOfSets : View {
     
-    @EnvironmentObject var schemaModel: TrainingDataModel
+    @ObservedObject var newSchema: TrainingDataModel
     var routine: Routine
     var superset: Superset
     
@@ -420,7 +421,7 @@ struct AmountOfSets : View {
             get: { String(self.superset.sets ?? 0)},
                set: {
                    if let value = NumberFormatter().number(from: $0) {
-                       self.schemaModel.updateSets(for: routine, for: superset, to: value.intValue)
+                       self.newSchema.updateSets(for: routine, for: superset, to: value.intValue)
                    }
                }
            )
