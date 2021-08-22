@@ -18,6 +18,21 @@ struct TrainingDashboardView : View {
         NavigationView{
             VStack{
                 List{
+                    if self.statisticsModel.schemaStatistics.routineStats != nil {
+                        Section(header:Text("Volume per training")){
+                            ForEach(self.statisticsModel.schemaStatistics.routineStats!, id:\.self){routineStats in
+                                VStack(alignment:.leading){
+                                    Text(routineStats.type).font(.headline).foregroundColor(.accentColor)
+                                        HStack{
+                                            ForEach(routineStats.trainingStats, id:\.self){ trainingStats in
+                                                ProgressBarVertical(value: trainingStats.volumePercentage ?? 0, label: String(trainingStats.trainingVolume))
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                    
                     Section(header:Text("Schemas en oefeningen")){
                         NavigationLink(destination: ExerciseOverview()){
                             HStack{
@@ -33,7 +48,7 @@ struct TrainingDashboardView : View {
                         }
                     }
                     Section(header:Text("Trainingsdagen")){
-                        NavigationLink(destination: TrainingDaySelectionView().environmentObject(userModel)){
+                        NavigationLink(destination: TrainingDaySelectionView()){
                             HStack{
                                 Image(systemName: "calendar").foregroundColor(Color.init("textColor"))
                                 Text("Selecteer je trainingsdagen").font(.subheadline)
@@ -41,7 +56,8 @@ struct TrainingDashboardView : View {
                         }
                     }
                 }
-            }.navigationTitle(Text("Trainingen"))
+            }
+            .navigationTitle(Text("Trainingen"))
         }
     }
 }
@@ -97,6 +113,37 @@ struct TrainingOverview: View {
             } else {
                 self.schemas.fetchedSchemas.remove(atOffsets: offsets)
             }
+        }
+    }
+}
+
+struct ProgressBarVertical: View {
+    var value: Float
+    var label: String
+    
+    var body: some View {
+        VStack(alignment: .leading){
+            Spacer()
+                if value <= 0.98 {
+                Rectangle()
+                    .frame(width: 15, height: CGFloat(self.value) * 75)
+                    .foregroundColor(Color.orange)
+                    .animation(.linear)
+                    .cornerRadius(45.0)
+                    .offset(x: 10)
+                }
+                else {
+                    Rectangle()
+                        .frame(width: 15, height: CGFloat(self.value) * 75)
+                        .foregroundColor(Color.green)
+                        .animation(.linear)
+                        .cornerRadius(45.0)
+                        .offset(x: 10)
+            }
+            Text(label)
+                .foregroundColor(.accentColor)
+                .font(.footnote)
+                .frame(height: 20)
         }
     }
 }

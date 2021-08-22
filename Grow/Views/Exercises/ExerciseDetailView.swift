@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+struct ExerciseDescription:View {
+    
+    @State var exercise: Exercise
+    @ObservedObject var exerciseStatsModel = StatisticsDataModel()
+    
+    var body: some View{
+        VStack{
+            Text(exercise.description ?? "Geen omschrijving bekend").padding()
+        }.navigationTitle(exercise.name)
+    }
+}
+
 struct ExerciseDetailView: View {
     
     @State var exercise: Exercise
@@ -14,6 +26,17 @@ struct ExerciseDetailView: View {
     
     var body: some View {
         List{
+            
+            ZStack{
+                Button(""){}
+                NavigationLink(destination: ExerciseDescription(exercise: exercise, exerciseStatsModel: exerciseStatsModel)){
+                    HStack{
+                        Image(systemName: "info.circle").foregroundColor(.accentColor)
+                        Text("Oefening omschrijving")
+                    }
+                }
+            }
+            
             if self.exerciseStatsModel.estimatedWeights.count > 1 {
             Section(header: Text("Persoonlijk record")){
                 VStack(alignment: .leading){

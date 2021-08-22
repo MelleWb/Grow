@@ -18,18 +18,11 @@ struct TabBarView: View {
     var body: some View {
         TabView {
             Dashboard()
-                .environmentObject(userModel)
-                .environmentObject(trainingModel)
-                .environmentObject(statisticsModel)
-                .environmentObject(foodModel)
                 .tabItem {
                     Label("Dashboard", systemImage: "gauge")
                 }
 
             TrainingDashboardView()
-                .environmentObject(userModel)
-                .environmentObject(trainingModel)
-                .environmentObject(statisticsModel)
                 .tabItem {
                     Label("Training", systemImage: "bolt")
                 }
@@ -39,6 +32,10 @@ struct TabBarView: View {
                     Label("Chat", systemImage: "message")
                 }
         }
+        .environmentObject(userModel)
+        .environmentObject(trainingModel)
+        .environmentObject(statisticsModel)
+        .environmentObject(foodModel)
     }
 }
 
@@ -65,22 +62,22 @@ struct Dashboard: View{
                                 .padding(.bottom, 20)
                                 VStack{
                                     HStack{
-                                        ContentViewLinearKoolh().environmentObject(userModel)
-                                        ContentViewLinearEiwit().environmentObject(userModel)
+                                        ContentViewLinearKoolh()
+                                        ContentViewLinearEiwit()
                                         }
                                     HStack{
-                                            ContentViewLinearVet().environmentObject(userModel)
-                                            ContentViewLinearVezel().environmentObject(userModel)
+                                            ContentViewLinearVet()
+                                            ContentViewLinearVezel()
                                             }
                                         }.padding(.top, 10)
                                          .padding(.bottom, 20)
                                     }
-                        NavigationLink(destination:FoodView().environmentObject(foodModel)){}.hidden()
+                        NavigationLink(destination:FoodView()){}.hidden()
                     }
                 }
                 Section(header:Text("Trainingen deze week")){
                     HStack{
-                        TrainingCircle().environmentObject(userModel)
+                        TrainingCircle()
                         let percentage = (self.userModel.workoutDonePercentage * 100).rounded()
                         let roundedPercentage = Int(round(percentage))
                         Text("\(roundedPercentage) %")
@@ -89,13 +86,13 @@ struct Dashboard: View{
                         HStack{
                             ZStack{
                                 Button("") {}
-                                NavigationLink(destination: WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!, showWorkoutView: $showWorkoutView).environmentObject(trainingModel).environmentObject(statisticsModel), isActive: $showWorkoutView){
+                                NavigationLink(destination: WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!, showWorkoutView: $showWorkoutView), isActive: $showWorkoutView){
                                     Image(systemName: "bolt")
                                         .foregroundColor(.accentColor)
                                         .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
                                     VStack(alignment: .leading){
-                                        Text("Start je training van vandaag").font(.subheadline).bold()
+                                        Text("Start je training van vandaag").font(.subheadline)
                                     }
                                 }
                             }
@@ -104,7 +101,6 @@ struct Dashboard: View{
                 }
             }
             .listStyle(InsetGroupedListStyle())
-            .environmentObject(userModel)
             .navigationTitle(Text("Dashboard"))
             .navigationBarItems(
                 trailing: Button(action: {
@@ -117,7 +113,7 @@ struct Dashboard: View{
                         .clipShape(Circle())
                         .frame(width: 25, height: 25, alignment: .center)
                 }).sheet(isPresented: $showProfileSheetView) {
-                    UpdateProfile(showProfileSheetView: $showProfileSheetView).environmentObject(userModel)
+                    UpdateProfile(showProfileSheetView: $showProfileSheetView)
                     }
                 }
             }
@@ -145,14 +141,11 @@ struct TrainingCircle: View {
 }
 
 struct CircleView: View {
-    @EnvironmentObject var userModel: UserDataModel
-    
     var body: some View {
     
         ZStack {
             VStack {
                 ProgressBarCirle()
-                    .environmentObject(userModel)
                     .frame(width: 125.0, height: 125.0)
                 }
         }
@@ -160,10 +153,7 @@ struct CircleView: View {
 }
 
 struct ProgressBarCirle: View {
-    //@Binding var progress: Float
-    @EnvironmentObject var foodModel: FoodDataModel
     @EnvironmentObject var userModel: UserDataModel
-
         
         var body: some View {
             ZStack {

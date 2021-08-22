@@ -47,7 +47,6 @@ class DateHelper {
         
         DateArray = [startDate]
         DateArray.append(endDate)
-        //print(DateArray)
         
         return DateArray
     }

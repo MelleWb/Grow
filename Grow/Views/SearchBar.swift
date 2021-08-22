@@ -28,7 +28,7 @@ struct SearchBar: View {
                              searching = false
                          }
                      }
-                    /*
+                    
                     if searching {
                                     Button("Annuleer") {
                                         searchText = ""
@@ -37,7 +37,7 @@ struct SearchBar: View {
                                             UIApplication.shared.dismissKeyboard()
                                         }
                                     }
-                                }*/
+                                }
                  }
                      .foregroundColor(.gray)
                      .padding(.leading, 13)

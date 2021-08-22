@@ -32,12 +32,13 @@ struct WorkoutOfTheDayView: View {
     
 
     var body: some View {
+        
         Form{
             List{
                 ForEach(self.trainingModel.routine.superset!, id: \.self){ set in
                     Section(header: Text(self.setOrSuperset(set: set))){
                         ForEach(set.exercises!, id:\.self) {exercise in
-                            ExerciseRow(exercise: exercise, amountOfSets: set.sets ?? 0).environmentObject(statisticsModel)
+                            ExerciseRow(exercise: exercise, amountOfSets: set.sets ?? 0)
                         }
                     }
                 }
@@ -47,6 +48,7 @@ struct WorkoutOfTheDayView: View {
         .listStyle(InsetGroupedListStyle())
         .onAppear(perform:{
             self.trainingModel.loadRoutineFromSchema(for: schema, for: routine)
+            self.statisticsModel.getStatisticsForCurrentRoutine(for: routine)
         })
         .navigationTitle("Training van vandaag")
         .navigationBarItems(trailing:
@@ -69,8 +71,9 @@ struct ExerciseRow:View{
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     var exercise: Exercise
     var amountOfSets: Int
-    
+
     var body: some View{
+        
         VStack(alignment: .leading){
             ZStack{
                 Button(""){}
@@ -103,12 +106,13 @@ struct RepsRow:View{
     
     var set: Int
     var exercise: Exercise
+    @State var placeholder: String = "reps"
     @State var repsInput: String = ""
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     
     var body: some View{
         VStack{
-            TextField("reps", text: $repsInput, onEditingChanged: { _ in
+            TextField($placeholder.wrappedValue, text: $repsInput ,onEditingChanged: { _ in
                 if let value = NumberFormatter().number(from: repsInput) {
                     self.statisticsModel.createUpdateReps(for: exercise, for: set, with: value.intValue)
                 }
@@ -118,6 +122,11 @@ struct RepsRow:View{
                 .multilineTextAlignment(.center)
                 .keyboardType(.numberPad)
         }.onAppear(perform: {
+            
+            if self.statisticsModel.getRepsPlaceholder(for: exercise, for:set) != 0{
+                self.placeholder = String(self.statisticsModel.getRepsPlaceholder(for: exercise, for:set))
+            }
+            
             if self.statisticsModel.getRepsForSet(for: exercise, for: set) != 0 {
                 self.repsInput = String(self.statisticsModel.getRepsForSet(for: exercise, for: set))
             }
@@ -129,13 +138,29 @@ struct WeightRow:View{
     
     var set: Int
     var exercise: Exercise
+    @State var placeholder: String = "kg"
     @State var weight: Double?
     @State var weightInput: String = ""
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     
+    func roundNumber(formattedValue: String) -> String {
+        if let range =  formattedValue.range(of: ".") {
+            
+            let decimal = formattedValue[range.lowerBound..<self.weightInput.endIndex]
+            
+            if decimal == ".0"{
+                return String(formattedValue[formattedValue.startIndex..<range.lowerBound])
+            } else {
+                return formattedValue
+            }
+            
+        }
+        return formattedValue
+    }
+    
     var body: some View{
         VStack{
-            TextField("kg", text: $weightInput, onEditingChanged: { _ in
+            TextField(placeholder, text: $weightInput, onEditingChanged: { _ in
                       if let value = NumberFormatter().number(from: weightInput) {
                           self.statisticsModel.createUpdateWeight(for: exercise, for: set, with: value.doubleValue)
                       }
@@ -147,26 +172,24 @@ struct WeightRow:View{
         }
         .onAppear(perform: {
             
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.maximumFractionDigits = 2
+            
             if self.statisticsModel.getWeightForSet(for: exercise, for: set) != 0 {
-                
-                let formatter = NumberFormatter()
-                formatter.numberStyle = .decimal
-                formatter.maximumFractionDigits = 2
 
                 let number = NSNumber(value: self.statisticsModel.getWeightForSet(for: exercise, for: set))
                 let formattedValue = formatter.string(from: number)!
                 
-                self.weightInput = formattedValue
-                if let range =  formattedValue.range(of: ".") {
-                    
-                    let decimal = formattedValue[range.lowerBound..<self.weightInput.endIndex]
-                    
-                    if decimal == ".0"{
-                        self.weightInput = String(formattedValue[formattedValue.startIndex..<range.lowerBound])
-                    }
-                    
-                }
+                self.weightInput = roundNumber(formattedValue: formattedValue)
             }
+            if self.statisticsModel.getWeightPlaceholder(for: exercise, for: set) != 0 {
+                let number = NSNumber(value: self.statisticsModel.getWeightPlaceholder(for: exercise, for: set))
+                let formattedValue = formatter.string(from: number)!
+                
+                self.placeholder = roundNumber(formattedValue: formattedValue)
+            }
+
         })
     }
 }

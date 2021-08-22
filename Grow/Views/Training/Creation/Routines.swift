@@ -40,10 +40,10 @@ struct SchemaBody: View{
             
                 if showAddRoutine {
                     NavigationLink(
-                        destination: AddRoutine(routine: routine ?? Routine(), routineType: "").environmentObject(schemaModel),
+                        destination: AddRoutine(routine: routine ?? Routine(), routineType: ""),
                                 isActive: $showAddRoutine
                             ) {
-                        AddRoutine(routine: routine ?? Routine(), routineType: "").environmentObject(schemaModel)
+                        AddRoutine(routine: routine ?? Routine(), routineType: "")
                     }.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
                 }
         Form{
@@ -65,7 +65,7 @@ struct SchemaBody: View{
                                 
                                 ZStack{
                                     Button("", action:{})
-                                    NavigationLink(destination: AddRoutine(routine: routine, routineType: routine.type ?? "").environmentObject(schemaModel)){
+                                    NavigationLink(destination: AddRoutine(routine: routine, routineType: routine.type ?? "")){
                                         VStack{
                                             Text(routine.type!).font(.headline)
                                             }
@@ -170,11 +170,11 @@ struct AddRoutine : View{
                             ForEach(schemaModel.schema.routines[routineIndex].superset!){ superset in
                                 
                                 List{
-                                    Section(header: ShowSupersetHeader(routine: routine, superset: superset).environmentObject(schemaModel)){
+                                    Section(header: ShowSupersetHeader(routine: routine, superset: superset)){
                                         
-                                        AmountOfSets(routine: routine, superset: superset).environmentObject(schemaModel)
+                                        AmountOfSets(routine: routine, superset: superset)
                                         
-                                        ExercisesInSuperset(routine: routine, superset: superset).environmentObject(schemaModel)
+                                        ExercisesInSuperset(routine: routine, superset: superset)
                                 }
                             }
                         }
