@@ -23,6 +23,7 @@ struct ExerciseDetailView: View {
     
     @State var exercise: Exercise
     @StateObject var exerciseStatsModel = StatisticsDataModel()
+    @State var showExerciseDescription: Bool = false
     
     var body: some View {
         List{
@@ -75,6 +76,9 @@ struct ExerciseDetailView: View {
         }
         .listStyle(InsetGroupedListStyle())
         .navigationTitle(exercise.name)
+        .navigationBarItems(trailing: Button(action: {self.showExerciseDescription = true}){
+            Image(systemName: "info.circle").foregroundColor(.accentColor)
+        })
         .onAppear(perform:{
             self.exerciseStatsModel.calcEstimatedWeights(for: exercise.name)
         })
