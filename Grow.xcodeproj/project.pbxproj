@@ -47,6 +47,8 @@
 		85F92EEA2694AD9F00698585 /* Routines.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F92EE92694AD9E00698585 /* Routines.swift */; };
 		85FC5F7F26826E5C00CAC57C /* UpdateProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FC5F7E26826E5B00CAC57C /* UpdateProfile.swift */; };
 		A6E001FFBE239836B521EE84 /* Pods_GrowTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A37F4C0892EF1E134FAE80A /* Pods_GrowTests.framework */; };
+		F041551726CE72660044FD22 /* AddProductView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F041551626CE72660044FD22 /* AddProductView.swift */; };
+		F041551926D178DA0044FD22 /* NewProductKcalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F041551826D178DA0044FD22 /* NewProductKcalView.swift */; };
 		F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043EE26B0942F002D5C65 /* DashboardView.swift */; };
 		F08043F326B3235E002D5C65 /* TrainingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043F226B3235E002D5C65 /* TrainingView.swift */; };
 /* End PBXBuildFile section */
@@ -134,6 +136,8 @@
 		D2F1545A4D93566705ECD8C1 /* Pods-Grow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow.debug.xcconfig"; path = "Target Support Files/Pods-Grow/Pods-Grow.debug.xcconfig"; sourceTree = "<group>"; };
 		E5138FA79BC7CEA39171F1B9 /* Pods_Grow_GrowUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Grow_GrowUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED30685E6FCB1070B6129F05 /* Pods_Grow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Grow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F041551626CE72660044FD22 /* AddProductView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddProductView.swift; sourceTree = "<group>"; };
+		F041551826D178DA0044FD22 /* NewProductKcalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewProductKcalView.swift; sourceTree = "<group>"; };
 		F08043EE26B0942F002D5C65 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		F08043F226B3235E002D5C65 /* TrainingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -244,8 +248,10 @@
 		855C4C5D26CE5CBE00EAB0FC /* Meals */ = {
 			isa = PBXGroup;
 			children = (
-				855C4C5E26CE5D0100EAB0FC /* AddMealView.swift */,
 				85143D7126CE603E0043FF1C /* FoodView.swift */,
+				855C4C5E26CE5D0100EAB0FC /* AddMealView.swift */,
+				F041551626CE72660044FD22 /* AddProductView.swift */,
+				F041551826D178DA0044FD22 /* NewProductKcalView.swift */,
 			);
 			path = Meals;
 			sourceTree = "<group>";
@@ -623,9 +629,11 @@
 				854B05EC26820A8700A824CD /* UserDefaults.swift in Sources */,
 				859B9452268B9A1B003F58F2 /* ExerciseOverview.swift in Sources */,
 				8545E33226B542FC0083F69E /* WorkoutOfTheDayView.swift in Sources */,
+				F041551926D178DA0044FD22 /* NewProductKcalView.swift in Sources */,
 				8588C33C2681D0FA00535E68 /* SceneDelegate.swift in Sources */,
 				85476A2F267FBCE200BA68A2 /* LoginView.swift in Sources */,
 				85F6FDCE2693A4E60051B60E /* PushNotificationSender.swift in Sources */,
+				F041551726CE72660044FD22 /* AddProductView.swift in Sources */,
 				857E622E2684B80900A3A9A4 /* ImagePicker.swift in Sources */,
 				85597D7726A2C166005375F7 /* DisableAutoDismiss.swift in Sources */,
 				857E622A268472D600A3A9A4 /* Helpers.swift in Sources */,
