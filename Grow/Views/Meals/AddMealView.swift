@@ -9,10 +9,20 @@ import SwiftUI
 
 struct AddMealView : View {
     @Binding var text: String
+    @EnvironmentObject var foodModel : FoodDataModel
+//    @State var AddproductView = false
+    @State var showAddProduct: Bool = false
 
     @State private var isEditing = false
     
     var body: some View {
+        
+        if showAddProduct {
+            NavigationLink(
+                destination: AddProductView().environmentObject(foodModel),
+                        isActive: $showAddProduct
+                    ) {}.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
+        }
 //            Form {
                 HStack {
 
@@ -38,22 +48,13 @@ struct AddMealView : View {
                         .transition(.move(edge: .trailing))
                         .animation(.default)
                     }
-                }.navigationBarItems( trailing: Text("Nieuw").foregroundColor(Color.init("textColor")))
-////            .navigationBarTitle(Text(""))
-//            .navigationBarItems( trailing: Text("Nieuw").foregroundColor(Color.init("textColor")))
-//        }
-        //
-//        Button("Ga terug", action: {
-//
-//            self.showAddMealView.toggle()
-//
-//        })
-
-    }
+                }.navigationBarItems(trailing:
+                                        ZStack{
+                                        Button(action: {
+                                            self.showAddProduct = true
+                                        }) {
+                                            Text("Nieuw").foregroundColor(Color.init("textColor"))
+                                                   }
+                                    }
+        )}
 }
-
-//struct AddMealView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        AddMealView()
-//    }
-//}
