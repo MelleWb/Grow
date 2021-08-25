@@ -25,10 +25,10 @@ struct User: Codable {
     var weight: Int?
     var plan: Int?
     var kcal: Int?
-    var carbs: Int?
-    var protein: Int?
-    var fat: Int?
-    var fiber: Int?
+    //var carbs: Int?
+    //var protein: Int?
+    //var fat: Int?
+    //var fiber: Int?
     var pal: Int?
     var fcmToken: String?
     var schema: String?
@@ -47,10 +47,10 @@ struct User: Codable {
          weight: Int? = nil,
          plan: Int? = nil,
          kcal: Int? = nil,
-         carbs: Int? = nil,
-         protein: Int? = nil,
-         fat: Int? = nil,
-         fiber: Int? = nil,
+         //carbs: Int? = nil,
+         //protein: Int? = nil,
+         //fat: Int? = nil,
+         //fiber: Int? = nil,
          pal: Int? = nil,
          fcmToken: String? = nil,
          schema: String? = nil,
@@ -69,10 +69,10 @@ struct User: Codable {
         self.weight = weight
         self.plan = plan
         self.kcal = kcal
-        self.carbs = carbs
-        self.protein = protein
-        self.fat = fat
-        self.fiber = fiber
+        //self.carbs = carbs
+        //self.protein = protein
+        //self.fat = fat
+        //self.fiber = fiber
         self.pal = pal
         self.fcmToken = fcmToken
         self.schema = schema
@@ -173,10 +173,7 @@ class UserDataModel: ObservableObject{
         self.userIntake.fiber = 30
         
         self.userIntakeLeftOvers.kcal = self.userIntake.kcal / Float(user.kcal ?? 0)
-        self.userIntakeLeftOvers.carbs = self.userIntake.carbs / Float(user.carbs ?? 0)
-        self.userIntakeLeftOvers.protein = self.userIntake.protein / Float(user.protein ?? 0)
-        self.userIntakeLeftOvers.fat = self.userIntake.fat / Float(user.fat ?? 0)
-        self.userIntakeLeftOvers.fiber = self.userIntake.fiber / Float(user.fiber ?? 0)
+        
     }
 
     func fetchUserAndCoachImage(){
@@ -506,23 +503,25 @@ class UserDataModel: ObservableObject{
                 }
         }
     
-    func calcProtein(){
-        self.user.protein = Int(Double(self.user.weight ?? 1) * 1.9)
+    func calcProtein() -> Int {
+        return Int(Double(self.user.weight ?? 1) * 1.9)
     }
     
-    func calcFat() {
-        self.user.fat = Int(Double(self.user.kcal ?? 1) * 0.3/9)
+    func calcFat() -> Int {
+        return Int(Double(self.user.kcal ?? 1) * 0.3/9)
     
     }
     
-    func calcCarbs() {
-        let proteinKcal = (self.user.protein ?? 1) * 4
-        let fatKcal = (self.user.fat ?? 1) * 9
-        self.user.carbs = Int(((self.user.kcal ?? 1) - proteinKcal - fatKcal)/4)
+    func calcCarbs() -> Int {
+        let proteinGrams:Int = self.calcProtein()
+        let fatGrams:Int = self.calcFat()
+        let proteinKcal = proteinGrams * 4
+        let fatKcal = fatGrams * 9
+        return Int(((self.user.kcal ?? 1) - proteinKcal - fatKcal)/4)
     }
     
-    func calcFiber() {
-        self.user.fiber = Int(Double(self.user.kcal ?? 1) * 0.014)
+    func calcFiber() -> Int {
+        return Int(Double(self.user.kcal ?? 1) * 0.014)
     }
     
    

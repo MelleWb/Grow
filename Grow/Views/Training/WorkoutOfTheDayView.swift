@@ -145,8 +145,7 @@ struct WeightRow:View{
     
     func roundNumber(formattedValue: String) -> String {
         if let range =  formattedValue.range(of: ".") {
-            
-            let decimal = formattedValue[range.lowerBound..<self.weightInput.endIndex]
+            let decimal = formattedValue[range.lowerBound..<formattedValue.endIndex]
             
             if decimal == ".0"{
                 return String(formattedValue[formattedValue.startIndex..<range.lowerBound])

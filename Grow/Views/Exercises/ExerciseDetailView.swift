@@ -76,9 +76,6 @@ struct ExerciseDetailView: View {
         }
         .listStyle(InsetGroupedListStyle())
         .navigationTitle(exercise.name)
-        .navigationBarItems(trailing: Button(action: {self.showExerciseDescription = true}){
-            Image(systemName: "info.circle").foregroundColor(.accentColor)
-        })
         .onAppear(perform:{
             self.exerciseStatsModel.calcEstimatedWeights(for: exercise.name)
         })

@@ -111,8 +111,8 @@ struct PersonalDetails: View {
             }
 
             VStack{
-                FirstName().environmentObject(userModel)
-                LastName().environmentObject(userModel)
+                FirstName()
+                LastName()
             }
         }
         .sheet(isPresented: $showingImagePicker, onDismiss: loadImage) {

@@ -14,77 +14,96 @@ struct FoodView: View {
     @EnvironmentObject var foodModel : FoodDataModel
     @State var showAddMealView = false
     @State var showAddMeal = false
-    @State var text = ""
-//    var meal: Meal
-    
+    @State private var date = Date()
+    @State private var text = ""
+
+    let dayNameFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale.init(identifier: "nl")
+        dateFormatter.calendar = .current
+        dateFormatter.dateFormat = "cccc"
+        return dateFormatter
+    }()
     
 var body: some View {
-    
     if showAddMeal {
         NavigationLink(
-            destination: AddMeal().environmentObject(foodModel),
+            destination: AddMealView(showAddMeal: $showAddMeal),
                     isActive: $showAddMeal
                 ) {
-            AddMeal().environmentObject(foodModel)
+            AddMealView(showAddMeal: $showAddMeal)
         }.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
     }
-    
-List{
-    Section(header: Text(Date(), style: .date)){
-        ZStack{
-            HStack{
-                VStack(alignment: .leading, spacing: 10){
-                    Text("Kcal.").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                    Text("Khool.").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                    Text("Eiwitten").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                    Text("Vetten").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                    Text("Vezels").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                }
-                VStack(alignment: .leading, spacing: 10){
-                    Text(String(userModel.user.kcal ?? 0)).font(.subheadline).bold()
-                    Text(String(userModel.user.carbs ?? 0)).font(.subheadline).bold()
-                    Text(String(userModel.user.protein ?? 0)).font(.subheadline).bold()
-                    Text(String(userModel.user.fat ?? 0)).font(.subheadline).bold()
-                    Text(String(userModel.user.fiber ?? 0)).font(.subheadline).bold()
-                }
-                VStack(alignment: .leading, spacing: 10){
-                    ContentViewLinearKcalFood().environmentObject(userModel).environmentObject(foodModel)
-                    ContentViewLinearKoolhFood().environmentObject(userModel).environmentObject(foodModel)
-                    ContentViewLinearEiwitFood().environmentObject(userModel).environmentObject(foodModel)
-                    ContentViewLinearVetFood().environmentObject(userModel).environmentObject(foodModel)
-                    ContentViewLinearVezelFood().environmentObject(userModel).environmentObject(foodModel)
-                        }
-                    }.padding(.top, 10)
-                    .padding(.bottom, 10)
-                    }
-        }
-    
-    Section{
-        Button(action: {
-            self.foodModel.addMeal()
-        }) {
-            HStack{
-                Image(systemName: "plus").foregroundColor(Color.init("textColor"))
-                Text("Voeg Maaltijd toe").foregroundColor(Color.init("textColor"))
-                        }
-                    }
-            }
-    
-    if self.foodModel.dailyIntake.meals != nil {
-        ForEach(self.foodModel.dailyIntake.meals!, id:\.self){ meal in
-            Section{
-                HStack{
-                    (ShowMealHeader(meal: meal).environmentObject(foodModel))
-                    Spacer()
-                    Text("0 Kcal")
-                }
+
+        List{
+            
+            Section(header:
+                        HStack{
+                            Button(action:{self.date.addTimeInterval(-86400)}){
+                                Image(systemName:"arrow.backward.circle")
+                                    .foregroundColor(.accentColor)
+                            }
+                            Spacer()
+                            
+                            Text(dayNameFormatter.string(from: date))
+                        
+                            Spacer()
+                            Button(action:{self.date.addTimeInterval(86400)}){
+                                Image(systemName:"arrow.forward.circle")
+                                    .foregroundColor(.accentColor)
+                            }}){
                 ZStack{
-                Button("", action:{})
-                    NavigationLink(destination:AddMealView(text: $text)) {
-                HStack{
+                    HStack{
+                        VStack(alignment: .leading, spacing: 10){
+                            Text("Kcal.").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                            Text("Koolh.").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                            Text("Eiwitten").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                            Text("Vetten").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                            Text("Vezels").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
+                        }
+                        VStack(alignment: .leading, spacing: 10){
+                            Text(String(userModel.user.kcal ?? 0)).font(.subheadline).bold()
+                            Text(String(0)).font(.subheadline).bold()
+                            Text(String(0)).font(.subheadline).bold()
+                            Text(String(0)).font(.subheadline).bold()
+                            Text(String(0)).font(.subheadline).bold()
+                        }
+                        VStack(alignment: .leading, spacing: 10){
+                            ContentViewLinearKcalFood()
+                            ContentViewLinearKoolhFood()
+                            ContentViewLinearEiwitFood()
+                            ContentViewLinearVetFood()
+                            ContentViewLinearVezelFood()
+                                }
+                            }.padding(.top, 10)
+                            .padding(.bottom, 10)
+                            }
+                }
+            
+            Section{
+                Button(action: {
+                    self.foodModel.addMeal()
+                }) {
+                    HStack{
                         Image(systemName: "plus").foregroundColor(Color.init("textColor"))
-                        Text("Voeg product toe").foregroundColor(Color.init("textColor"))
+                        Text("Voeg Maaltijd toe").foregroundColor(Color.init("textColor"))
+                                }
+                            }
                     }
+            
+            if self.foodModel.foodDiary.meals != nil {
+                ForEach(self.foodModel.foodDiary.meals!, id:\.self){ meal in
+                    Section{
+                        HStack{
+                            (ShowMealHeader(meal: meal))
+                            Spacer()
+                            Text("0 Kcal")
+                        }
+                        ZStack{
+                            Button("", action:{self.showAddMeal = true})
+                        HStack{
+                                Image(systemName: "plus").foregroundColor(Color.init("textColor"))
+                                Text("Voeg product toe").foregroundColor(Color.init("textColor"))
                     }
                 }
             }
@@ -92,7 +111,13 @@ List{
     }
 }
         .listStyle(InsetGroupedListStyle())
-        .environmentObject(userModel)
+        .navigationTitle(Text("Voeding"))
+        .toolbar(content: {
+            DatePicker("Please enter date", selection: $date, displayedComponents: .date)
+                .labelsHidden()
+                .datePickerStyle(CompactDatePickerStyle())
+                .environment(\.locale, Locale.init(identifier: "nl"))
+        })
         .onAppear(perform:{
         self.foodModel.getTodaysIntake(for: userModel)
         })
@@ -102,41 +127,44 @@ List{
 struct ShowMealHeader: View {
     
     @EnvironmentObject var foodModel : FoodDataModel
+    @State private var showingActionSheet = false
     var meal: Meal
-    
+
     var body: some View{
-        Button (action: {
-            foodModel.removeMeal(for: meal)
-            
-        }, label: {
-            Image(systemName: "trash")
-                .resizable()
-                .foregroundColor(Color.init("textColor"))
-                .frame(width: 17, height: 20, alignment: .trailing)
-        })
-        
         let mealIndex: Int = foodModel.getMealIndex(for: meal) + 1
-        HStack{Text("Meal \(mealIndex)").padding()
-            
+        HStack{
+            Text("Meal \(mealIndex)")
+                .padding()
+                .contextMenu(menuItems: {
+                    Button (action: {
+                        foodModel.removeMeal(for: meal)
+                        
+                    }, label: {
+                        Text("Verwijder")
+                        Image(systemName: "trash")
+                            .resizable()
+                            .foregroundColor(.accentColor)
+                            .frame(width: 17, height: 20, alignment: .trailing)
+                    })
+                    Button (action: {
+                    self.showingActionSheet = true
+                    }, label: {
+                        Text("Kopieren")
+                        Image(systemName: "doc.on.doc")
+                            .resizable()
+                            .foregroundColor(.accentColor)
+                            .frame(width: 17, height: 20, alignment: .trailing)
+                    })
+                })
             
             
         }
-    }
-}
-
-struct AddMeal : View{
-    
-    @EnvironmentObject var schemaModel: TrainingDataModel
-    @EnvironmentObject var userModel : UserDataModel
-    @EnvironmentObject var foodModel : FoodDataModel
-//    var routine: Routine
-//    @State var routineType: String
-    
-    var body: some View{
-    List{
-        Section{
-            Text("hello")
-            }.listStyle(InsetGroupedListStyle())
+        .actionSheet(isPresented: $showingActionSheet) {
+            ActionSheet(title: Text("Kopieren"), message: Text("Selecteer een dag"), buttons: [
+                .default(Text("Morgen")) {  },
+                .default(Text("Overmorgen")) {  },
+                .cancel()
+            ])
         }
     }
 }
@@ -179,8 +207,6 @@ struct ContentViewLinearKcalFood: View {
     
     var body: some View {
                 HStack{
-//                    Text("Kcal. ").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-//                    Text(String(userModel.user.kcal ?? 0)).font(.subheadline).bold()
                     ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.kcal)
                 }
         }
@@ -193,8 +219,6 @@ struct ContentViewLinearKoolhFood: View {
     
     var body: some View {
                 HStack{
-//                    Text("Koolh.").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-//                    Text(String(userModel.user.carbs ?? 0)).font(.subheadline).bold()
                     ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.carbs)
                 }
     }
@@ -206,8 +230,6 @@ struct ContentViewLinearEiwitFood: View {
     
     var body: some View {
                 HStack{
-//                    Text("Eiwitten").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-//                    Text(String(userModel.user.protein ?? 0)).font(.subheadline).bold()
                     ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.protein)
                     }
     }
@@ -219,8 +241,6 @@ struct ContentViewLinearVetFood: View {
     
     var body: some View {
                 HStack{
-//                    Text("Vetten").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-//                    Text(String(userModel.user.fat ?? 0)).font(.subheadline).bold()
                     ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.fat)
                     }
     }
@@ -232,16 +252,7 @@ struct ContentViewLinearVezelFood: View {
     
     var body: some View {
                 HStack{
-//                    Text("Vezels").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-//                    Text(String(userModel.user.fiber ?? 0)).font(.subheadline).bold()
                     ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.fiber)
                     }
     }
 }
-
-//struct FoodView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FoodView()
-//            .environment(\.locale, Locale(identifier: "fr"))
-//    }
-//}

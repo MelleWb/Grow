@@ -11,6 +11,7 @@ import Firebase
 struct SceneDelegate : View{
 
     @ObservedObject var userSettings = UserSettings()
+    
     @State var ViewToDisplay:String = ""
     
     func setViewToDisplay(view: String){
@@ -27,12 +28,15 @@ struct SceneDelegate : View{
         }.onAppear(perform: {
             Auth.auth().addStateDidChangeListener { auth, user in
             if user != nil {
+                let pushManager = PushNotificationManager(userID: user?.uid ?? "test")
+                    pushManager.registerForPushNotifications()
                 setViewToDisplay(view: "Dashboard")
             } else {
                 setViewToDisplay(view: "Login")
                 }
             }
         })
+        .environment(\.locale, Locale.init(identifier: "nl"))
     }
 }
 

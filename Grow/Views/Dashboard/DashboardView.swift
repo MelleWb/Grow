@@ -53,11 +53,10 @@ struct Dashboard: View{
             
         NavigationView{
             List{
-                Section{
+                Section(header: Text(Date(), style: .date)){
                     ZStack{
                         HStack{
                             CircleView()
-                                .environmentObject(userModel)
                                 .padding(.top, 20)
                                 .padding(.bottom, 20)
                                 VStack{
@@ -232,7 +231,7 @@ struct ContentViewLinearKoolh: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(userModel.user.carbs ?? 0)).font(.subheadline).bold()
+                    Text(String(0)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                 }
                 Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
@@ -251,7 +250,7 @@ struct ContentViewLinearEiwit: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(userModel.user.protein ?? 0)).font(.subheadline).bold()
+                    Text(String(0)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
@@ -268,7 +267,7 @@ struct ContentViewLinearVet: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(userModel.user.fat ?? 0)).font(.subheadline).bold()
+                    Text(String(0)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
@@ -285,7 +284,7 @@ struct ContentViewLinearVezel: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(userModel.user.fiber ?? 0)).font(.subheadline).bold()
+                    Text(String(0)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
