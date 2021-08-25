@@ -10,13 +10,14 @@ import KeyboardToolbar
 
 struct WorkoutOfTheDayView: View {
     
+    @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var userModel: UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     var schema: String
     var routine:UUID
     @State var amountOfSets: Int = 0
-    @Binding var showWorkoutView: Bool
+    //@Binding var showWorkoutView: Bool
     
     func setOrSuperset(set: Superset) -> String{
         let setNumber: Int = self.trainingModel.getSupersetIndex(for: self.trainingModel.routine, for: set) + 1
@@ -32,18 +33,18 @@ struct WorkoutOfTheDayView: View {
     
 
     var body: some View {
-        
+        NavigationView{
         Form{
             List{
                 ForEach(self.trainingModel.routine.superset!, id: \.self){ set in
                     Section(header: Text(self.setOrSuperset(set: set))){
                         ForEach(set.exercises!, id:\.self) {exercise in
                             ExerciseRow(exercise: exercise, amountOfSets: set.sets ?? 0)
+                            }
                         }
                     }
                 }
-            }
-        }.modifier(AdaptsKeyboard())
+            }.modifier(AdaptsKeyboard())
         .keyboardToolbar(toolbarItems)
         .listStyle(InsetGroupedListStyle())
         .onAppear(perform:{
@@ -51,11 +52,12 @@ struct WorkoutOfTheDayView: View {
             self.statisticsModel.getStatisticsForCurrentRoutine(for: routine)
         })
         .navigationTitle("Training van vandaag")
-        .navigationBarItems(trailing:
+        .navigationBarItems(leading: Button(action:{presentationMode.wrappedValue.dismiss()},label:{Text("Sluiten")}),
+                                trailing:
                                 Button(action:{
                                     let success: Bool = self.statisticsModel.saveTraining(for: userModel.user.id!, for: routine)
                                     if success{
-                                        self.showWorkoutView = false
+                                        presentationMode.wrappedValue.dismiss()
                                     } else {
                                         print("some error")
                                     }
@@ -63,6 +65,7 @@ struct WorkoutOfTheDayView: View {
                                 Text("Opslaan").foregroundColor(.accentColor)
                                 }
         )
+        }
     }
 }
 
@@ -98,6 +101,8 @@ struct ExerciseRow:View{
                     RepsRow(set: index, exercise: exercise).environmentObject(statisticsModel)
                 }
             }
+        }.onTapGesture {
+            hideKeyboard()
         }
     }
 }

@@ -78,31 +78,38 @@ struct NewProductsNutritionView: View {
                         Text("Calorieën")
                         TextField("", text: kcalBinding)
                             .multilineTextAlignment(.trailing)
+                            .keyboardType(.numberPad)
                         }
                         HStack{
                             Text("Koolhydraten (g)")
                             TextField("", text: carbsBinding)
                             .multilineTextAlignment(.trailing)
+                                .keyboardType(.numberPad)
                         }
                         HStack{
                             Text("Eiwitten (g)")
                             TextField("", text: proteinBinding)
                             .multilineTextAlignment(.trailing)
+                            .keyboardType(.numberPad)
                         }
                         HStack{
                             Text("Vetten (g)")
                             TextField("", text: fatBinding)
                             .multilineTextAlignment(.trailing)
+                            .keyboardType(.numberPad)
                         }
                         HStack{
                             Text("Vezels (g)")
                             TextField("", text: fiberBinding)
                             .multilineTextAlignment(.trailing)
+                            .keyboardType(.numberPad)
                         }
                     }
                 }
         }.alert(isPresented: $showAlert){
             Alert(title: Text("Oops"), message: Text("Iets ging er fout"), dismissButton: .default(Text("Ok!")))
+        }.onTapGesture {
+            hideKeyboard()
         }
         .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text(self.product.name))

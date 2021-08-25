@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct AddMealView : View {
+    
+    @State var meal: Meal
     @State var searchText = ""
     @State var searching = false
     @EnvironmentObject var foodModel : FoodDataModel
@@ -17,25 +19,26 @@ struct AddMealView : View {
     var body: some View {
         VStack{
         List {
-            SearchBar(searchText: $searchText, searching: $searching)
-            ForEach(foodModel.products.filter({ (product: Product) -> Bool in
-                return product.name.hasPrefix(searchText) || searchText == ""
-            }), id: \.self) { product in
-                                Text(product.name)
-
+                SearchBar(searchText: $searchText, searching: $searching)
+                ForEach(foodModel.products.filter({ (product: Product) -> Bool in
+                    return product.name.hasPrefix(searchText) || searchText == ""
+                }), id: \.self) { product in
+                    ZStack{
+                        Button(""){}
+                        NavigationLink(destination:ProductDetailView(shouldPopToRoot: $showAddMeal, product: product, meal: meal)){
+                                    Text(product.name)
+                        }.isDetailLink(false)
+                    }
+                }
            }
         }
-        }
+        .listStyle(InsetGroupedListStyle())
         .onAppear(perform:{self.foodModel.fetchProducts()})
                 .sheet(isPresented: $showAddProduct, content: {AddProductView(showAddProduct: $showAddProduct)})
-                .navigationBarItems(trailing:
-                                        ZStack{
-                                        Button(action: {
-                                            self.showAddProduct = true
-                                        }) {
-                                            Text("Nieuw").foregroundColor(Color.init("textColor"))
-                                                   }
-                                    }
-                )
+            .toolbar(content: {Button(action: {
+                self.showAddProduct = true
+            }) {
+                Text("Nieuw").foregroundColor(Color.init("textColor"))
+            }})
     }
 }

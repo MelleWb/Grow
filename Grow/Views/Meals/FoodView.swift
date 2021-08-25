@@ -16,6 +16,7 @@ struct FoodView: View {
     @State var showAddMeal = false
     @State private var date = Date()
     @State private var text = ""
+    @State var meal: Meal = Meal()
 
     let dayNameFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
@@ -26,17 +27,14 @@ struct FoodView: View {
     }()
     
 var body: some View {
+    
     if showAddMeal {
-        NavigationLink(
-            destination: AddMealView(showAddMeal: $showAddMeal),
-                    isActive: $showAddMeal
-                ) {
-            AddMealView(showAddMeal: $showAddMeal)
-        }.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
+        NavigationLink(destination: AddMealView(meal: meal, showAddMeal: self.$showAddMeal),isActive: self.$showAddMeal) {AddMealView(meal: meal, showAddMeal: self.$showAddMeal)}
+            .isDetailLink(false)
+            .navigationBarTitle("Voeg product toe")
     }
-
+    
         List{
-            
             Section(header:
                         HStack{
                             Button(action:{self.date.addTimeInterval(-86400)}){
@@ -85,27 +83,39 @@ var body: some View {
                     self.foodModel.addMeal()
                 }) {
                     HStack{
-                        Image(systemName: "plus").foregroundColor(Color.init("textColor"))
-                        Text("Voeg Maaltijd toe").foregroundColor(Color.init("textColor"))
+                        Image(systemName: "plus").foregroundColor(.accentColor)
+                        Text("Voeg Maaltijd toe").foregroundColor(.accentColor)
                                 }
                             }
                     }
             
             if self.foodModel.foodDiary.meals != nil {
                 ForEach(self.foodModel.foodDiary.meals!, id:\.self){ meal in
+                    
                     Section{
                         HStack{
                             (ShowMealHeader(meal: meal))
                             Spacer()
                             Text("0 Kcal")
                         }
-                        ZStack{
-                            Button("", action:{self.showAddMeal = true})
-                        HStack{
-                                Image(systemName: "plus").foregroundColor(Color.init("textColor"))
-                                Text("Voeg product toe").foregroundColor(Color.init("textColor"))
-                    }
-                }
+                        /*
+                        if meal.products != nil && meal.product > 0 {
+                            ForEach(meal.products!, id:\.self){ product in
+                                HStack{
+                                    Text(product.name)
+                                    Spacer()
+                                    Text(product.kcal)
+                                }
+                            }
+                        }
+                        */
+                        Button(action:{self.showAddMeal = true
+                                self.meal = meal},label:{
+                            HStack{
+                                Image(systemName: "plus").foregroundColor(.accentColor)
+                                Text("Voeg product toe").foregroundColor(.accentColor)
+                            }
+                         })
             }
         }
     }

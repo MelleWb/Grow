@@ -46,6 +46,7 @@ struct Dashboard: View{
     @EnvironmentObject var foodModel: FoodDataModel
     @State var showProfileSheetView: Bool = false
     @State var showWorkoutView: Bool = false
+    @State private var isWorkOutPresented = false
     
     var body: some View {
         
@@ -71,7 +72,7 @@ struct Dashboard: View{
                                         }.padding(.top, 10)
                                          .padding(.bottom, 20)
                                     }
-                        NavigationLink(destination:FoodView()){}.hidden()
+                        NavigationLink(destination:FoodView()){}.isDetailLink(false)
                     }
                 }
                 Section(header:Text("Trainingen deze week")){
@@ -83,23 +84,19 @@ struct Dashboard: View{
                     }
                     if userModel.user.workoutOfTheDay != nil {
                         HStack{
-                            ZStack{
-                                Button("") {}
-                                NavigationLink(destination: WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!, showWorkoutView: $showWorkoutView), isActive: $showWorkoutView){
+                                Button(action: {isWorkOutPresented.toggle()}, label: {
+                                    HStack{
                                     Image(systemName: "bolt")
                                         .foregroundColor(.accentColor)
-                                        .padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
 
-                                    VStack(alignment: .leading){
-                                        Text("Start je training van vandaag").font(.subheadline)
+                                    Text("Start je training van vandaag").font(.subheadline).foregroundColor(.black)
                                     }
-                                }
-                            }
+                                })
+                                }.padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
+                                
                         }
                     }
-                }
-            }
-            .listStyle(InsetGroupedListStyle())
+                }.listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Dashboard"))
             .navigationBarItems(
                 trailing: Button(action: {
@@ -111,12 +108,16 @@ struct Dashboard: View{
                         .resizable()
                         .clipShape(Circle())
                         .frame(width: 25, height: 25, alignment: .center)
-                }).sheet(isPresented: $showProfileSheetView) {
+                })
+        .sheet(isPresented: $showProfileSheetView) {
                     UpdateProfile(showProfileSheetView: $showProfileSheetView)
                     }
-                }
+        .fullScreenCover(isPresented: $isWorkOutPresented){
+                WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!)
             }
-        )}
+        }
+        })
+    }
 }
 
 struct TrainingCircle: View {
@@ -295,3 +296,8 @@ struct ContentViewLinearVezel: View {
     }
 }
 
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}

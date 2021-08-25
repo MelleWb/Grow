@@ -187,7 +187,12 @@ struct FoodDiary: Codable, Hashable, Identifiable {
 
 struct Meal: Codable, Hashable, Identifiable {
     var id = UUID()
-    var product: [Product]?
+    var products: [Product]?
+    
+    init(id:UUID = UUID(), products:[Product]? = nil){
+        self.id = id
+        self.products = products
+    }
 }
 
 struct Product: Codable, Hashable, Identifiable{

@@ -11,7 +11,7 @@ import Firebase
 struct AddProductView: View {
     @EnvironmentObject var foodModel : FoodDataModel
     @State var product: Product = Product()
-    let unit = ["Grammen", "Milimeters"]
+    let unit = ["Grammen", "Milliliters"]
     @State var showProductsNutritionView: Bool = false
     @Binding var showAddProduct: Bool
     
@@ -68,6 +68,7 @@ struct AddProductView: View {
                         TextField("Portiegrootte", text:$portionAmount)
                             .multilineTextAlignment(.trailing)
                             .frame(height:40)
+                            .keyboardType(.numberPad)
                     }
                         Button(action:{
                             var amountNumber: Int = 0
