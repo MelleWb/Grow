@@ -14,10 +14,22 @@ struct NewProductsNutritionView: View {
     @Binding var showAddProduct: Bool
     @State var showAlert: Bool = false
     
+    func calculateKcal(){
+        self.product.kcal = 0
+        
+        let calcCarbs = self.product.carbs * 4
+        let calcProtein = self.product.protein * 4
+        let calcFat = self.product.fat * 9
+        let calcFiber = self.product.fiber * 2
+        
+        self.product.kcal = calcCarbs + calcProtein + calcFat + calcFiber
+    }
+    
     var body: some View {
         VStack{
         let kcalBinding = Binding<String>(
-            get: { if self.product.kcal == 0 {
+            get: {
+                if self.product.kcal == 0 {
                 return ""
             } else {
                 return String(self.product.kcal)
@@ -26,6 +38,8 @@ struct NewProductsNutritionView: View {
             set: {
                 if let value = NumberFormatter().number(from: $0) {
                     self.product.kcal = value.intValue
+                } else {
+                    self.product.kcal = 0
                 }})
         
         let carbsBinding = Binding<String>(
@@ -37,7 +51,11 @@ struct NewProductsNutritionView: View {
             set: {
                 if let value = NumberFormatter().number(from: $0) {
                     self.product.carbs = value.intValue
-                }})
+                } else {
+                    self.product.carbs = 0
+                }
+                calculateKcal()
+            })
         
         let proteinBinding = Binding<String>(
             get: { if self.product.protein == 0 {
@@ -48,7 +66,11 @@ struct NewProductsNutritionView: View {
             set: {
                 if let value = NumberFormatter().number(from: $0) {
                     self.product.protein = value.intValue
-                }})
+                }else {
+                    self.product.protein = 0
+                }
+                calculateKcal()
+            })
         
         let fatBinding = Binding<String>(
             get: { if self.product.fat == 0 {
@@ -59,7 +81,11 @@ struct NewProductsNutritionView: View {
             set: {
                 if let value = NumberFormatter().number(from: $0) {
                     self.product.fat = value.intValue
-                }})
+                }else {
+                    self.product.fat = 0
+                }
+                calculateKcal()
+            })
         
         let fiberBinding = Binding<String>(
             get: { if self.product.fiber == 0 {
@@ -70,7 +96,11 @@ struct NewProductsNutritionView: View {
             set: {
                 if let value = NumberFormatter().number(from: $0) {
                     self.product.fiber = value.intValue
-                }})
+                }else {
+                    self.product.fiber = 0
+                }
+                calculateKcal()
+            })
             VStack{
                 Form{
                     Section(header:Text("Nutrienten per 100 gram")){

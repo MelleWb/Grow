@@ -18,6 +18,9 @@ class FoodDataModel: ObservableObject{
     @Published var products = [Product()]
     var user = User()
     
+    @Published var todaysDiary = FoodDiary()
+    @Published var otherDaysIntake = UserIntake()
+    
     init(){
         self.initiateFoodModel()
     }
@@ -43,6 +46,40 @@ class FoodDataModel: ObservableObject{
           } else {
             print("Document does not exist in cache")
           }
+        }
+    }
+    
+    func getTodaysFoodDiary(){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
+        
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: Date())
+        let start = calendar.date(from: components)!
+        let end = calendar.date(byAdding: .day, value: 1, to: start)!
+        let queryRef = docRef
+           .whereField("created", isGreaterThan: start)
+           .whereField("created", isLessThan: end)
+            .limit(to: 1)
+        
+        queryRef.addSnapshotListener { (querySnapshot, error) in
+
+                    guard let documents = querySnapshot?.documents else {
+                            print("No documents")
+                        return
+                    }
+            let todaysIntake: [FoodDiary] = documents.map { (querySnapshot) -> FoodDiary in
+                do {
+                    let data = try querySnapshot.data(as: FoodDiary.self)
+                }catch {
+                    print(error)
+                    }
+                return FoodDiary()
+            }
         }
     }
     
@@ -157,14 +194,15 @@ struct BudgetLeftOver{
 }
 
 struct UserIntake{
-    var date: Date?
+    var date: Date
     var kcal: Float
     var carbs: Float
     var protein: Float
     var fat: Float
     var fiber: Float
     
-    init(kcal: Float = 0, carbs: Float = 0, protein: Float = 0, fat: Float = 0, fiber: Float = 0){
+    init(date: Date = Date(), kcal: Float = 0, carbs: Float = 0, protein: Float = 0, fat: Float = 0, fiber: Float = 0){
+        self.date = date
         self.kcal = kcal
         self.carbs = carbs
         self.protein = protein

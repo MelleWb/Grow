@@ -25,10 +25,6 @@ struct User: Codable {
     var weight: Int?
     var plan: Int?
     var kcal: Int?
-    //var carbs: Int?
-    //var protein: Int?
-    //var fat: Int?
-    //var fiber: Int?
     var pal: Int?
     var fcmToken: String?
     var schema: String?
@@ -47,10 +43,6 @@ struct User: Codable {
          weight: Int? = nil,
          plan: Int? = nil,
          kcal: Int? = nil,
-         //carbs: Int? = nil,
-         //protein: Int? = nil,
-         //fat: Int? = nil,
-         //fiber: Int? = nil,
          pal: Int? = nil,
          fcmToken: String? = nil,
          schema: String? = nil,
@@ -69,10 +61,6 @@ struct User: Codable {
         self.weight = weight
         self.plan = plan
         self.kcal = kcal
-        //self.carbs = carbs
-        //self.protein = protein
-        //self.fat = fat
-        //self.fiber = fiber
         self.pal = pal
         self.fcmToken = fcmToken
         self.schema = schema
@@ -108,7 +96,7 @@ class UserDataModel: ObservableObject{
     @Published var userImages = UserImages()
     @Published var errorMessage: String?
     @Published var queryRunning: Bool = true
-    @Published var userIntake =  UserIntake()
+    @Published var userIntake =  UserIntake(date: Date())
     @Published var userIntakeLeftOvers = BudgetLeftOver()
     @Published var workoutDonePercentage: Float = 0.0
     
