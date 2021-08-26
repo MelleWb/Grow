@@ -94,21 +94,13 @@ var body: some View {
                     
                     Section{
                         HStack{
-                            (ShowMealHeader(meal: meal))
+                            ShowMealHeader(meal: meal)
                             Spacer()
-                            Text("0 Kcal")
+                            Text("\(meal.kcal) Kcal")
                         }
-                        /*
-                        if meal.products != nil && meal.product > 0 {
-                            ForEach(meal.products!, id:\.self){ product in
-                                HStack{
-                                    Text(product.name)
-                                    Spacer()
-                                    Text(product.kcal)
-                                }
-                            }
-                        }
-                        */
+                            ProductForMeal(meal:meal)
+
+                        
                         Button(action:{self.showAddMeal = true
                                 self.meal = meal},label:{
                             HStack{
@@ -132,6 +124,29 @@ var body: some View {
         self.foodModel.getTodaysIntake(for: userModel)
         })
     }
+}
+
+struct ProductForMeal: View {
+    @EnvironmentObject var foodModel : FoodDataModel
+    @State var meal: Meal
+    
+    var body: some View {
+        if meal.products != nil {
+            ForEach(meal.products!, id:\.self){ product in
+                NavigationLink(destination:ProductDetailView(shouldPopToRoot: Binding<Bool>.constant(false), product: product, meal: meal)){
+                    HStack{
+                        VStack(alignment:.leading){
+                            Text(String(product.name)).padding(.init(top: 0, leading: 0, bottom: 5, trailing: 0))
+                            Text("\(product.selectedProductDetails?.amount ?? 0) gram").font(.footnote).foregroundColor(.gray)
+                        }
+                        Spacer()
+                        Text(String(product.selectedProductDetails?.kcal ?? 0))
+                    }.padding()
+                }
+            }
+        }
+    }
+    
 }
 
 struct ShowMealHeader: View {

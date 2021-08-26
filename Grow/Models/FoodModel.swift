@@ -14,15 +14,19 @@ class FoodDataModel: ObservableObject{
     
     @Published var userIntake =  UserIntake()
     @Published var userIntakeLeftOvers = BudgetLeftOver()
+    
+    @Published var diaryForView = FoodDiary ()
     @Published var foodDiary = FoodDiary()
+    
     @Published var products = [Product()]
     var user = User()
     
-    @Published var todaysDiary = FoodDiary()
-    @Published var otherDaysIntake = UserIntake()
+    @Published var todaysDiary = [FoodDiary()]
+    @Published var otherDaysIntake = [FoodDiary()]
     
     init(){
         self.initiateFoodModel()
+        self.getTodaysFoodDiary()
     }
     
     func initiateFoodModel(){
@@ -38,7 +42,7 @@ class FoodDataModel: ObservableObject{
             do{
                 self.user = try document.data(as: User.self)!
                 
-                //
+                
             }
             catch {
               print(error)
@@ -46,6 +50,54 @@ class FoodDataModel: ObservableObject{
           } else {
             print("Document does not exist in cache")
           }
+        }
+    }
+    
+    func getFoodDiaryForDate(for date: Date){
+        //First detach the listener
+        
+        //Now do create a new listener
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
+        
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: date)
+        let start = calendar.date(from: components)!
+        let end = calendar.date(byAdding: .day, value: 1, to: start)!
+        let queryRef = docRef
+           .whereField("created", isGreaterThan: start)
+           .whereField("created", isLessThan: end)
+            .limit(to: 1)
+        
+        queryRef.addSnapshotListener { (querySnapshot, error) in
+
+                    guard let documents = querySnapshot?.documents else {
+                            print("No documents")
+                        return
+                    }
+            
+            self.todaysDiary = documents.map { (querySnapshot) -> FoodDiary in
+                
+                let result = Result {
+                    try querySnapshot.data(as: FoodDiary.self)
+                }
+                switch result {
+                case .success(let stats):
+                    if let stats = stats {
+                        return stats
+                    }
+                    else {
+                        print ("Document does not exists")
+                    }
+                case .failure(let error):
+                    print("error decoding schema: \(error)")
+                }
+                return FoodDiary()
+            }
         }
     }
     
@@ -72,12 +124,23 @@ class FoodDataModel: ObservableObject{
                             print("No documents")
                         return
                     }
-            let todaysIntake: [FoodDiary] = documents.map { (querySnapshot) -> FoodDiary in
-                do {
-                    let data = try querySnapshot.data(as: FoodDiary.self)
-                }catch {
-                    print(error)
+            
+            self.todaysDiary = documents.map { (querySnapshot) -> FoodDiary in
+                
+                let result = Result {
+                    try querySnapshot.data(as: FoodDiary.self)
+                }
+                switch result {
+                case .success(let stats):
+                    if let stats = stats {
+                        return stats
                     }
+                    else {
+                        print ("Document does not exists")
+                    }
+                case .failure(let error):
+                    print("error decoding schema: \(error)")
+                }
                 return FoodDiary()
             }
         }
@@ -159,8 +222,32 @@ class FoodDataModel: ObservableObject{
         } else {
         self.foodDiary.meals?.append(Meal())
         }
-        print(self.foodDiary.meals)
     }
+    
+    func addProductToMeal(for meal: Meal, with product: Product, with selectedSize: SelectedProductDetails) -> Bool{
+
+        var newProduct:Product = product
+        newProduct.selectedProductDetails = selectedSize
+        
+        if let mealIndex = self.foodDiary.meals!.firstIndex(where: { $0.id == meal.id }) {
+            if self.foodDiary.meals![mealIndex].products != nil {
+                if let productIndex = self.foodDiary.meals![mealIndex].products!.firstIndex(where: { $0.id == product.id }) {
+                    self.foodDiary.meals![mealIndex].products![productIndex] = product
+                } else {
+                self.foodDiary.meals![mealIndex].products!.append(newProduct)
+                }
+            }else {
+                self.foodDiary.meals![mealIndex].products = [(newProduct)]
+            }
+            self.foodDiary.meals![mealIndex].kcal += selectedSize.kcal
+            self.foodDiary.meals![mealIndex].carbs += selectedSize.carbs
+            self.foodDiary.meals![mealIndex].protein += selectedSize.protein
+            self.foodDiary.meals![mealIndex].fat += selectedSize.fat
+            self.foodDiary.meals![mealIndex].fiber += selectedSize.fiber
+        }
+        return true
+    }
+    
     
     func getMealIndex(for meal: Meal) -> Int{
         if let mealIndex = self.foodDiary.meals!.firstIndex(where: { $0.id == meal.id }) {
@@ -225,11 +312,23 @@ struct FoodDiary: Codable, Hashable, Identifiable {
 
 struct Meal: Codable, Hashable, Identifiable {
     var id = UUID()
+    var name: String?
     var products: [Product]?
+    var kcal:Int
+    var carbs: Int
+    var protein: Int
+    var fat: Int
+    var fiber: Int
     
-    init(id:UUID = UUID(), products:[Product]? = nil){
+    init(id:UUID = UUID(), name: String? = nil, products:[Product]? = nil, kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0){
         self.id = id
+        self.name = name
         self.products = products
+        self.kcal = kcal
+        self.carbs = carbs
+        self.protein = protein
+        self.fat = fat
+        self.fiber = fiber
     }
 }
 
@@ -243,8 +342,9 @@ struct Product: Codable, Hashable, Identifiable{
     var fiber: Int
     var unit: String
     var portions: [ProductPortion]
+    var selectedProductDetails : SelectedProductDetails?
     
-    init(id:UUID = UUID(), name:String = "", kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)]){
+    init(id:UUID = UUID(), name:String = "", kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil){
         self.id = id
         self.name = name
         self.kcal = kcal
@@ -254,6 +354,27 @@ struct Product: Codable, Hashable, Identifiable{
         self.fiber = fiber
         self.unit = unit
         self.portions = portions
+        self.selectedProductDetails = selectedProductDetails
+    }
+}
+
+struct SelectedProductDetails: Codable, Hashable, Identifiable{
+    var id = UUID()
+    var kcal: Int
+    var carbs: Int
+    var protein: Int
+    var fat: Int
+    var fiber: Int
+    var amount: Int
+    
+    init(id:UUID = UUID(), kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0, amount:Int = 0){
+        self.id = id
+        self.kcal = kcal
+        self.carbs = carbs
+        self.protein = protein
+        self.fat = fat
+        self.fiber = fiber
+        self.amount = amount
     }
 }
 

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProductDetailView: View {
     
+    @EnvironmentObject var foodModel: FoodDataModel
     @Binding var shouldPopToRoot: Bool
     @State var product:Product
     @State var meal: Meal
@@ -93,7 +94,21 @@ struct ProductDetailView: View {
                 hideKeyboard()
             }
         }.navigationTitle(Text(product.name))
-        .toolbar(content: {Button("Voeg toe"){self.shouldPopToRoot = false}})
+        .toolbar(content: {Button("Voeg toe"){
+            //Update the root
+            
+            if let value = NumberFormatter().number(from: amount) {
+                let createdProduct:SelectedProductDetails = SelectedProductDetails(kcal: self.calories, carbs: self.carbs, protein: self.protein, fat: self.fat, fiber: self.fiber, amount: value.intValue)
+        
+                let success = self.foodModel.addProductToMeal(for: meal, with: self.product, with: createdProduct)
+                
+                if success {
+                        self.shouldPopToRoot = false
+                }
+            }
+            
+
+        }})
         .onAppear(perform:{
             if let value = NumberFormatter().number(from: amount) {
                 self.updateCalories(portion: value.intValue)
