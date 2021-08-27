@@ -60,11 +60,11 @@ var body: some View {
                             Text("Vezels").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                         }
                         VStack(alignment: .leading, spacing: 10){
-                            Text(String(userModel.user.kcal ?? 0)).font(.subheadline).bold()
-                            Text(String(0)).font(.subheadline).bold()
-                            Text(String(0)).font(.subheadline).bold()
-                            Text(String(0)).font(.subheadline).bold()
-                            Text(String(0)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieBudget.kcal ?? 0)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieBudget.carbs)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieBudget.protein)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieBudget.fat)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieBudget.fiber)).font(.subheadline).bold()
                         }
                         VStack(alignment: .leading, spacing: 10){
                             ContentViewLinearKcalFood()
@@ -73,6 +73,13 @@ var body: some View {
                             ContentViewLinearVetFood()
                             ContentViewLinearVezelFood()
                                 }
+                        VStack(alignment: .leading, spacing: 10){
+                            Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.kcal )).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.carbs)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.protein)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.fat)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.fiber)).font(.subheadline).bold()
+                        }
                             }.padding(.top, 10)
                             .padding(.bottom, 10)
                             }
@@ -108,8 +115,8 @@ var body: some View {
                                 Text("Voeg product toe").foregroundColor(.accentColor)
                             }
                          })
-            }
-        }
+                    }
+                }.onDelete(perform: removeMeal)
     }
 }
         .listStyle(InsetGroupedListStyle())
@@ -121,19 +128,25 @@ var body: some View {
                 .environment(\.locale, Locale.init(identifier: "nl"))
         })
         .onAppear(perform:{
-        self.foodModel.getTodaysIntake(for: userModel)
+        //self.foodModel.getTodaysIntake(for: userModel)
         })
+    }
+    
+    func removeMeal(at offsets: IndexSet){
+        let mealIndex: Int = offsets[offsets.startIndex]
+        self.foodModel.deleteMeal(for: meal, with: mealIndex)
     }
 }
 
 struct ProductForMeal: View {
     @EnvironmentObject var foodModel : FoodDataModel
     @State var meal: Meal
+    @State var showProductDetailView = false
     
     var body: some View {
         if meal.products != nil {
             ForEach(meal.products!, id:\.self){ product in
-                NavigationLink(destination:ProductDetailView(shouldPopToRoot: Binding<Bool>.constant(false), product: product, meal: meal)){
+                NavigationLink(destination:ProductDetailView(shouldPopToRoot: $showProductDetailView, product: product, meal: meal)){
                     HStack{
                         VStack(alignment:.leading){
                             Text(String(product.name)).padding(.init(top: 0, leading: 0, bottom: 5, trailing: 0))
@@ -143,8 +156,13 @@ struct ProductForMeal: View {
                         Text(String(product.selectedProductDetails?.kcal ?? 0))
                     }.padding()
                 }
-            }
+            }.onDelete(perform: deleteProduct)
         }
+    }
+    
+    func deleteProduct(at offsets: IndexSet) {
+        let productIndex: Int = offsets[offsets.startIndex]
+        self.foodModel.deleteProductFromMeal(for: meal, with: productIndex)
     }
     
 }
@@ -232,7 +250,7 @@ struct ContentViewLinearKcalFood: View {
     
     var body: some View {
                 HStack{
-                    ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.kcal)
+                    ProgressBarLinear(value: $foodModel.foodDiary.usersCalorieUsedPercentage.kcal)
                 }
         }
     }
@@ -244,7 +262,7 @@ struct ContentViewLinearKoolhFood: View {
     
     var body: some View {
                 HStack{
-                    ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.carbs)
+                    ProgressBarLinear(value: $foodModel.foodDiary.usersCalorieUsedPercentage.carbs)
                 }
     }
 }
@@ -255,7 +273,7 @@ struct ContentViewLinearEiwitFood: View {
     
     var body: some View {
                 HStack{
-                    ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.protein)
+                    ProgressBarLinear(value: $foodModel.foodDiary.usersCalorieUsedPercentage.protein)
                     }
     }
 }
@@ -266,7 +284,7 @@ struct ContentViewLinearVetFood: View {
     
     var body: some View {
                 HStack{
-                    ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.fat)
+                    ProgressBarLinear(value: $foodModel.foodDiary.usersCalorieUsedPercentage.fat)
                     }
     }
 }
@@ -277,7 +295,7 @@ struct ContentViewLinearVezelFood: View {
     
     var body: some View {
                 HStack{
-                    ProgressBarLinear(value: $foodModel.userIntakeLeftOvers.fiber)
+                    ProgressBarLinear(value: $foodModel.foodDiary.usersCalorieUsedPercentage.fiber)
                     }
     }
 }

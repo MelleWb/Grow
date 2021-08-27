@@ -96,8 +96,6 @@ class UserDataModel: ObservableObject{
     @Published var userImages = UserImages()
     @Published var errorMessage: String?
     @Published var queryRunning: Bool = true
-    @Published var userIntake =  UserIntake(date: Date())
-    @Published var userIntakeLeftOvers = BudgetLeftOver()
     @Published var workoutDonePercentage: Float = 0.0
     
     init(){
@@ -133,9 +131,6 @@ class UserDataModel: ObservableObject{
                 //Determine workout of the day
                 self.determineWorkoutOfTheDay()
                 
-                //Get todays intake
-                self.getTodaysIntake()
-                
                 //Get training statistics
                 self.getTrainingStatsForCurrentWeek()
                 
@@ -149,19 +144,6 @@ class UserDataModel: ObservableObject{
           }
         }
       }
-    }
-    
-    func getTodaysIntake(){
-
-        //Firbase call but for now some hardcoding
-        self.userIntake.kcal = 2040
-        self.userIntake.carbs = 325
-        self.userIntake.protein = 125
-        self.userIntake.fat = 20
-        self.userIntake.fiber = 30
-        
-        self.userIntakeLeftOvers.kcal = self.userIntake.kcal / Float(user.kcal ?? 0)
-        
     }
 
     func fetchUserAndCoachImage(){
@@ -365,11 +347,6 @@ class UserDataModel: ObservableObject{
         }
         
         self.calcKcal()
-        self.calcProtein()
-        self.calcFat()
-        self.calcCarbs()
-        self.calcFiber()
-        
     }
     
     func uploadPicture(for image: UIImage){
@@ -490,28 +467,6 @@ class UserDataModel: ObservableObject{
                     }
                 }
         }
-    
-    func calcProtein() -> Int {
-        return Int(Double(self.user.weight ?? 1) * 1.9)
-    }
-    
-    func calcFat() -> Int {
-        return Int(Double(self.user.kcal ?? 1) * 0.3/9)
-    
-    }
-    
-    func calcCarbs() -> Int {
-        let proteinGrams:Int = self.calcProtein()
-        let fatGrams:Int = self.calcFat()
-        let proteinKcal = proteinGrams * 4
-        let fatKcal = fatGrams * 9
-        return Int(((self.user.kcal ?? 1) - proteinKcal - fatKcal)/4)
-    }
-    
-    func calcFiber() -> Int {
-        return Int(Double(self.user.kcal ?? 1) * 0.014)
-    }
-    
    
 }
 
