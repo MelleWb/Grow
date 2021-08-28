@@ -28,25 +28,38 @@ struct FoodView: View {
     
 var body: some View {
     
+    let dateBinding = Binding<Date> {
+        self.foodModel.date
+    } set: { dateValue in
+        self.foodModel.date = dateValue
+        self.foodModel.dateHasChanged()
+    }
+
+    
     if showAddMeal {
         NavigationLink(destination: AddMealView(meal: meal, showAddMeal: self.$showAddMeal),isActive: self.$showAddMeal) {AddMealView(meal: meal, showAddMeal: self.$showAddMeal)}
             .isDetailLink(false)
             .navigationBarTitle("Voeg product toe")
     }
-    
         List{
             Section(header:
                         HStack{
-                            Button(action:{self.date.addTimeInterval(-86400)}){
+                            Button(action:{
+                                self.foodModel.date.addTimeInterval(-86400)
+                                self.date = self.foodModel.date
+                            }){
                                 Image(systemName:"arrow.backward.circle")
                                     .foregroundColor(.accentColor)
                             }
                             Spacer()
                             
-                            Text(dayNameFormatter.string(from: date))
+                            Text(dayNameFormatter.string(from: self.foodModel.date))
                         
                             Spacer()
-                            Button(action:{self.date.addTimeInterval(86400)}){
+                            Button(action:{
+                                self.foodModel.date.addTimeInterval(86400)
+                                self.date = self.foodModel.date
+                            }){
                                 Image(systemName:"arrow.forward.circle")
                                     .foregroundColor(.accentColor)
                             }}){
@@ -60,7 +73,7 @@ var body: some View {
                             Text("Vezels").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                         }
                         VStack(alignment: .leading, spacing: 10){
-                            Text(String(self.foodModel.foodDiary.usersCalorieBudget.kcal ?? 0)).font(.subheadline).bold()
+                            Text(String(self.foodModel.foodDiary.usersCalorieBudget.kcal)).font(.subheadline).bold()
                             Text(String(self.foodModel.foodDiary.usersCalorieBudget.carbs)).font(.subheadline).bold()
                             Text(String(self.foodModel.foodDiary.usersCalorieBudget.protein)).font(.subheadline).bold()
                             Text(String(self.foodModel.foodDiary.usersCalorieBudget.fat)).font(.subheadline).bold()
@@ -118,17 +131,16 @@ var body: some View {
                     }
                 }.onDelete(perform: removeMeal)
     }
+        }.onReceive(foodModel.$date) { date in
+            self.foodModel.dateHasChanged()
 }
         .listStyle(InsetGroupedListStyle())
         .navigationTitle(Text("Voeding"))
         .toolbar(content: {
-            DatePicker("Please enter date", selection: $date, displayedComponents: .date)
+            DatePicker("Please enter date", selection: dateBinding, displayedComponents: .date)
                 .labelsHidden()
                 .datePickerStyle(CompactDatePickerStyle())
                 .environment(\.locale, Locale.init(identifier: "nl"))
-        })
-        .onAppear(perform:{
-        //self.foodModel.getTodaysIntake(for: userModel)
         })
     }
     

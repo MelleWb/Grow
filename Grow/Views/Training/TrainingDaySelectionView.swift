@@ -37,6 +37,7 @@ struct StaticWeekDaysView: View{
 
 struct DynamicTrainingDaysView: View {
     @EnvironmentObject var userModel: UserDataModel
+    @EnvironmentObject var foodModel: FoodDataModel
     @State var isEditMode: EditMode = .active
     
     var body: some View {
@@ -60,6 +61,7 @@ struct DynamicTrainingDaysView: View {
         self.userModel.user.weekPlan!.move(fromOffsets: source, toOffset: destination)
         self.userModel.determineWorkoutOfTheDay()
         self.userModel.updateUser()
+        self.foodModel.initiateFoodModel()
         }
 }
 

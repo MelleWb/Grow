@@ -72,7 +72,7 @@ struct Dashboard: View{
                                         }.padding(.top, 10)
                                          .padding(.bottom, 20)
                                     }
-                        NavigationLink(destination:FoodView()){}.isDetailLink(false)
+                        NavigationLink(destination:FoodView()){}.isDetailLink(false).hidden()
                     }
                 }
                 Section(header:Text("Trainingen deze week")){
@@ -162,17 +162,17 @@ struct ProgressBarCirle: View {
                     .opacity(0.3)
                     .foregroundColor(Color.gray)
                 
-                if self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal <= 0.8 {
+                if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal <= 0.8 {
                     Circle()
-                        .trim(from: 0.0, to: CGFloat(min(self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal, 1.0)))
+                        .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                         .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                         .foregroundColor(Color.green)
                         .rotationEffect(Angle(degrees: 270.0))
                         .animation(.linear)
                 }
-                else if self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal > 0.8 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1{
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.8 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1{
                 Circle()
-                    .trim(from: 0.0, to: CGFloat(min(self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal, 1.0)))
+                    .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                     .foregroundColor(Color.orange)
                     .rotationEffect(Angle(degrees: 270.0))
@@ -180,7 +180,7 @@ struct ProgressBarCirle: View {
                 }
                 else {
                     Circle()
-                        .trim(from: 0.0, to: CGFloat(min(self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal, 1.0)))
+                        .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                         .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                         .foregroundColor(Color.red)
                         .rotationEffect(Angle(degrees: 270.0))
@@ -188,7 +188,7 @@ struct ProgressBarCirle: View {
                     
                 }
                 VStack{
-                    Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.kcal))
+                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.kcal))
                     Text("Kcal over")
                 }
             }
@@ -232,12 +232,12 @@ struct ContentViewLinearKoolh: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.carbs)).font(.subheadline).bold()
+                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.carbs)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                 }
                 Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.foodDiary.usersCalorieUsedPercentage.carbs).frame(height: 7.5)
+            ProgressBarLinearFood(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.carbs).frame(height: 7.5)
 
         }
     }
@@ -250,12 +250,12 @@ struct ContentViewLinearEiwit: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.protein)).font(.subheadline).bold()
+                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.protein)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.foodDiary.usersCalorieUsedPercentage.protein).frame(height: 7.5)
+            ProgressBarLinearFood(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.protein).frame(height: 7.5)
         }
     }
 }
@@ -267,12 +267,12 @@ struct ContentViewLinearVet: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.fat)).font(.subheadline).bold()
+                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.fat)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.foodDiary.usersCalorieUsedPercentage.fat).frame(height: 7.5)
+            ProgressBarLinearFood(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fat).frame(height: 7.5)
         }
     }
 }
@@ -284,12 +284,12 @@ struct ContentViewLinearVezel: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(self.foodModel.foodDiary.usersCalorieLeftOver.fiber)).font(.subheadline).bold()
+                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.fiber)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.foodDiary.usersCalorieUsedPercentage.fiber).frame(height: 7.5)
+            ProgressBarLinearFood(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fiber).frame(height: 7.5)
             
         }
     }

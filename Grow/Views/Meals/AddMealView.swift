@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct AddMealView : View {
     
@@ -15,6 +16,25 @@ struct AddMealView : View {
     @EnvironmentObject var foodModel : FoodDataModel
     @State var showAddProduct: Bool = false
     @Binding var showAddMeal: Bool
+    
+    func delete(at offsets: IndexSet) {
+        
+        let index = offsets[offsets.startIndex]
+        let documentID:String = foodModel.products[index].documentID ?? ""
+        print(documentID)
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        db.collection("foodProducts").document(documentID).delete() { err in
+            if let err = err {
+                print("Error removing document: \(err)")
+            } else {
+                foodModel.products.remove(atOffsets: offsets)
+            }
+        }
+    }
     
     var body: some View {
         VStack{
@@ -29,7 +49,7 @@ struct AddMealView : View {
                                     Text(product.name)
                         }.isDetailLink(false)
                     }
-                }
+                }.onDelete(perform: delete)
            }
         }
         .listStyle(InsetGroupedListStyle())

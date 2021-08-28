@@ -12,18 +12,18 @@ import FirebaseFirestoreSwift
 
 class FoodDataModel: ObservableObject{
     
-    @Published var diaryForView = FoodDiary ()
-    @Published var foodDiary = FoodDiary()
+    @Published var date: Date = Date()
     
+    @Published var foodDiary = FoodDiary()
     @Published var products = [Product()]
     var user = User()
+    var foodDiaryListener: ListenerRegistration? = nil
     
-    @Published var todaysDiary = [FoodDiary()]
+    @Published var todaysDiary = FoodDiary()
     @Published var otherDaysIntake = [FoodDiary()]
     
     init(){
         self.initiateFoodModel()
-        self.getTodaysFoodDiary()
     }
     
     func initiateFoodModel(){
@@ -38,7 +38,7 @@ class FoodDataModel: ObservableObject{
           if let document = document {
             do{
                 self.user = try document.data(as: User.self)!
-                self.setCaloriesForDiary()
+                self.getFoodDiary()
             }
             catch {
               print(error)
@@ -49,10 +49,47 @@ class FoodDataModel: ObservableObject{
         }
     }
     
-    func getFoodDiaryForDate(for date: Date){
-        //First detach the listener
+    func dateHasChanged(){
+        //Set the calories right
         
-        //Now do create a new listener
+        
+        let isToday = Calendar.current.isDateInToday(self.date)
+        
+        if isToday{
+            //set the foodDiary to todaysDiary
+            //Remove listener first
+            self.foodDiaryListener!.remove()
+            
+            //Now fetch results
+            self.foodDiary = FoodDiary()
+            self.setCaloriesForDiary()
+            self.getFoodDiary()
+            self.foodDiary = self.todaysDiary
+        } else {
+            //Remove listener first
+            self.foodDiaryListener!.remove()
+            
+            //Now fetch results
+            self.foodDiary = FoodDiary()
+            self.setCaloriesForDiary()
+            self.getFoodDiary()
+        }
+    }
+    
+    func getDayOfWeekAsNumber(date: Date) -> Int{
+        let dayOfWeek = Calendar.current.component(.weekday, from: date)
+        let dayOfWeekString:String = Calendar.current.weekdaySymbols[dayOfWeek-1]
+        
+        if dayOfWeekString == "Sunday"{
+            return 6
+        }
+        else {
+            return dayOfWeek - 2
+        }
+        
+    }
+    
+    func getFoodDiary(){
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
@@ -65,18 +102,18 @@ class FoodDataModel: ObservableObject{
         let start = calendar.date(from: components)!
         let end = calendar.date(byAdding: .day, value: 1, to: start)!
         let queryRef = docRef
-           .whereField("created", isGreaterThan: start)
-           .whereField("created", isLessThan: end)
+           .whereField("date", isGreaterThan: start)
+           .whereField("date", isLessThan: end)
             .limit(to: 1)
         
-        queryRef.addSnapshotListener { (querySnapshot, error) in
-
+        foodDiaryListener = queryRef.addSnapshotListener { (querySnapshot, error) in
+            
                     guard let documents = querySnapshot?.documents else {
                             print("No documents")
                         return
                     }
             
-            self.todaysDiary = documents.map { (querySnapshot) -> FoodDiary in
+            let _:[FoodDiary] = documents.map { (querySnapshot) -> FoodDiary in
                 
                 let result = Result {
                     try querySnapshot.data(as: FoodDiary.self)
@@ -84,58 +121,23 @@ class FoodDataModel: ObservableObject{
                 switch result {
                 case .success(let stats):
                     if let stats = stats {
+                        
+                        self.foodDiary = stats
+                        self.setCaloriesForDiary()
+                        
+                        let isToday = Calendar.current.isDateInToday(self.date)
+                        if isToday{
+                            self.todaysDiary =  self.foodDiary
+                        }
                         return stats
                     }
                     else {
                         print ("Document does not exists")
                     }
                 case .failure(let error):
-                    print("error decoding schema: \(error)")
-                }
-                return FoodDiary()
-            }
-        }
-    }
-    
-    func getTodaysFoodDiary(){
-        
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
-        let db = Firestore.firestore()
-        
-        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
-        
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month, .day], from: Date())
-        let start = calendar.date(from: components)!
-        let end = calendar.date(byAdding: .day, value: 1, to: start)!
-        let queryRef = docRef
-           .whereField("created", isGreaterThan: start)
-           .whereField("created", isLessThan: end)
-            .limit(to: 1)
-        
-        queryRef.addSnapshotListener { (querySnapshot, error) in
-
-                    guard let documents = querySnapshot?.documents else {
-                            print("No documents")
-                        return
-                    }
-            
-            self.todaysDiary = documents.map { (querySnapshot) -> FoodDiary in
-                
-                let result = Result {
-                    try querySnapshot.data(as: FoodDiary.self)
-                }
-                switch result {
-                case .success(let stats):
-                    if let stats = stats {
-                        return stats
-                    }
-                    else {
-                        print ("Document does not exists")
-                    }
-                case .failure(let error):
-                    print("error decoding schema: \(error)")
+                    print("error decoding schema...")
+                    self.setCaloriesForDiary()
+                    print(self.foodDiary)
                 }
                 return FoodDiary()
             }
@@ -157,6 +159,40 @@ class FoodDataModel: ObservableObject{
         catch {
           print(error)
             return false
+        }
+    }
+    
+    func saveDiary(){
+        
+        //Make sure the date of the foodDiary is right
+        self.foodDiary.date = self.date
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let diaryRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
+        
+        if self.foodDiary.id == "" {
+            print("I create a document")
+            let newDiary = diaryRef.document()
+            
+            do {
+                try newDiary.setData(from: self.foodDiary, merge: true)
+            }
+            catch {
+              print(error)
+            }
+        } else {
+            print("I reuse a document")
+            let documentID = self.foodDiary.id!
+            let existingDiary = diaryRef.document(documentID)
+            do {
+                try existingDiary.setData(from: self.foodDiary, merge: true)
+            }
+            catch {
+              print(error)
+            }
         }
     }
     
@@ -245,7 +281,9 @@ class FoodDataModel: ObservableObject{
                 }
             }
         }
+        self.setCaloriesForDiary()
         self.updateUsersCalories()
+        self.saveDiary()
     }
     
     func deleteMeal(for meal: Meal, with mealIndex: Int) {
@@ -321,11 +359,20 @@ class FoodDataModel: ObservableObject{
     }
     
     func setCaloriesForDiary(){
-        self.foodDiary.usersCalorieBudget.kcal = self.user.kcal ?? 0
-        self.foodDiary.usersCalorieBudget.carbs = self.calcCarbs()
+        var kcal:Int = 0
+        let dayOfWeek = self.getDayOfWeekAsNumber(date: self.date)
+
+        if user.weekPlan![dayOfWeek].isTrainingDay!{
+            kcal = Int((Double(self.user.kcal ?? 0) * 1.1).rounded())
+        } else {
+            kcal = self.user.kcal ?? 0
+        }
+        
+        self.foodDiary.usersCalorieBudget.kcal = kcal
+        self.foodDiary.usersCalorieBudget.carbs = self.calcCarbs(kcal: kcal)
         self.foodDiary.usersCalorieBudget.protein = self.calcProtein()
-        self.foodDiary.usersCalorieBudget.fat = self.calcFat()
-        self.foodDiary.usersCalorieBudget.fiber = self.calcFiber()
+        self.foodDiary.usersCalorieBudget.fat = self.calcFat(kcal: kcal)
+        self.foodDiary.usersCalorieBudget.fiber = self.calcFiber(kcal: kcal)
         
         //Initiate the usersCalorieLeftOver and set it equal to the budget the first time
         self.foodDiary.usersCalorieLeftOver = self.foodDiary.usersCalorieBudget
@@ -336,25 +383,23 @@ class FoodDataModel: ObservableObject{
         return Int(Double(self.user.weight ?? 1) * 1.9)
     }
 
-    func calcFat() -> Int {
-        return Int(Double(self.user.kcal ?? 1) * 0.3/9)
+    func calcFat(kcal: Int) -> Int {
+        return Int(Double(kcal) * 0.3/9)
 
     }
 
-    func calcCarbs() -> Int {
+    func calcCarbs(kcal: Int) -> Int {
         let proteinGrams:Int = self.calcProtein()
-        let fatGrams:Int = self.calcFat()
+        let fatGrams:Int = self.calcFat(kcal: kcal)
         let proteinKcal = proteinGrams * 4
         let fatKcal = fatGrams * 9
-        return Int(((self.user.kcal ?? 1) - proteinKcal - fatKcal)/4)
+        return Int((kcal - proteinKcal - fatKcal)/4)
     }
 
-    func calcFiber() -> Int {
-        return Int(Double(self.user.kcal ?? 1) * 0.014)
+    func calcFiber(kcal: Int) -> Int {
+        return Int(Double(kcal) * 0.014)
     }
-
 }
-
 
 struct Calories: Codable, Hashable, Identifiable {
     var id = UUID()
@@ -391,7 +436,7 @@ struct CaloriesPercentages: Codable, Hashable, Identifiable {
 }
 
 struct FoodDiary: Codable, Hashable, Identifiable {
-    var id = UUID()
+    @DocumentID var id: String?
     var meals: [Meal]?
     var date: Date
     var usersCalorieBudget: Calories
@@ -399,7 +444,7 @@ struct FoodDiary: Codable, Hashable, Identifiable {
     var usersCalorieLeftOver: Calories
     var usersCalorieUsedPercentage: CaloriesPercentages
     
-    init(id:UUID = UUID(),meals: [Meal]? = [Meal()], date: Date = Date(), usersCalorieBudget: Calories = Calories(), usersCalorieUsed: Calories = Calories(), usersCalorieLeftOver: Calories = Calories(), usersCalorieUsedPercentage: CaloriesPercentages = CaloriesPercentages()){
+    init(id:String? = "",meals: [Meal]? = [Meal()], date: Date = Date(), usersCalorieBudget: Calories = Calories(), usersCalorieUsed: Calories = Calories(), usersCalorieLeftOver: Calories = Calories(), usersCalorieUsedPercentage: CaloriesPercentages = CaloriesPercentages()){
         self.id = id
         self.meals = meals
         self.date = date
@@ -434,6 +479,7 @@ struct Meal: Codable, Hashable, Identifiable {
 
 struct Product: Codable, Hashable, Identifiable{
     var id = UUID()
+    @DocumentID var documentID: String?
     var name: String
     var kcal: Int
     var carbs: Int
@@ -444,8 +490,9 @@ struct Product: Codable, Hashable, Identifiable{
     var portions: [ProductPortion]
     var selectedProductDetails : SelectedProductDetails?
     
-    init(id:UUID = UUID(), name:String = "", kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil){
+    init(id:UUID = UUID(), documentID:String? = "", name:String = "", kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil){
         self.id = id
+        self.documentID = documentID
         self.name = name
         self.kcal = kcal
         self.carbs = carbs

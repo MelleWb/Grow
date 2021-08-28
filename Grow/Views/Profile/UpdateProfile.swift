@@ -14,6 +14,7 @@ struct UpdateProfile: View {
 
     @Binding var showProfileSheetView: Bool
     @EnvironmentObject var userModel: UserDataModel
+    @EnvironmentObject var foodModel: FoodDataModel
     @State var originalImage: UIImage?
     
     let toolbarItems: [KeyboardToolbarItem] = [.dismissKeyboard]
@@ -24,28 +25,31 @@ struct UpdateProfile: View {
             Form {
                 Section {
                     VStack(alignment: .leading){
-                        PersonalDetails(originalImage: $originalImage).environmentObject(userModel)
+                        PersonalDetails(originalImage: $originalImage)
                         }.padding()
                     }
                 Section {
-                    DateOfBirth().environmentObject(userModel)
+                    DateOfBirth()
                 }.padding()
                 Section {
-                    WeightHeight().environmentObject(userModel)
+                    WeightHeight()
                 }.padding()
                 Section{
-                    Gender().environmentObject(userModel)
+                    Gender()
                 }.padding()
                 .pickerStyle(DefaultPickerStyle())
                 Section {
-                    Plan().environmentObject(userModel)
+                    Plan()
                 }.padding()
                 .pickerStyle(DefaultPickerStyle())
                 Section {
-                    PalValue().environmentObject(userModel)
+                    PalValue()
+                }.padding()
+                Section{
+                    ModifyKcal()
                 }.padding()
                 Section {
-                    WorkOutSchema().environmentObject(userModel)
+                    WorkOutSchema()
                 }.padding()
                 
                 .pickerStyle(DefaultPickerStyle())
@@ -62,8 +66,9 @@ struct UpdateProfile: View {
                         self.userModel.uploadPicture(for: originalImage!)
                         }
                     
-                    //Update the user
+                    //Update the user and reinitiate the foodmodel
                     self.userModel.updateUser()
+                    self.foodModel.initiateFoodModel()
                     //dismiss the sheet
                     self.showProfileSheetView = false
                    
@@ -289,6 +294,40 @@ struct PalValue : View {
                                 Text("4 a 5 keer per week").tag(2)
                                 Text("6 a 7 keer per week").tag(3)
                         }.padding()
+            }
+    }
+}
+
+struct ModifyKcal : View {
+    @EnvironmentObject var userModel: UserDataModel
+    
+    var body: some View {
+        
+        let kcalBinding = Binding<String> {
+            String(self.userModel.user.kcal ?? 0)
+        } set: { kcal in
+            if let value = NumberFormatter().number(from: kcal) {
+                self.userModel.user.kcal = value.intValue
+            }
+        }
+
+        return
+            Section{
+                HStack{
+                    VStack{
+                        Text("Caloriën rustdag")
+                        TextField(String(self.userModel.user.kcal ?? 0), text:kcalBinding)
+                            .padding()
+                            .keyboardType(.numberPad)
+                            .background(Color.init("textField"))
+                            .cornerRadius(5.0)
+                    }
+                    VStack{
+                        Text("Kilocaloriën sportdag")
+                        Text(String((Double(self.userModel.user.kcal ?? 1)*1.1).rounded()))
+                    }
+                    
+                }
             }
     }
 }

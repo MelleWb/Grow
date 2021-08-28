@@ -14,6 +14,7 @@ struct ProductDetailView: View {
     @State var product:Product
     @State var meal: Meal
     @State var amount: String = "100"
+    @State var amountInput: String = ""
     
     @State var calories: Int = 0
     @State var carbs: Int = 0
@@ -38,9 +39,10 @@ struct ProductDetailView: View {
     var body: some View {
         
         let amountProxy = Binding<String>(
-            get: { amount },
+            get: { amountInput },
             set: {
                 amount = $0
+                amountInput = $0
                 if let value = NumberFormatter().number(from: $0) {
                     self.updateCalories(portion: value.intValue)
                 }
