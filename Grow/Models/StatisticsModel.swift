@@ -354,6 +354,23 @@ class StatisticsDataModel: ObservableObject {
         }
     }
     
+    func isValidTraining(for routine: Routine) -> Bool{
+        var countOfSets: Int = 0
+        
+        for superset in routine.superset! {
+            let sets:Int = superset.sets!
+            let exercises:Int = superset.exercises!.count
+            let calculation = sets * exercises
+            countOfSets += calculation
+            }
+        
+        if exerciseStatistics.count != countOfSets{
+            return false
+        } else {
+            return true
+        }
+    }   
+    
     func saveTraining(for user: String, for routineID: UUID) -> Bool{
 
         var volume:Double = 0

@@ -10,14 +10,14 @@ import KeyboardToolbar
 
 struct WorkoutOfTheDayView: View {
     
-    @Environment(\.presentationMode) var presentationMode
+    @Binding var showWOD: Bool
     @EnvironmentObject var userModel: UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     var schema: String
     var routine:UUID
     @State var amountOfSets: Int = 0
-    //@Binding var showWorkoutView: Bool
+    @State var showAlert: Bool = false
     
     func setOrSuperset(set: Superset) -> String{
         let setNumber: Int = self.trainingModel.getSupersetIndex(for: self.trainingModel.routine, for: set) + 1
@@ -52,19 +52,30 @@ struct WorkoutOfTheDayView: View {
             self.statisticsModel.getStatisticsForCurrentRoutine(for: routine)
         })
         .navigationTitle("Training van vandaag")
-        .navigationBarItems(leading: Button(action:{presentationMode.wrappedValue.dismiss()},label:{Text("Sluiten")}),
+        .navigationBarItems(leading: Button(action:{showWOD = false},label:{Text("Sluiten")}),
                                 trailing:
                                 Button(action:{
-                                    let success: Bool = self.statisticsModel.saveTraining(for: userModel.user.id!, for: routine)
-                                    if success{
-                                        presentationMode.wrappedValue.dismiss()
-                                    } else {
-                                        print("some error")
+                                    
+                                let isValid: Bool = self.statisticsModel.isValidTraining(for: self.trainingModel.routine)
+                                    
+                                    if isValid{
+                                    
+                                        let success: Bool = self.statisticsModel.saveTraining(for: userModel.user.id!, for: routine)
+                                        if success{
+                                            self.showWOD = false
+                                        } else {
+                                            print("some error")
+                                        }
+                                    }
+                                    else {
+                                        self.showAlert = true
                                     }
                                 }){
                                 Text("Opslaan").foregroundColor(.accentColor)
                                 }
         )
+        .alert(isPresented: $showAlert, content: {
+                Alert(title: Text("Oops"), message: Text("Het lijkt erop dat je niet alle reps en gewichten hebt ingevuld"), dismissButton: .default(Text("Ok!")))})
         }
     }
 }

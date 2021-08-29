@@ -123,26 +123,82 @@ class FoodDataModel: ObservableObject{
                     if let stats = stats {
                         
                         self.foodDiary = stats
-                        self.setCaloriesForDiary()
-                        
-                        let isToday = Calendar.current.isDateInToday(self.date)
-                        if isToday{
-                            self.todaysDiary =  self.foodDiary
-                        }
                         return stats
                     }
                     else {
                         print ("Document does not exists")
                     }
-                case .failure(let error):
+                case .failure:
                     print("error decoding schema...")
-                    self.setCaloriesForDiary()
-                    print(self.foodDiary)
                 }
                 return FoodDiary()
             }
+            self.setCaloriesForDiary()
+            self.updateUsersCalories()
+            let isToday = Calendar.current.isDateInToday(self.date)
+            if isToday{
+                self.todaysDiary =  self.foodDiary
+            }
         }
     }
+    
+    func copyMeal(meal: Meal){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
+        
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: date)
+        let start = calendar.date(from: components)!
+        let end = calendar.date(byAdding: .day, value: 1, to: start)!
+        let queryRef = docRef
+           .whereField("date", isGreaterThan: start)
+           .whereField("date", isLessThan: end)
+            .limit(to: 1)
+
+            queryRef.getDocuments() { (querySnapshot, err) in
+                if let err = err {
+                    print("Error getting documents: \(err)")
+                } else {
+                    if querySnapshot!.documents.count > 0 {
+                        for document in querySnapshot!.documents {
+                            do{
+                                var diaryToCopyInto: FoodDiary = try document.data(as: FoodDiary.self)!
+                                if diaryToCopyInto.meals == nil {
+                                    diaryToCopyInto.meals = [meal]
+                                } else {
+                                    diaryToCopyInto.meals!.append(meal)
+                                }
+                                do {
+                                    try docRef.document(document.documentID).setData(from: diaryToCopyInto, merge: true)
+                                }
+                                catch {
+                                  print(error)
+                                }
+                            }
+                            catch{
+                                print("error")
+                            }
+                        }
+                    } else {
+                        var diaryToCopyInto: FoodDiary = FoodDiary()
+                        //set the meal to the created diary and set the date correct
+                        diaryToCopyInto.meals = [meal]
+                        diaryToCopyInto.date = self.date
+                            do {
+                                try docRef.document().setData(from: diaryToCopyInto)
+                            }
+                            catch {
+                              print(error)
+                            }
+                    }
+                }
+            }
+            //self.saveCopiedMeal(meal: meal)
+        }
     
     func createProduct(product: Product) -> Bool{
         
@@ -237,6 +293,24 @@ class FoodDataModel: ObservableObject{
         } else {
         self.foodDiary.meals?.append(Meal())
         }
+    }
+    
+    func saveCopiedMeal(meal: Meal){
+
+        let isToday = Calendar.current.isDateInToday(self.date)
+
+        if self.foodDiary.meals == nil || self.foodDiary.meals!.isEmpty{
+            self.foodDiary.meals = [meal]
+        } else {
+            self.foodDiary.meals!.append(meal)
+        }
+        
+        if isToday{
+            self.todaysDiary =  self.foodDiary
+        }
+        
+        self.setCaloriesForDiary()
+        saveDiary()
     }
     
     func addProductToMeal(for meal: Meal, with product: Product, with selectedSize: SelectedProductDetails) -> Bool{
@@ -380,7 +454,7 @@ class FoodDataModel: ObservableObject{
     
     
     func calcProtein() -> Int {
-        return Int(Double(self.user.weight ?? 1) * 1.9)
+        return Int(Double(self.user.weight ?? 1) * 2)
     }
 
     func calcFat(kcal: Int) -> Int {

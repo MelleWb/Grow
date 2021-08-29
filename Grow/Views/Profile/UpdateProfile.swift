@@ -51,7 +51,24 @@ struct UpdateProfile: View {
                 Section {
                     WorkOutSchema()
                 }.padding()
-                
+                Button(action: {
+                               let firebaseAuth = Auth.auth()
+                              do {
+                                try firebaseAuth.signOut()
+                                self.showProfileSheetView = false
+                              } catch let signOutError as NSError {
+                                print ("Error signing out: %@", signOutError)
+                              }
+                           })
+                           {
+                               Text("Uitloggen")
+                                   .font(.headline)
+                                   .foregroundColor(.white)
+                                   .padding()
+                                   .frame(width: 200, height: 60, alignment: .center)
+                                   .background(Color.init("buttonColor"))
+                                   .cornerRadius(15.0)
+                           }
                 .pickerStyle(DefaultPickerStyle())
                 .modifier(AdaptsKeyboard())
                 .onAppear(perform:{self.originalImage = self.userModel.userImages.userImage?.image})

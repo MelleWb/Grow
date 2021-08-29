@@ -42,6 +42,8 @@
 		85CB7FA026C1C0A700025736 /* StatisticsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CB7F9F26C1C0A700025736 /* StatisticsModel.swift */; };
 		85D21061268F8F32002BA11C /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D21060268F8F32002BA11C /* SearchBar.swift */; };
 		85D210682691EEA0002BA11C /* TrainingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D210672691EEA0002BA11C /* TrainingDashboard.swift */; };
+		85DBDB8D26DBD49B00512FF1 /* WithPopOver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DBDB8C26DBD49B00512FF1 /* WithPopOver.swift */; };
+		85DBDB8F26DC276B00512FF1 /* ChangeIntakeOfProduct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DBDB8E26DC276B00512FF1 /* ChangeIntakeOfProduct.swift */; };
 		85DF0607268C4CA400020559 /* AddExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DF0606268C4CA400020559 /* AddExercise.swift */; };
 		85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */; };
 		85F6FDCC2693A3D70051B60E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 85F6FDCB2693A3D70051B60E /* GoogleService-Info.plist */; };
@@ -127,6 +129,8 @@
 		85CB7F9F26C1C0A700025736 /* StatisticsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsModel.swift; sourceTree = "<group>"; };
 		85D21060268F8F32002BA11C /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		85D210672691EEA0002BA11C /* TrainingDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDashboard.swift; sourceTree = "<group>"; };
+		85DBDB8C26DBD49B00512FF1 /* WithPopOver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithPopOver.swift; sourceTree = "<group>"; };
+		85DBDB8E26DC276B00512FF1 /* ChangeIntakeOfProduct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeIntakeOfProduct.swift; sourceTree = "<group>"; };
 		85DF0606268C4CA400020559 /* AddExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExercise.swift; sourceTree = "<group>"; };
 		85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDetailView.swift; sourceTree = "<group>"; };
 		85F6FDCB2693A3D70051B60E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -257,6 +261,7 @@
 				F041551626CE72660044FD22 /* AddProductView.swift */,
 				F041551826D178DA0044FD22 /* NewProductsNutritionView.swift */,
 				85647EA426D6C4A300835CC8 /* ProductDetailView.swift */,
+				85DBDB8E26DC276B00512FF1 /* ChangeIntakeOfProduct.swift */,
 			);
 			path = Meals;
 			sourceTree = "<group>";
@@ -273,6 +278,7 @@
 				85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */,
 				85597D7626A2C166005375F7 /* DisableAutoDismiss.swift */,
 				8512512A26B9D9350006D304 /* AdaptsKeyboard.swift */,
+				85DBDB8C26DBD49B00512FF1 /* WithPopOver.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -635,7 +641,9 @@
 				85037C16268915D500EC344B /* UserModel.swift in Sources */,
 				85476A31267FC04100BA68A2 /* KeyboardResponder.swift in Sources */,
 				854B05EC26820A8700A824CD /* UserDefaults.swift in Sources */,
+				85DBDB8D26DBD49B00512FF1 /* WithPopOver.swift in Sources */,
 				859B9452268B9A1B003F58F2 /* ExerciseOverview.swift in Sources */,
+				85DBDB8F26DC276B00512FF1 /* ChangeIntakeOfProduct.swift in Sources */,
 				8545E33226B542FC0083F69E /* WorkoutOfTheDayView.swift in Sources */,
 				F041551926D178DA0044FD22 /* NewProductsNutritionView.swift in Sources */,
 				8588C33C2681D0FA00535E68 /* SceneDelegate.swift in Sources */,
@@ -807,7 +815,7 @@
 				CODE_SIGN_ENTITLEMENTS = Grow/Grow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
 				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_PREVIEWS = YES;
@@ -883,7 +891,7 @@
 				CODE_SIGN_ENTITLEMENTS = Grow/Grow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
 				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_PREVIEWS = YES;

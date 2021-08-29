@@ -212,6 +212,7 @@ PODS:
     - abseil/base/base_internal
     - abseil/base/config
     - abseil/meta/type_traits
+  - ActionSheetPicker-3.0 (2.7.1)
   - BoringSSL-GRPC (0.0.7):
     - BoringSSL-GRPC/Implementation (= 0.0.7)
     - BoringSSL-GRPC/Interface (= 0.0.7)
@@ -364,6 +365,7 @@ PODS:
   - Protobuf (3.17.0)
 
 DEPENDENCIES:
+  - ActionSheetPicker-3.0
   - Cache
   - Firebase/Analytics
   - Firebase/Auth
@@ -376,6 +378,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - abseil
+    - ActionSheetPicker-3.0
     - BoringSSL-GRPC
     - Cache
     - Firebase
@@ -403,6 +406,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   abseil: 6c8eb7892aefa08d929b39f9bb108e5367e3228f
+  ActionSheetPicker-3.0: 36da254b97a09ff89679ecb8b8510bd3e5bdc773
   BoringSSL-GRPC: 8edf627ee524575e2f8d19d56f068b448eea3879
   Cache: 4ca7e00363fca5455f26534e5607634c820ffc2d
   Firebase: c23a36d9e4cdf7877dfcba8dd0c58add66358999
@@ -428,6 +432,6 @@ SPEC CHECKSUMS:
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   Protobuf: 7327d4444215b5f18e560a97f879ff5503c4581c
 
-PODFILE CHECKSUM: 52577fd4f15d59f45e60f579f013926617cf724e
+PODFILE CHECKSUM: 84af09413c9ac2195000e88989d44694c1eacf25
 
 COCOAPODS: 1.10.1

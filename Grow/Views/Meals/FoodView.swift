@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Firebase
+import ActionSheetPicker_3_0
 
 struct FoodView: View {
     
@@ -183,43 +184,63 @@ struct ShowMealHeader: View {
     
     @EnvironmentObject var foodModel : FoodDataModel
     @State private var showingActionSheet = false
+    @State private var showCalendar = false
     var meal: Meal
 
     var body: some View{
-        let mealIndex: Int = foodModel.getMealIndex(for: meal) + 1
-        HStack{
-            Text("Meal \(mealIndex)")
-                .padding()
-                .contextMenu(menuItems: {
-                    Button (action: {
-                        foodModel.removeMeal(for: meal)
-                        
-                    }, label: {
-                        Text("Verwijder")
-                        Image(systemName: "trash")
-                            .resizable()
-                            .foregroundColor(.accentColor)
-                            .frame(width: 17, height: 20, alignment: .trailing)
+        if foodModel.foodDiary.meals != nil {
+            let mealIndex: Int = foodModel.getMealIndex(for: meal) + 1
+            HStack{
+                Text("Maaltijd \(mealIndex)")
+                    .padding()
+                    .contextMenu(menuItems: {
+                        VStack{                            Text("\(self.foodModel.foodDiary.meals![foodModel.getMealIndex(for: meal)].kcal) Calorieën")
+                           
+                                Text("\(self.foodModel.foodDiary.meals![foodModel.getMealIndex(for: meal)].carbs) Koolhydraten")
+
+                                Text("\(self.foodModel.foodDiary.meals![foodModel.getMealIndex(for: meal)].protein) Eiwitten")
+
+                                Text("\(self.foodModel.foodDiary.meals![foodModel.getMealIndex(for: meal)].fat) Vetten")
+
+                                Text("\(self.foodModel.foodDiary.meals![foodModel.getMealIndex(for: meal)].fiber) Vezels")
+                            }
+                        Button (action: {
+                        //self.showingActionSheet = true
+                            self.foodModel.date.addTimeInterval(86400)
+                            self.foodModel.dateHasChanged()
+                            self.foodModel.copyMeal(meal: meal)
+                            
+                        }, label: {
+                            Text("Kopieren naar volgende dag")
+                            Image(systemName: "doc.on.doc")
+                                .resizable()
+                                .foregroundColor(.accentColor)
+                                .frame(width: 17, height: 20, alignment: .trailing)
+                        })
+                        Button (action: {
+                            foodModel.removeMeal(for: meal)
+                            
+                        }, label: {
+                            Text("Verwijder")
+                            Image(systemName: "trash")
+                                .resizable()
+                                .foregroundColor(.accentColor)
+                                .frame(width: 17, height: 20, alignment: .trailing)
+                        })
                     })
-                    Button (action: {
-                    self.showingActionSheet = true
-                    }, label: {
-                        Text("Kopieren")
-                        Image(systemName: "doc.on.doc")
-                            .resizable()
-                            .foregroundColor(.accentColor)
-                            .frame(width: 17, height: 20, alignment: .trailing)
-                    })
-                })
             
             
         }
-        .actionSheet(isPresented: $showingActionSheet) {
-            ActionSheet(title: Text("Kopieren"), message: Text("Selecteer een dag"), buttons: [
-                .default(Text("Morgen")) {  },
-                .default(Text("Overmorgen")) {  },
-                .cancel()
-            ])
+        
+            .actionSheet(isPresented: $showingActionSheet) {
+                ActionSheet(title: Text("Kopieren"), message: Text("Kopieren naar"), buttons: [
+                    .default(Text("De volgende dag").foregroundColor(.accentColor)) { },
+                    .default(Text("Overmorgen").foregroundColor(.accentColor)) {
+                        self.showCalendar = true
+                    },
+                    .cancel()
+                ])
+            }
         }
     }
 }
@@ -227,7 +248,6 @@ struct ShowMealHeader: View {
 struct ProgressBarLinear: View {
     @Binding var value: Float
     @EnvironmentObject var userModel: UserDataModel
-    
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
@@ -235,19 +255,60 @@ struct ProgressBarLinear: View {
                     .opacity(0.3)
                     .foregroundColor(Color(UIColor.gray))
                 
-                if value <= 0.8 {
-                
+                if value <= 0.90 {
                 Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
-                    .foregroundColor(Color.green)
+                    .foregroundColor(Color.red)
                     .animation(.linear)
                 }
-                else if value > 0.8 && value < 1 {
+                else if value > 0.90 && value < 0.95 {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
                         .foregroundColor(Color.orange)
                         .animation(.linear)
-                } else {
+                }
+                else if value > 0.95 && value < 1.05 {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                        .foregroundColor(Color.green)
+                        .animation(.linear)
+                }
+                else if value > 1.05 && value < 1.1 {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                        .foregroundColor(Color.orange)
+                        .animation(.linear)
+                }
+                else {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
                         .foregroundColor(Color.red)
+                        .animation(.linear)
+                }
+            }.cornerRadius(45.0)
+            .offset(y: geometry.size.height/3.5)
+        }
+    }
+}
+
+struct FiberProgressBarLinear: View {
+    @Binding var value: Float
+    @EnvironmentObject var userModel: UserDataModel
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle().frame(width: geometry.size.width , height: geometry.size.height/2)
+                    .opacity(0.3)
+                    .foregroundColor(Color(UIColor.gray))
+                
+                if value <= 0.90 {
+                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                    .foregroundColor(Color.red)
+                    .animation(.linear)
+                }
+                else if value > 0.9 && value < 0.95 {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                        .foregroundColor(Color.orange)
+                        .animation(.linear)
+                }
+                else {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                        .foregroundColor(Color.green)
                         .animation(.linear)
                 }
             }.cornerRadius(45.0)
@@ -307,7 +368,7 @@ struct ContentViewLinearVezelFood: View {
     
     var body: some View {
                 HStack{
-                    ProgressBarLinear(value: $foodModel.foodDiary.usersCalorieUsedPercentage.fiber)
+                    FiberProgressBarLinear(value: $foodModel.foodDiary.usersCalorieUsedPercentage.fiber)
                     }
     }
 }

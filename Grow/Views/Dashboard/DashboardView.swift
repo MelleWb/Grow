@@ -113,7 +113,7 @@ struct Dashboard: View{
                     UpdateProfile(showProfileSheetView: $showProfileSheetView)
                     }
         .fullScreenCover(isPresented: $isWorkOutPresented){
-                WorkoutOfTheDayView(schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!)
+            WorkoutOfTheDayView(showWOD: $isWorkOutPresented, schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!)
             }
         }
         })
@@ -162,7 +162,7 @@ struct ProgressBarCirle: View {
                     .opacity(0.3)
                     .foregroundColor(Color.gray)
                 
-                if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal <= 0.8 {
+                if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal <= 0.9 {
                     Circle()
                         .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                         .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
@@ -170,7 +170,23 @@ struct ProgressBarCirle: View {
                         .rotationEffect(Angle(degrees: 270.0))
                         .animation(.linear)
                 }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.8 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1{
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.9 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 0.95{
+                Circle()
+                    .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
+                    .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
+                    .foregroundColor(Color.orange)
+                    .rotationEffect(Angle(degrees: 270.0))
+                    .animation(.linear)
+                }
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.95 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.05{
+                Circle()
+                    .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
+                    .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
+                    .foregroundColor(Color.green)
+                    .rotationEffect(Angle(degrees: 270.0))
+                    .animation(.linear)
+                }
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 1.05 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.1{
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
@@ -195,9 +211,9 @@ struct ProgressBarCirle: View {
         }
     }
 
-struct ProgressBarLinearFood: View {
+struct ProgressBarLinearDashboard: View {
     @Binding var value: Float
-    
+    @EnvironmentObject var userModel: UserDataModel
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
@@ -205,22 +221,64 @@ struct ProgressBarLinearFood: View {
                     .opacity(0.3)
                     .foregroundColor(Color(UIColor.gray))
                 
-                if value <= 0.8 {
-                
+                if value <= 0.90 {
                 Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                    .foregroundColor(Color.green)
+                    .foregroundColor(Color.red)
                     .animation(.linear)
                 }
-                else if value > 0.8 && value < 1 {
+                else if value > 0.90 && value < 0.95 {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.orange)
                         .animation(.linear)
-                } else {
+                }
+                else if value > 0.95 && value < 1.05 {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                        .foregroundColor(Color.green)
+                        .animation(.linear)
+                }
+                else if value > 1.05 && value < 1.1 {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                        .foregroundColor(Color.orange)
+                        .animation(.linear)
+                }
+                else {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.red)
                         .animation(.linear)
                 }
             }.cornerRadius(45.0)
+            .offset(y: geometry.size.height/3.5)
+        }
+    }
+}
+
+struct FiberProgressBarLinearDashboard: View {
+    @Binding var value: Float
+    @EnvironmentObject var userModel: UserDataModel
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
+                    .opacity(0.3)
+                    .foregroundColor(Color(UIColor.gray))
+                
+                if value <= 0.90 {
+                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                    .foregroundColor(Color.red)
+                    .animation(.linear)
+                }
+                else if value > 0.9 && value < 0.95 {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                        .foregroundColor(Color.orange)
+                        .animation(.linear)
+                }
+                else {
+                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
+                        .foregroundColor(Color.green)
+                        .animation(.linear)
+                }
+            }.cornerRadius(45.0)
+            .offset(y: geometry.size.height/3.5)
         }
     }
 }
@@ -237,7 +295,7 @@ struct ContentViewLinearKoolh: View {
                 }
                 Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.carbs).frame(height: 7.5)
+            ProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.carbs).frame(height: 7.5)
 
         }
     }
@@ -255,7 +313,7 @@ struct ContentViewLinearEiwit: View {
                     }
                 Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.protein).frame(height: 7.5)
+            ProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.protein).frame(height: 7.5)
         }
     }
 }
@@ -272,7 +330,7 @@ struct ContentViewLinearVet: View {
                     }
                 Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fat).frame(height: 7.5)
+            ProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fat).frame(height: 7.5)
         }
     }
 }
@@ -289,7 +347,7 @@ struct ContentViewLinearVezel: View {
                     }
                 Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
                 }
-            ProgressBarLinearFood(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fiber).frame(height: 7.5)
+            FiberProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fiber).frame(height: 7.5)
             
         }
     }
