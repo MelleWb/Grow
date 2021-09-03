@@ -9,6 +9,15 @@ import SwiftUI
 import Firebase
 import Combine
 
+class NumberHelper{
+    class func roundedNumbersFromDouble(unit: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .none
+
+        return formatter.string(from: NSNumber(value: unit)) ?? "0"
+    }
+}
+
 class DateHelper {
 
     class func from(year: Int, month: Int, day: Int) -> Date {

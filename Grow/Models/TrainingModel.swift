@@ -14,17 +14,52 @@ class TrainingDataModel: ObservableObject{
     @Published var schema = Schema()
     @Published var fetchedSchemas = [Schema]()
     @Published var routine = Routine()
+    var user = User()
     
     private var db = Firestore.firestore()
     
-    func loadRoutineFromSchema(for schema: String, for routine: UUID){
-        if self.schema.name.isEmpty{
+    init(){
+        fetchData()
+        initiateTrainingModel()
+    }
+    
+    func initiateTrainingModel(){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid)
+
+        docRef.getDocument(source: .cache) { (document, error) in
+          if let document = document {
+            do{
+                self.user = try document.data(as: User.self)!
+                self.loadRoutineFromSchema()
+            }
+            catch {
+              print(error)
+            }
+          } else {
+            print("Document does not exist in cache")
+          }
+        }
+    }
+    
+    func  resetUser(user:  User){
+        self.user = user
+        self.loadRoutineFromSchema()
+    }
+    
+    func loadRoutineFromSchema(){
+        
+        if self.user.workoutOfTheDay != nil || self.user.workoutOfTheDay?.uuidString != ""{
             
             let settings = FirestoreSettings()
             settings.isPersistenceEnabled = true
             let db = Firestore.firestore()
             
-            let docRef = db.collection("schemas").document(schema)
+            let docRef = db.collection("schemas").document(self.user.schema!)
               
             docRef.getDocument { document, error in
               if (error as NSError?) != nil {
@@ -35,19 +70,19 @@ class TrainingDataModel: ObservableObject{
                   do {
                     self.schema = try document.data(as: Schema.self)!
                     
-                    if let index = self.schema.routines.firstIndex(where: { $0.id == routine }) {
+                    if let index = self.schema.routines.firstIndex(where: { $0.id == self.user.workoutOfTheDay }) {
                             self.routine = self.schema.routines[index]
                         }
                   }
                   catch {
                     print(error)
+                    }
                   }
                 }
               }
-            }
         }
         else {
-            if let index = self.schema.routines.firstIndex(where: { $0.id == routine }) {
+            if let index = self.schema.routines.firstIndex(where: { $0.id == self.user.workoutOfTheDay }) {
                     self.routine = self.schema.routines[index]
                 }
         }

@@ -25,9 +25,7 @@ struct TrainingVolumeView: View {
                     }
                 }
             }
-        }.onAppear(perform:{
-            self.statisticsModel.getStatisticsForCurrentSchema()
-        })
+        }
         .navigationTitle(Text("Volume per training"))
     }
 }

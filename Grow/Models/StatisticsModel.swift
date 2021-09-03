@@ -16,6 +16,10 @@ class StatisticsDataModel: ObservableObject {
     @Published var maxWeight = ExerciseStatistics()
     @Published var estimatedWeights = [EstimatedWeights()]
     @Published var trainingStatistics = TrainingStatistics()
+    @Published var trainingHistory = [TrainingStatistics()]
+    
+    var trainingHistoryListener: ListenerRegistration? = nil
+    var trainingStatsListener: ListenerRegistration? = nil
     var user = User()
     
     init(){
@@ -34,6 +38,13 @@ class StatisticsDataModel: ObservableObject {
           if let document = document {
             do{
                 self.user = try document.data(as: User.self)!
+                self.getStatisticsForCurrentRoutine()
+                
+                if self.trainingStatsListener != nil {
+                    self.trainingStatsListener?.remove()
+                }
+                self.getStatisticsForCurrentSchema()
+                self.loadTrainingHistory()
             }
             catch {
               print(error)
@@ -42,6 +53,17 @@ class StatisticsDataModel: ObservableObject {
             print("Document does not exist in cache")
           }
         }
+    }
+    
+    func resetUser(user: User) {
+        self.user = user
+        
+        //Remove the listener
+        trainingStatsListener?.remove()
+        
+        //Initiate the stats again
+        self.getStatisticsForCurrentRoutine()
+        self.getStatisticsForCurrentSchema()
     }
     
     func calcEstimatedWeights(for exerciseName: String){
@@ -216,23 +238,26 @@ class StatisticsDataModel: ObservableObject {
         return value
     }
     
-    func getStatisticsForCurrentRoutine(for routineID: UUID){
+    func getStatisticsForCurrentRoutine(){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
-        let db = Firestore.firestore()
+        if self.user.id != "" && self.user.workoutOfTheDay != nil && self.user.workoutOfTheDay?.uuidString != ""{
         
-        let routine = routineID.uuidString
+            let routine:String = self.user.workoutOfTheDay!.uuidString
+                
+            let settings = FirestoreSettings()
+            settings.isPersistenceEnabled = true
+            let db = Firestore.firestore()
         
-    db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics")
-        .whereField("routineID", isEqualTo: routine).order(by: "trainingDate", descending: true).limit(to: 1).addSnapshotListener { (querySnapshot, error) in
+        
+            db.collection("users").document(self.user.id!).collection("trainingStatistics")
+                .whereField("routineID", isEqualTo: routine).order(by: "trainingDate", descending: true).limit(to: 1).getDocuments(completion: { (querySnapshot, error) in
 
                 guard let documents = querySnapshot?.documents else {
                         print("No documents")
                     return
                 }
                 
-            let trainingStatistics:[TrainingStatistics] = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
+            let _ = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
                     
                     let result = Result {
                         try queryDocumentSnapshot.data(as: TrainingStatistics.self)
@@ -240,6 +265,7 @@ class StatisticsDataModel: ObservableObject {
                     switch result {
                     case .success(let stats):
                         if let stats = stats {
+                            self.trainingStatistics = stats
                             return stats
                         }
                         else {
@@ -248,15 +274,14 @@ class StatisticsDataModel: ObservableObject {
                     case .failure(let error):
                         print("error decoding schema: \(error)")
                     }
-                    return TrainingStatistics(id: UUID(), routineID: UUID(), documentID: "", trainingDate: Date(), trainingVolume: 0, volumePercentage: 0)
+                    return TrainingStatistics()
                 }
-                if !trainingStatistics.isEmpty {
-                    self.trainingStatistics = trainingStatistics[0]
-                }
-            }
+            })
+        }
     }
-        
+    
     func getStatisticsForCurrentSchema(){
+        
         if self.schemaStatistics.routineStats == nil {
         var schema:Schema = Schema()
         
@@ -282,7 +307,7 @@ class StatisticsDataModel: ObservableObject {
                     
                     let routineString:String = routine.id.uuidString
                     
-                    db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics")
+                    self.trainingStatsListener = db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics")
                         .whereField("routineID", isEqualTo: routineString).order(by: "trainingDate", descending: true).limit(to: 10).addSnapshotListener { (querySnapshot, error) in
                             
                             guard let documents = querySnapshot?.documents else {
@@ -325,6 +350,56 @@ class StatisticsDataModel: ObservableObject {
             }
           }
         }
+        }
+    }
+    
+    func loadTrainingHistory(){
+        
+        if self.user.id != nil {
+        
+            let settings = FirestoreSettings()
+            settings.isPersistenceEnabled = true
+            let db = Firestore.firestore()
+            
+            trainingHistoryListener = db.collection("users").document(self.user.id!).collection("trainingStatistics").order(by: "trainingDate", descending: true).addSnapshotListener { (querySnapshot, error) in
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents")
+                    return
+                }
+                
+                self.trainingHistory = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
+                    
+                    let result = Result {
+                        try queryDocumentSnapshot.data(as: TrainingStatistics.self)
+                    }
+                    switch result {
+                    case .success(let history):
+                        if let history = history {
+                            return history
+                        }
+                        else {
+                            print ("Document does not exists")
+                        }
+                    case .failure(let error):
+                        print("error decoding schema: \(error)")
+                    }
+                    return TrainingStatistics()
+                }
+            }
+        }
+    }
+    
+    func removeTrainingHistory(for index: Int){
+        let documentID = self.trainingHistory[index].documentID ?? ""
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics").document(documentID).delete() { err in
+            if let err = err {
+                print("Error removing document: \(err)")
+            }
         }
     }
     
@@ -439,7 +514,6 @@ class StatisticsDataModel: ObservableObject {
     }
     
     func createUpdateReps(for exercise: Exercise, for set: Int, with reps: Int) {
-        print(exercise)
         //check if self.exerciseStatistics is empty
         if self.exerciseStatistics.isEmpty {
             self.exerciseStatistics = [ExerciseStatistics(id: UUID(), documentID: "", exerciseID: exercise.id, exerciseName: exercise.name, date: Date(), set: set, reps: reps, weight: 0)]

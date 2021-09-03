@@ -330,22 +330,17 @@ struct ModifyKcal : View {
 
         return
             Section{
-                HStack{
-                    VStack{
-                        Text("Caloriën rustdag")
+                VStack(alignment: .leading){
+                        Text("Caloriënbudget op een rustdag")
                         TextField(String(self.userModel.user.kcal ?? 0), text:kcalBinding)
                             .padding()
                             .keyboardType(.numberPad)
                             .background(Color.init("textField"))
                             .cornerRadius(5.0)
-                    }
-                    VStack{
-                        Text("Kilocaloriën sportdag")
-                        Text(String((Double(self.userModel.user.kcal ?? 1)*1.1).rounded()))
-                    }
                     
-                }
+                    Text("Kilocaloriën sportdag \(String((Double(self.userModel.user.kcal ?? 1)*1.1).rounded()))")
             }
+        }
     }
 }
 

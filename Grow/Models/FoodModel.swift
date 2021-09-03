@@ -16,14 +16,23 @@ class FoodDataModel: ObservableObject{
     
     @Published var foodDiary = FoodDiary()
     @Published var products = [Product()]
+    @Published var savedMeals = [Meal()]
     var user = User()
     var foodDiaryListener: ListenerRegistration? = nil
+    var mealListener: ListenerRegistration? = nil
+    var productListener: ListenerRegistration? = nil
     
     @Published var todaysDiary = FoodDiary()
     @Published var otherDaysIntake = [FoodDiary()]
     
     init(){
         self.initiateFoodModel()
+    }
+    
+    func  resetUser(user:  User){
+        self.user = user
+        self.getFoodDiary()
+        self.fetchProducts()
     }
     
     func initiateFoodModel(){
@@ -39,6 +48,8 @@ class FoodDataModel: ObservableObject{
             do{
                 self.user = try document.data(as: User.self)!
                 self.getFoodDiary()
+                self.fetchProducts()
+                self.getMeals()
             }
             catch {
               print(error)
@@ -205,11 +216,17 @@ class FoodDataModel: ObservableObject{
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
+        let prodRef = db.collection("foodProducts")
+        var docRef: DocumentReference? = nil
         
-        let newProdRef = db.collection("foodProducts").document()
+        if product.documentID != "" {
+            docRef = prodRef.document(product.documentID!)
+        } else {
+            docRef = prodRef.document()
+        }
         
         do {
-          try newProdRef.setData(from: product, merge: true)
+            try docRef!.setData(from: product, merge: true)
             return true
         }
         catch {
@@ -252,6 +269,78 @@ class FoodDataModel: ObservableObject{
         }
     }
     
+    func getMeals(){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let docRef = db.collection("meals")
+        
+        mealListener = docRef.addSnapshotListener { (querySnapshot, error) in
+            
+                    guard let documents = querySnapshot?.documents else {
+                            print("No documents")
+                        return
+                    }
+            
+            self.savedMeals = documents.map { (querySnapshot) -> Meal in
+                
+                let result = Result {
+                    try querySnapshot.data(as: Meal.self)
+                }
+                switch result {
+                case .success(let stats):
+                    if let stats = stats {
+
+                        return stats
+                    }
+                    else {
+                        print ("Document does not exists")
+                    }
+                case .failure:
+                    print("error decoding schema...")
+                }
+                return Meal()
+            }
+        }
+    }
+    
+    func saveMeal(for meal: Meal) -> Bool {
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let mealRef = db.collection("meals")
+        
+        if meal.documentID == nil {
+            print("I create a document")
+            let newMealRef = mealRef.document()
+            
+            do {
+                try newMealRef.setData(from: meal, merge: true)
+                return true
+            }
+            catch {
+              print(error)
+                return false
+            }
+        } else {
+            print("I reuse a document")
+            let documentID = meal.documentID!
+            let existingMealRef = mealRef.document(documentID)
+            do {
+                try existingMealRef.setData(from: meal, merge: true)
+                return true
+            }
+            catch {
+              print(error)
+                return false
+            }
+        }
+    }
+    
     func fetchProducts(){
         
         let settings = FirestoreSettings()
@@ -259,7 +348,7 @@ class FoodDataModel: ObservableObject{
         let db = Firestore.firestore()
         
         
-        db.collection("foodProducts").addSnapshotListener { (querySnapshot, error) in
+        productListener = db.collection("foodProducts").addSnapshotListener { (querySnapshot, error) in
 
                 guard let documents = querySnapshot?.documents else {
                         print("No documents")
@@ -293,6 +382,15 @@ class FoodDataModel: ObservableObject{
         } else {
         self.foodDiary.meals?.append(Meal())
         }
+    }
+    
+    func addSavedMeal(meal: Meal){
+        if  self.foodDiary.meals == nil {
+            self.foodDiary.meals? = [meal]
+        } else {
+        self.foodDiary.meals?.append(meal)
+        }
+        self.updateMeal(for: meal)
     }
     
     func saveCopiedMeal(meal: Meal){
@@ -331,6 +429,19 @@ class FoodDataModel: ObservableObject{
             self.updateMeal(for: meal)
         }
         return true
+    }
+    
+    func updateProductInMeal(for meal: Meal, with product: Product, with selectedSize: SelectedProductDetails) -> Bool{
+        if let mealIndex = self.foodDiary.meals!.firstIndex(where: { $0.id == meal.id }) {
+            if self.foodDiary.meals![mealIndex].products != nil {
+                if let productIndex = self.foodDiary.meals![mealIndex].products!.firstIndex(where: { $0.id == product.id }) {
+                    self.foodDiary.meals![mealIndex].products![productIndex].selectedProductDetails = selectedSize
+                    self.updateMeal(for: meal)
+                    return true
+                }
+            }
+        }
+        return false
     }
     
     func updateMeal(for meal: Meal){
@@ -433,13 +544,18 @@ class FoodDataModel: ObservableObject{
     }
     
     func setCaloriesForDiary(){
-        var kcal:Int = 0
+        var kcal:Double = 0
         let dayOfWeek = self.getDayOfWeekAsNumber(date: self.date)
+        
+        if user.weekPlan != nil{
 
-        if user.weekPlan![dayOfWeek].isTrainingDay!{
-            kcal = Int((Double(self.user.kcal ?? 0) * 1.1).rounded())
+            if user.weekPlan![dayOfWeek].isTrainingDay ?? false{
+                kcal = Double(self.user.kcal ?? 0) * 1.1
+            } else {
+                kcal = Double(self.user.kcal ?? 0)
+            }
         } else {
-            kcal = self.user.kcal ?? 0
+            kcal = Double(self.user.kcal ?? 0)
         }
         
         self.foodDiary.usersCalorieBudget.kcal = kcal
@@ -453,37 +569,37 @@ class FoodDataModel: ObservableObject{
     }
     
     
-    func calcProtein() -> Int {
-        return Int(Double(self.user.weight ?? 1) * 2)
+    func calcProtein() -> Double {
+        return Double(self.user.weight ?? 1) * 2
     }
 
-    func calcFat(kcal: Int) -> Int {
-        return Int(Double(kcal) * 0.3/9)
+    func calcFat(kcal: Double) -> Double {
+        return (kcal * 0.3)/9
 
     }
 
-    func calcCarbs(kcal: Int) -> Int {
-        let proteinGrams:Int = self.calcProtein()
-        let fatGrams:Int = self.calcFat(kcal: kcal)
+    func calcCarbs(kcal: Double) -> Double {
+        let proteinGrams:Double = self.calcProtein()
+        let fatGrams:Double = self.calcFat(kcal: kcal)
         let proteinKcal = proteinGrams * 4
         let fatKcal = fatGrams * 9
-        return Int((kcal - proteinKcal - fatKcal)/4)
+        return (kcal - proteinKcal - fatKcal)/4
     }
 
-    func calcFiber(kcal: Int) -> Int {
-        return Int(Double(kcal) * 0.014)
+    func calcFiber(kcal: Double) -> Double {
+        return kcal * 0.014
     }
 }
 
 struct Calories: Codable, Hashable, Identifiable {
     var id = UUID()
-    var kcal: Int
-    var carbs: Int
-    var protein: Int
-    var fat: Int
-    var fiber: Int
+    var kcal: Double
+    var carbs: Double
+    var protein: Double
+    var fat: Double
+    var fiber: Double
     
-    init(kcal: Int = 0, carbs: Int = 0, protein: Int = 0, fat: Int = 0, fiber: Int = 0){
+    init(kcal: Double = 0, carbs: Double = 0, protein: Double = 0, fat: Double = 0, fiber: Double = 0){
         self.kcal = kcal
         self.carbs = carbs
         self.protein = protein
@@ -531,16 +647,18 @@ struct FoodDiary: Codable, Hashable, Identifiable {
 
 struct Meal: Codable, Hashable, Identifiable {
     var id = UUID()
+    @DocumentID var documentID: String?
     var name: String?
     var products: [Product]?
-    var kcal:Int
-    var carbs: Int
-    var protein: Int
-    var fat: Int
-    var fiber: Int
+    var kcal:Double
+    var carbs: Double
+    var protein: Double
+    var fat: Double
+    var fiber: Double
     
-    init(id:UUID = UUID(), name: String? = nil, products:[Product]? = nil, kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0){
+    init(id:UUID = UUID(), documentID:String? = nil, name: String? = nil, products:[Product]? = nil, kcal:Double = 0, carbs:Double = 0, protein:Double = 0, fat:Double = 0, fiber:Double = 0){
         self.id = id
+        self.documentID = documentID
         self.name = name
         self.products = products
         self.kcal = kcal
@@ -555,16 +673,16 @@ struct Product: Codable, Hashable, Identifiable{
     var id = UUID()
     @DocumentID var documentID: String?
     var name: String
-    var kcal: Int
-    var carbs: Int
-    var protein: Int
-    var fat: Int
-    var fiber: Int
+    var kcal: Double
+    var carbs: Double
+    var protein: Double
+    var fat: Double
+    var fiber: Double
     var unit: String
     var portions: [ProductPortion]
     var selectedProductDetails : SelectedProductDetails?
     
-    init(id:UUID = UUID(), documentID:String? = "", name:String = "", kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil){
+    init(id:UUID = UUID(), documentID:String? = "", name:String = "", kcal:Double = 0, carbs:Double = 0, protein:Double = 0, fat:Double = 0, fiber:Double = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil){
         self.id = id
         self.documentID = documentID
         self.name = name
@@ -581,14 +699,14 @@ struct Product: Codable, Hashable, Identifiable{
 
 struct SelectedProductDetails: Codable, Hashable, Identifiable{
     var id = UUID()
-    var kcal: Int
-    var carbs: Int
-    var protein: Int
-    var fat: Int
-    var fiber: Int
+    var kcal: Double
+    var carbs: Double
+    var protein: Double
+    var fat: Double
+    var fiber: Double
     var amount: Int
     
-    init(id:UUID = UUID(), kcal:Int = 0, carbs:Int = 0, protein:Int = 0, fat:Int = 0, fiber:Int = 0, amount:Int = 0){
+    init(id:UUID = UUID(), kcal:Double = 0, carbs:Double = 0, protein:Double = 0, fat:Double = 0, fiber:Double = 0, amount:Int = 0){
         self.id = id
         self.kcal = kcal
         self.carbs = carbs

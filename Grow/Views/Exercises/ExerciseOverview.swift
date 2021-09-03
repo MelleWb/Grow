@@ -40,7 +40,7 @@ struct ExerciseOverview: View {
                 List {
                     SearchBar(searchText: $searchText, searching: $searching)
                     ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
-                        return exercise.name.hasPrefix(searchText) || searchText == ""
+                        return exercise.name.range(of: searchText, options: .caseInsensitive) != nil || searchText == ""
                     }), id: \.self) { exercise in
                         NavigationLink( destination: ExerciseDetailView(exercise: exercise)) {
                                     VStack(alignment: .leading) {
@@ -52,7 +52,7 @@ struct ExerciseOverview: View {
                     
                    .onDelete(perform: delete)
                 }
-            }.onAppear(perform: exerciseModel.fetchData)
+            }
             .listStyle(InsetGroupedListStyle())
             .navigationTitle("Oefeningen")
             .navigationBarItems(trailing: (

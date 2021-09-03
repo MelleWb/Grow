@@ -31,6 +31,12 @@ struct TrainingDashboardView : View {
                                 Text("Trainingsvolume per trainingsdag").font(.subheadline)
                             }
                         }
+                        NavigationLink(destination: TrainingHistoryOverview()){
+                            HStack{
+                                Image(systemName: "clock.arrow.circlepath").foregroundColor(.accentColor)
+                                Text("Training historie").font(.subheadline)
+                            }
+                        }
                         NavigationLink(destination: TrainingOverview()){
                             HStack{
                                 Image(systemName: "square.and.pencil").foregroundColor(.accentColor)
@@ -76,9 +82,7 @@ struct TrainingOverview: View {
                     .allowAutoDismiss { false }
             }
             
-        }.onAppear(perform:{
-            schemas.fetchData()
-        })
+        }
         .listStyle(InsetGroupedListStyle())
         .navigationBarTitle(Text("Schemas"), displayMode: .inline)
         .navigationBarItems(trailing:

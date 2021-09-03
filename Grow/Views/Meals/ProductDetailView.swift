@@ -16,16 +16,16 @@ struct ProductDetailView: View {
     @State var amount: String = "100"
     @State var amountInput: String = ""
     
-    @State var calories: Int = 0
-    @State var carbs: Int = 0
-    @State var protein: Int = 0
-    @State var fat: Int = 0
-    @State var fiber: Int = 0
+    @State var calories: Double = 0
+    @State var carbs: Double = 0
+    @State var protein: Double = 0
+    @State var fat: Double = 0
+    @State var fiber: Double = 0
     
-    func calculation(unit: Int, portion: Int) -> Int {
-        let per100gram:Int = unit
+    func calculation(unit: Double, portion: Int) -> Double {
+        let per100gram:Double = unit
         let per1gram:Double = Double(per100gram) / 100
-        return Int((Double(per1gram) * Double(portion)).rounded())
+        return (Double(per1gram) * Double(portion)).rounded()
     }
     
     func updateCalories(portion: Int){

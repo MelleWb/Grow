@@ -46,6 +46,10 @@ class ExerciseDataModel: ObservableObject{
     
     private var db = Firestore.firestore()
     
+    init(){
+        fetchData()
+    }
+    
     func fetchData() {
         db.collection("exercises").order(by: "name").addSnapshotListener { (querySnapshot, error) in
                 guard let documents = querySnapshot?.documents else {

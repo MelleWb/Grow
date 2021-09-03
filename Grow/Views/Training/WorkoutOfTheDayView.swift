@@ -33,7 +33,6 @@ struct WorkoutOfTheDayView: View {
     
 
     var body: some View {
-        NavigationView{
         Form{
             List{
                 ForEach(self.trainingModel.routine.superset!, id: \.self){ set in
@@ -47,13 +46,8 @@ struct WorkoutOfTheDayView: View {
             }.modifier(AdaptsKeyboard())
         .keyboardToolbar(toolbarItems)
         .listStyle(InsetGroupedListStyle())
-        .onAppear(perform:{
-            self.trainingModel.loadRoutineFromSchema(for: schema, for: routine)
-            self.statisticsModel.getStatisticsForCurrentRoutine(for: routine)
-        })
         .navigationTitle("Training van vandaag")
-        .navigationBarItems(leading: Button(action:{showWOD = false},label:{Text("Sluiten")}),
-                                trailing:
+        .navigationBarItems(trailing:
                                 Button(action:{
                                     
                                 let isValid: Bool = self.statisticsModel.isValidTraining(for: self.trainingModel.routine)
@@ -62,7 +56,10 @@ struct WorkoutOfTheDayView: View {
                                     
                                         let success: Bool = self.statisticsModel.saveTraining(for: userModel.user.id!, for: routine)
                                         if success{
+                                            self.trainingModel.initiateTrainingModel()
+                                            self.statisticsModel.initiateStatistics()
                                             self.showWOD = false
+                                        
                                         } else {
                                             print("some error")
                                         }
@@ -76,7 +73,6 @@ struct WorkoutOfTheDayView: View {
         )
         .alert(isPresented: $showAlert, content: {
                 Alert(title: Text("Oops"), message: Text("Het lijkt erop dat je niet alle reps en gewichten hebt ingevuld"), dismissButton: .default(Text("Ok!")))})
-        }
     }
 }
 
@@ -103,13 +99,13 @@ struct ExerciseRow:View{
         VStack(alignment: .center){
             HStack{
                 ForEach(0..<amountOfSets, id: \.self) { index in
-                    WeightRow(set: index, exercise: exercise).environmentObject(statisticsModel)
+                    WeightRow(set: index, exercise: exercise)
                 }
             }
                 
             HStack{
                 ForEach(0..<amountOfSets, id: \.self) { index in
-                    RepsRow(set: index, exercise: exercise).environmentObject(statisticsModel)
+                    RepsRow(set: index, exercise: exercise)
                 }
             }
         }.onTapGesture {

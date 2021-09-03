@@ -27,9 +27,9 @@ struct TabBarView: View {
                     Label("Training", systemImage: "bolt")
                 }
                     
-            ChatView().environmentObject(userModel)
+            SettingsView()
                 .tabItem {
-                    Label("Chat", systemImage: "message")
+                    Label("Instellingen", systemImage: "gear")
                 }
         }
         .environmentObject(userModel)
@@ -47,6 +47,7 @@ struct Dashboard: View{
     @State var showProfileSheetView: Bool = false
     @State var showWorkoutView: Bool = false
     @State private var isWorkOutPresented = false
+
     
     var body: some View {
         
@@ -77,26 +78,26 @@ struct Dashboard: View{
                 }
                 Section(header:Text("Trainingen deze week")){
                     HStack{
-                        TrainingCircle()
-                        let percentage = (self.userModel.workoutDonePercentage * 100).rounded()
-                        let roundedPercentage = Int(round(percentage))
-                        Text("\(roundedPercentage) %")
+                            TrainingCircle()
+                            let percentage = (self.userModel.workoutDonePercentage * 100).rounded()
+                                let roundedPercentage = Int(round(percentage))
+                                Text("\(roundedPercentage) %")
                     }
                     if userModel.user.workoutOfTheDay != nil {
                         HStack{
-                                Button(action: {isWorkOutPresented.toggle()}, label: {
+                            NavigationLink(destination: WorkoutOfTheDayView(showWOD: $isWorkOutPresented, schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!),isActive:$isWorkOutPresented) {
                                     HStack{
                                     Image(systemName: "bolt")
                                         .foregroundColor(.accentColor)
 
-                                    Text("Start je training van vandaag").font(.subheadline).foregroundColor(.black)
+                                        Text("Start je training van vandaag").font(.subheadline).foregroundColor(Color.init("blackWhite"))
                                     }
-                                })
-                                }.padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
-                                
+                            }.isDetailLink(false)
+                            }.padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
                         }
                     }
-                }.listStyle(InsetGroupedListStyle())
+                }
+            .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Dashboard"))
             .navigationBarItems(
                 trailing: Button(action: {
@@ -112,9 +113,6 @@ struct Dashboard: View{
         .sheet(isPresented: $showProfileSheetView) {
                     UpdateProfile(showProfileSheetView: $showProfileSheetView)
                     }
-        .fullScreenCover(isPresented: $isWorkOutPresented){
-            WorkoutOfTheDayView(showWOD: $isWorkOutPresented, schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!)
-            }
         }
         })
     }
@@ -204,7 +202,7 @@ struct ProgressBarCirle: View {
                     
                 }
                 VStack{
-                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.kcal))
+                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.kcal))
                     Text("Kcal over")
                 }
             }
@@ -285,12 +283,13 @@ struct FiberProgressBarLinearDashboard: View {
 
 struct ContentViewLinearKoolh: View {
     @EnvironmentObject var foodModel: FoodDataModel
+
     
     var body: some View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.carbs)).font(.subheadline).bold()
+                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.carbs)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                 }
                 Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
@@ -308,7 +307,7 @@ struct ContentViewLinearEiwit: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.protein)).font(.subheadline).bold()
+                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.protein)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
@@ -325,7 +324,7 @@ struct ContentViewLinearVet: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.fat)).font(.subheadline).bold()
+                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.fat)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
@@ -342,7 +341,7 @@ struct ContentViewLinearVezel: View {
         VStack {
             VStack{
                 HStack{
-                    Text(String(self.foodModel.todaysDiary.usersCalorieLeftOver.fiber)).font(.subheadline).bold()
+                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.fiber)).font(.subheadline).bold()
                     Text("g").font(.subheadline).bold()
                     }
                 Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)

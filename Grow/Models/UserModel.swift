@@ -406,6 +406,9 @@ class UserDataModel: ObservableObject{
         let docRef = db.collection("users").document(id)
         do {
           try docRef.setData(from: user, merge: true)
+            
+            //Immediately fetch new data
+            self.fetchUser(uid: user.id!)
         }
         catch {
           print(error)

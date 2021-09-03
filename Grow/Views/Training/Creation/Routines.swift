@@ -85,7 +85,7 @@ struct SchemaBody: View{
                                     }
                                 }
                         }
-                    }.modifier(AdaptsKeyboard())
+                    }
             }
     func deleteRoutine(indexSet: IndexSet) {
         self.newSchema.schema.routines.remove(atOffsets: indexSet)
@@ -128,7 +128,7 @@ struct AddSchema: View{
                             Text("Voeg toe").bold()
                            }
                     )
-        }.modifier(AdaptsKeyboard())
+        }
     }
     func deleteRoutine(indexSet: IndexSet) {
         self.newSchema.schema.routines.remove(atOffsets: indexSet)
@@ -266,7 +266,6 @@ struct ExercisesInSuperset: View{
                 Text("Selecteer oefeningen").foregroundColor(Color.init("textColor"))
             }
         }
-        .modifier(AdaptsKeyboard())
         .sheet(isPresented: $showExerciseSheetView, content: {ExerciseSheetView(newSchema: newSchema, showExerciseSheetView: $showExerciseSheetView, routine: routine, superset: superset)})
     }
 
@@ -309,7 +308,7 @@ struct ExerciseSheetView : View {
             List {
                 SearchBar(searchText: $searchText, searching: $searching)
                 ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
-                    return exercise.name.hasPrefix(searchText) || searchText == ""
+                    return exercise.name.range(of: searchText, options: .caseInsensitive) != nil || searchText == ""
                 }), id: \.self) { exercise in
                     SelectionCell(newSchema: newSchema, exercise: exercise, routine: routine, superset: superset, selectedExercises: self.$selectedExercises)
                 }
