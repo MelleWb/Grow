@@ -26,6 +26,11 @@ struct TabBarView: View {
                 .tabItem {
                     Label("Training", systemImage: "bolt")
                 }
+            
+            MeasurementOverview()
+                .tabItem{
+                    Label("Progressie", systemImage: "chart.bar.xaxis")
+                }
                     
             SettingsView()
                 .tabItem {
@@ -44,9 +49,9 @@ struct Dashboard: View{
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     @EnvironmentObject var foodModel: FoodDataModel
-    @State var showProfileSheetView: Bool = false
-    @State var showWorkoutView: Bool = false
+    @State var showProfileView: Bool = false
     @State private var isWorkOutPresented = false
+    @State var showMeasurementView: Bool = false
 
     
     var body: some View {
@@ -54,65 +59,85 @@ struct Dashboard: View{
         ProgressIndicator(isShowing: self.$userModel.queryRunning, loadingText: "Profiel laden", content:{
             
         NavigationView{
-            List{
-                Section(header: Text(Date(), style: .date)){
-                    ZStack{
-                        HStack{
-                            CircleView()
-                                .padding(.top, 20)
-                                .padding(.bottom, 20)
-                                VStack{
-                                    HStack{
-                                        ContentViewLinearKoolh()
-                                        ContentViewLinearEiwit()
-                                        }
-                                    HStack{
-                                            ContentViewLinearVet()
-                                            ContentViewLinearVezel()
+            VStack{
+                List{
+                    Section(header: Text(Date(), style: .date)){
+                        ZStack{
+                            HStack{
+                                CircleView()
+                                    .padding(.top, 20)
+                                    .padding(.bottom, 20)
+                                    VStack{
+                                        HStack{
+                                            ContentViewLinearKoolh()
+                                            ContentViewLinearEiwit()
                                             }
-                                        }.padding(.top, 10)
-                                         .padding(.bottom, 20)
-                                    }
-                        NavigationLink(destination:FoodView()){}.isDetailLink(false).hidden()
-                    }
-                }
-                Section(header:Text("Trainingen deze week")){
-                    HStack{
-                            TrainingCircle()
-                            let percentage = (self.userModel.workoutDonePercentage * 100).rounded()
-                                let roundedPercentage = Int(round(percentage))
-                                Text("\(roundedPercentage) %")
-                    }
-                    if userModel.user.workoutOfTheDay != nil {
-                        HStack{
-                            NavigationLink(destination: WorkoutOfTheDayView(showWOD: $isWorkOutPresented, schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!),isActive:$isWorkOutPresented) {
-                                    HStack{
-                                    Image(systemName: "bolt")
-                                        .foregroundColor(.accentColor)
-
-                                        Text("Start je training van vandaag").font(.subheadline).foregroundColor(Color.init("blackWhite"))
-                                    }
-                            }.isDetailLink(false)
-                            }.padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
+                                        HStack{
+                                                ContentViewLinearVet()
+                                                ContentViewLinearVezel()
+                                                }
+                                            }.padding(.top, 10)
+                                             .padding(.bottom, 20)
+                                        }
+                            NavigationLink(destination:FoodView()){}.isDetailLink(false).hidden()
                         }
                     }
+                    
+                    Section{
+                        HStack{
+                            NavigationLink(destination: NewMeasurementView(showMeasurementView: $showMeasurementView), isActive:$showMeasurementView){
+                                    Image(systemName: "alarm").foregroundColor(.accentColor)
+                                    Text("Tijd voor een nieuwe meting")
+                            }
+                        }
+                    }
+                    
+                    
+                    Section(header:Text("Trainingen deze week")){
+                        HStack{
+                                TrainingCircle()
+                            if let percentage = (self.userModel.workoutDonePercentage * 100).rounded(){
+                                    let roundedPercentage = Int(round(percentage))
+                                    Text("\(roundedPercentage) %")
+                            }
+                        }
+                        if userModel.user.workoutOfTheDay != nil {
+                            HStack{
+                                NavigationLink(destination: WorkoutOfTheDayView(showWOD: $isWorkOutPresented, schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!),isActive:$isWorkOutPresented) {
+                                        HStack{
+                                        Image(systemName: "bolt")
+                                            .foregroundColor(.accentColor)
+
+                                            Text("Start je training van vandaag").font(.subheadline).foregroundColor(Color.init("blackWhite"))
+                                        }
+                                }.isDetailLink(false)
+                                }.padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
+                            }
+                        }
                 }
+                if showProfileView {
+                    NavigationLink(destination:UpdateProfile(showProfileView: $showProfileView), isActive: $showProfileView){
+                        UpdateProfile(showProfileView: $showProfileView)
+                    }.isDetailLink(false).hidden()
+                }
+            }
+            
             .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Dashboard"))
             .navigationBarItems(
                 trailing: Button(action: {
                     withAnimation {
-                        self.showProfileSheetView.toggle()
+                        self.showProfileView.toggle()
                     }
                 }) {
-                    Image(uiImage: (userModel.userImages.userImage?.image ?? UIImage(named: "loadingImageCircle"))!)
+                    Image(uiImage: (userModel.userImages.userImage ?? UIImage(named: "loadingImageCircle"))!)
                         .resizable()
                         .clipShape(Circle())
                         .frame(width: 25, height: 25, alignment: .center)
                 })
-        .sheet(isPresented: $showProfileSheetView) {
-                    UpdateProfile(showProfileSheetView: $showProfileSheetView)
-                    }
+//        .sheet(isPresented: $showProfileSheetView) {
+//                    UpdateProfile(showProfileSheetView: $showProfileSheetView)
+//                    }
         }
         })
     }

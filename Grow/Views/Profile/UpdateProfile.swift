@@ -12,66 +12,57 @@ import KeyboardToolbar
 
 struct UpdateProfile: View {
 
-    @Binding var showProfileSheetView: Bool
+    @Binding var showProfileView: Bool
     @EnvironmentObject var userModel: UserDataModel
     @EnvironmentObject var foodModel: FoodDataModel
+    @EnvironmentObject var trainingModel: TrainingDataModel
+    @EnvironmentObject var statisticsModel: StatisticsDataModel
     @State var originalImage: UIImage?
     
     let toolbarItems: [KeyboardToolbarItem] = [.dismissKeyboard]
     
     var body: some View {
-        
-        NavigationView {
+
             Form {
                 Section {
-                    VStack(alignment: .leading){
-                        PersonalDetails(originalImage: $originalImage)
-                        }.padding()
-                    }
-                Section {
+                    PersonalDetails(originalImage: $originalImage)
+
                     DateOfBirth()
-                }.padding()
-                Section {
+
                     WeightHeight()
-                }.padding()
-                Section{
+
                     Gender()
-                }.padding()
-                .pickerStyle(DefaultPickerStyle())
-                Section {
+
                     Plan()
-                }.padding()
-                .pickerStyle(DefaultPickerStyle())
-                Section {
+
                     PalValue()
-                }.padding()
-                Section{
+
                     ModifyKcal()
-                }.padding()
-                Section {
+
                     WorkOutSchema()
-                }.padding()
-                Button(action: {
-                               let firebaseAuth = Auth.auth()
-                              do {
-                                try firebaseAuth.signOut()
-                                self.showProfileSheetView = false
-                              } catch let signOutError as NSError {
-                                print ("Error signing out: %@", signOutError)
-                              }
-                           })
-                           {
-                               Text("Uitloggen")
-                                   .font(.headline)
-                                   .foregroundColor(.white)
-                                   .padding()
-                                   .frame(width: 200, height: 60, alignment: .center)
-                                   .background(Color.init("buttonColor"))
-                                   .cornerRadius(15.0)
-                           }
+                    
+                    Button(action: {
+                                   let firebaseAuth = Auth.auth()
+                                  do {
+                                    try firebaseAuth.signOut()
+                                    self.showProfileView = false
+                                  } catch let signOutError as NSError {
+                                    print ("Error signing out: %@", signOutError)
+                                  }
+                               })
+                               {
+                                   Text("Uitloggen")
+                                       .font(.headline)
+                                       .foregroundColor(.white)
+                                       .padding()
+                                       .frame(width: 200, height: 60, alignment: .center)
+                                       .background(Color.init("buttonColor"))
+                                       .cornerRadius(15.0)
+                               }.padding()
+                }
+                
                 .pickerStyle(DefaultPickerStyle())
-                .modifier(AdaptsKeyboard())
-                .onAppear(perform:{self.originalImage = self.userModel.userImages.userImage?.image})
+                .onAppear(perform:{self.originalImage = self.userModel.userImages.userImage})
                 
                 }
             .accentColor(.accentColor)
@@ -85,14 +76,15 @@ struct UpdateProfile: View {
                     
                     //Update the user and reinitiate the foodmodel
                     self.userModel.updateUser()
-                    self.foodModel.initiateFoodModel()
+                    self.foodModel.resetUser(user: self.userModel.user)
+                    self.trainingModel.resetUser(user: self.userModel.user)
+                    self.statisticsModel.resetUser(user: self.userModel.user)
                     //dismiss the sheet
-                    self.showProfileSheetView = false
+                    self.showProfileView = false
                    
                    }) {
                     Text("Klaar").bold().foregroundColor(Color.init("textColor"))
                    })
-        }
         }
 }
 
@@ -136,7 +128,7 @@ struct PersonalDetails: View {
                 FirstName()
                 LastName()
             }
-        }
+        }.padding()
         .sheet(isPresented: $showingImagePicker, onDismiss: loadImage) {
             ImagePicker(image: self.$inputImage)
         }
@@ -196,6 +188,7 @@ struct DateOfBirth : View {
             DatePicker("Geboortedatum", selection: dateOfBirth, displayedComponents: .date)
             .datePickerStyle(CompactDatePickerStyle())
                 .frame(maxHeight: 400)
+            .padding()
     }
 }
 
@@ -317,6 +310,10 @@ struct PalValue : View {
 
 struct ModifyKcal : View {
     @EnvironmentObject var userModel: UserDataModel
+    @State var proteinRatioInput: String = ""
+    @State var fatRatioInput: String = ""
+    @State var proteinPlaceholder: String = ""
+    @State var fatPlaceholder: String = ""
     
     var body: some View {
         
@@ -327,7 +324,23 @@ struct ModifyKcal : View {
                 self.userModel.user.kcal = value.intValue
             }
         }
+        
+        let proteinBinding = Binding<String>(get: {
+            self.proteinRatioInput
+        }, set: {protein in
+            if let value = NumberFormatter().number(from: protein){
+                self.userModel.user.proteinRatio = value.doubleValue
+            }
+            self.proteinRatioInput = protein
+        })
 
+        let fatBinding = Binding<String>(get: {self.fatRatioInput}, set: {fat in
+            if let value = NumberFormatter().number(from: fat){
+                self.userModel.user.fatRatio = value.doubleValue
+            }
+            self.fatRatioInput = fat
+        })
+        
         return
             Section{
                 VStack(alignment: .leading){
@@ -338,9 +351,29 @@ struct ModifyKcal : View {
                             .background(Color.init("textField"))
                             .cornerRadius(5.0)
                     
-                    Text("Kilocaloriën sportdag \(String((Double(self.userModel.user.kcal ?? 1)*1.1).rounded()))")
-            }
-        }
+                    Text("Op een sportdag \(String((Double(self.userModel.user.kcal ?? 1)*1.1).rounded())) kcal")
+                }.padding()
+                    
+                        VStack(alignment: .leading){
+                            Text("Eiwit ratio (1.6 en 2.0)")
+                            TextField(proteinPlaceholder, text: proteinBinding)
+                                .padding()
+                                .keyboardType(.decimalPad)
+                                .background(Color.init("textField"))
+                                .cornerRadius(5.0)
+                        }.padding()
+                        VStack(alignment: .leading){
+                            Text("Vet percentage (ongeveer 30%)")
+                            TextField(fatPlaceholder, text: fatBinding)
+                                .padding()
+                                .keyboardType(.decimalPad)
+                                .background(Color.init("textField"))
+                                .cornerRadius(5.0)
+                        }.padding()
+            }.onAppear(perform: {
+                self.proteinPlaceholder = String(self.userModel.user.proteinRatio ?? 2)
+                self.fatPlaceholder = String(self.userModel.user.fatRatio ?? 30)
+            })
     }
 }
 
@@ -352,10 +385,10 @@ struct WorkOutSchema : View {
         return
             Section() {
                 List{
-                    NavigationLink(destination: SelectWorkOutSchema().environmentObject(userModel)){
+                    NavigationLink(destination: SelectWorkOutSchema()){
                         Text("Selecteer een trainingsschema")
                     }
-                }
+                }.padding()
         }
     }
 }
@@ -374,9 +407,10 @@ struct SelectWorkOutSchema:View {
             ForEach(schemaModel.fetchedSchemas.filter({ (schema: Schema) -> Bool in
                 return schema.name.hasPrefix(searchText) || searchText == ""
             }), id: \.self){ schema in
-                SelectWorkoutCell(schema: schema, selectedSchema: self.$selectedSchema).environmentObject(userModel).environmentObject(schemaModel)
+                SelectWorkoutCell(schema: schema, selectedSchema: self.$selectedSchema)
                 }
-            }.onAppear(perform:{
+            }.padding()
+        .onAppear(perform:{
                 self.schemaModel.fetchData()
                 self.selectedSchema = userModel.user.schema
             })

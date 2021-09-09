@@ -45,6 +45,46 @@ struct NewProductsNutritionView: View {
                                             self.kcalInput = kcal
                                           })
         
+        let carbsBinding = Binding<String>(get: {self.carbsInput},
+                                          set: { carbs in
+                                            if let value = NumberFormatter().number(from: carbs) {
+                                                self.product.carbs = value.doubleValue
+                                                
+                                            }
+                                            calculateKcal()
+                                            self.carbsInput = carbs
+                                          })
+        
+        let proteinBinding = Binding<String>(get: {self.proteinInput},
+                                          set: { protein in
+                                            if let value = NumberFormatter().number(from: protein) {
+                                                self.product.protein = value.doubleValue
+                                                
+                                            }
+                                            calculateKcal()
+                                            self.proteinInput = protein
+                                          })
+        
+        let fatBinding = Binding<String>(get: {self.fatInput},
+                                          set: { fat in
+                                            if let value = NumberFormatter().number(from: fat) {
+                                                self.product.fat = value.doubleValue
+                                                
+                                            }
+                                            calculateKcal()
+                                            self.fatInput = fat
+                                          })
+        
+        let fiberBinding = Binding<String>(get: {self.fiberInput},
+                                          set: { fiber in
+                                            if let value = NumberFormatter().number(from: fiber) {
+                                                self.product.fiber = value.doubleValue
+                                                
+                                            }
+                                            calculateKcal()
+                                            self.fiberInput = fiber
+                                          })
+        
             VStack{
                 Form{
                     Section(header:Text("Nutrienten per 100 gram")){
@@ -56,45 +96,25 @@ struct NewProductsNutritionView: View {
                         }
                         HStack{
                             Text("Koolhydraten (g)")
-                            TextField($carbsInput.wrappedValue, text: $carbsInput ,onEditingChanged: { _ in
-                                if let value = NumberFormatter().number(from: carbsInput) {
-                                    self.product.carbs = value.doubleValue
-                                }
-                                calculateKcal()
-                            })
+                            TextField($carbsInput.wrappedValue, text: carbsBinding)
                             .multilineTextAlignment(.trailing)
                                 .keyboardType(.decimalPad)
                         }
                         HStack{
                             Text("Eiwitten (g)")
-                            TextField($proteinInput.wrappedValue, text: $proteinInput ,onEditingChanged: { _ in
-                                if let value = NumberFormatter().number(from: proteinInput) {
-                                    self.product.protein = value.doubleValue
-                                }
-                                calculateKcal()
-                            })
+                            TextField($proteinInput.wrappedValue, text: proteinBinding)
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.decimalPad)
                         }
                         HStack{
                             Text("Vetten (g)")
-                            TextField($fatInput.wrappedValue, text: $fatInput ,onEditingChanged: { _ in
-                                if let value = NumberFormatter().number(from: fatInput) {
-                                    self.product.fat = value.doubleValue
-                                }
-                                calculateKcal()
-                            })
+                            TextField($fatInput.wrappedValue, text: fatBinding)
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.decimalPad)
                         }
                         HStack{
                             Text("Vezels (g)")
-                            TextField($fiberInput.wrappedValue, text: $fiberInput ,onEditingChanged: { _ in
-                                if let value = NumberFormatter().number(from: fiberInput) {
-                                    self.product.fiber = value.doubleValue
-                                }
-                                calculateKcal()
-                            })
+                            TextField($fiberInput.wrappedValue, text: fiberBinding)
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.decimalPad)
                         }

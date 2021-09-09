@@ -570,11 +570,11 @@ class FoodDataModel: ObservableObject{
     
     
     func calcProtein() -> Double {
-        return Double(self.user.weight ?? 1) * 2
+        return Double(self.user.weight ?? 1) * (self.user.proteinRatio ?? 2)
     }
 
     func calcFat(kcal: Double) -> Double {
-        return (kcal * 0.3)/9
+        return (kcal * (self.user.fatRatio ?? 0.3))/9
 
     }
 

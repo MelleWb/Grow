@@ -282,7 +282,7 @@ class StatisticsDataModel: ObservableObject {
     
     func getStatisticsForCurrentSchema(){
         
-        if self.schemaStatistics.routineStats == nil {
+        if self.schemaStatistics.routineStats == nil && self.user.schema != nil {
         var schema:Schema = Schema()
         
         let settings = FirestoreSettings()

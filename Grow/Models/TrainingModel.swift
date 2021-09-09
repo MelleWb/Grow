@@ -53,7 +53,7 @@ class TrainingDataModel: ObservableObject{
     
     func loadRoutineFromSchema(){
         
-        if self.user.workoutOfTheDay != nil || self.user.workoutOfTheDay?.uuidString != ""{
+        if self.user.workoutOfTheDay != nil || self.user.workoutOfTheDay?.uuidString != "" && self.user.schema != nil{
             
             let settings = FirestoreSettings()
             settings.isPersistenceEnabled = true

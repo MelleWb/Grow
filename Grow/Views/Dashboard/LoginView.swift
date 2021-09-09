@@ -14,15 +14,17 @@ struct LoginView : View {
     @StateObject var fbAuth = FirebaseAuthentication()
     @ObservedObject var keyboardResponder = KeyboardResponder()
     @ObservedObject var userSettings = UserSettings()
-    @State var isShowing: Bool = false
+    @State var showActivityIndicator = false
     
     var showAuthResult: String = ""
         
         func setAuthDetails() -> String {
             if (fbAuth.isAuthenticated == true) {
+                showActivityIndicator = false
                 return "Gelukt"
             }
             else if fbAuth.errorText != "" {
+                showActivityIndicator = false
                 return fbAuth.errorText
             }
             else {
@@ -31,6 +33,9 @@ struct LoginView : View {
         }
     
         var body: some View{
+            
+            ProgressIndicator(isShowing: $showActivityIndicator, loadingText: "Inloggen", content:{
+                
             VStack {
                 WelcomeText()
                 LoginImage()
@@ -45,19 +50,19 @@ struct LoginView : View {
                 }
 
                 Button(action: {
-                    self.isShowing = true
+                    self.showActivityIndicator = true
                     fbAuth.signIn(username: userSettings.username, password: userSettings.password)
-                    self.isShowing = false
                 })
                 {
                     LoginButtonContent()
                 }
-            }
             .offset(y: -keyboardResponder.currentHeight*0.4)
             .padding()
             .environmentObject(fbAuth)
             }
+            })
         }
+}
     
 struct UsernameTextField : View {
     @Binding var username: String

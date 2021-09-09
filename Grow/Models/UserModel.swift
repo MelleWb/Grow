@@ -6,10 +6,9 @@
 //
 
 import Foundation
-import SwiftUI
-import FirebaseFirestoreSwift
 import Firebase
-import Cache
+import FirebaseFirestoreSwift
+
 
 
 struct User: Codable {
@@ -25,6 +24,8 @@ struct User: Codable {
     var weight: Int?
     var plan: Int?
     var kcal: Int?
+    var proteinRatio: Double?
+    var fatRatio: Double?
     var pal: Int?
     var fcmToken: String?
     var schema: String?
@@ -43,6 +44,8 @@ struct User: Codable {
          weight: Int? = nil,
          plan: Int? = nil,
          kcal: Int? = nil,
+         proteinRatio: Double? = 1.8,
+         fatRatio: Double? = 0.3,
          pal: Int? = nil,
          fcmToken: String? = nil,
          schema: String? = nil,
@@ -61,6 +64,8 @@ struct User: Codable {
         self.weight = weight
         self.plan = plan
         self.kcal = kcal
+        self.proteinRatio = proteinRatio
+        self.fatRatio = fatRatio
         self.pal = pal
         self.fcmToken = fcmToken
         self.schema = schema
@@ -70,12 +75,12 @@ struct User: Codable {
 }
 
 struct UserImages {
-    var userImage: ImageWrapper?
-    var coachImage: ImageWrapper?
+    var userImage: UIImage?
+    var coachImage: UIImage?
     
     init(
-        userImage: ImageWrapper? = nil,
-        coachImage: ImageWrapper? = nil
+        userImage: UIImage? = nil,
+        coachImage: UIImage? = nil
     ){
         self.coachImage = coachImage
         self.userImage = userImage
@@ -89,14 +94,48 @@ struct DayPlan: Codable, Identifiable, Hashable {
     var isTrainingDay: Bool?
 }
 
+struct BodyMeasurement: Codable, Identifiable, Hashable {
+    
+    var id = UUID()
+    var date: Date
+    @DocumentID var documentID: String?
+    var frontImageUrl: String
+    var sideImageUrl: String
+    var backImageUrl: String
+    var weight: Double? = 0
+    
+    init(
+        id: UUID = UUID(),
+        date: Date = Date(),
+        documentID:String? = nil,
+        frontImageUrl: String = "",
+        sideImageUrl: String = "",
+        backImageUrl: String = "",
+        weight: Double? = 0
+    ){
+        self.id = id
+        self.date = date
+        self.documentID = documentID
+        self.frontImageUrl = frontImageUrl
+        self.sideImageUrl = sideImageUrl
+        self.backImageUrl = backImageUrl
+        self.weight = weight
+    }
+}
+
+
 
 class UserDataModel: ObservableObject{
     
     @Published var user = User()
     @Published var userImages = UserImages()
+    @Published var measurement = BodyMeasurement()
+    @Published var measurements = [BodyMeasurement()]
     @Published var errorMessage: String?
     @Published var queryRunning: Bool = true
     @Published var workoutDonePercentage: Float = 0.0
+    @Published var uploadedImages: Int = 0
+    var measurementListener: ListenerRegistration? = nil
     
     init(){
         if Auth.auth().currentUser?.uid != nil{
@@ -134,6 +173,9 @@ class UserDataModel: ObservableObject{
                 //Get training statistics
                 self.getTrainingStatsForCurrentWeek()
                 
+                //Get measurements
+                self.getBodyMeasurements()
+                
                 //Update query Running
                 self.queryRunning = false
                 
@@ -156,9 +198,9 @@ class UserDataModel: ObservableObject{
             // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
             imageRef.getData(maxSize: 1 * 4000 * 4000) { data, error in
                 if error != nil {
-                    self.userImages.coachImage = ImageWrapper(image: defaultImage)
+                    self.userImages.coachImage = defaultImage
               } else {
-                    self.userImages.coachImage = ImageWrapper(image: UIImage(data: data!) ?? defaultImage)
+                    self.userImages.coachImage = UIImage(data: data!) ?? defaultImage
               }
                 
             }
@@ -171,9 +213,9 @@ class UserDataModel: ObservableObject{
             // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
             imageRef.getData(maxSize: 1 * 4000 * 4000) { data, error in
                 if error != nil {
-                    self.userImages.userImage = ImageWrapper(image: defaultImage)
+                    self.userImages.userImage = defaultImage
               } else {
-                    self.userImages.userImage = ImageWrapper(image: UIImage(data: data!) ?? defaultImage)
+                    self.userImages.userImage = UIImage(data: data!) ?? defaultImage
               }
             }
         }
@@ -367,6 +409,106 @@ class UserDataModel: ObservableObject{
                     })
                 }
             })
+        }
+    }
+    
+    func addNewMeasurementPictures(images: UIImage, name: String) {
+            
+            let storageRef = Storage.storage().reference().child("\(self.user.id!) \((UUID()))_\(Date())_\(name)")
+            
+            let compressedImage = resizeImage(image:images, targetSize: CGSize(width: 768, height: 1024))!
+            
+            let uploadTask = storageRef.putData(compressedImage.pngData()!, metadata: nil)
+            
+            uploadTask.observe(.success) { snapshot in
+                
+                snapshot.reference.downloadURL { url, error in
+                    
+                    if name == "Front"{
+                        self.measurement.frontImageUrl = url!.absoluteString
+                        self.uploadedImages += 1
+                    } else if name == "Side"{
+                        self.measurement.sideImageUrl = url!.absoluteString
+                        self.uploadedImages += 1
+                    } else if name == "Back"{
+                        self.measurement.backImageUrl = url!.absoluteString
+                        self.uploadedImages += 1
+                    }
+                }
+                
+            }
+
+            uploadTask.observe(.failure) { snapshot in
+                if let error = snapshot.error as NSError? {
+                switch (StorageErrorCode(rawValue: error.code)!) {
+                case .objectNotFound:
+                  break
+                case .unauthorized:
+                  // User doesn't have permission to access file
+                  break
+                case .cancelled:
+                  // User canceled the upload
+                  break
+
+                case .unknown:
+                  // Unknown error occurred, inspect the server response
+                  break
+                default:
+                  // A separate error occurred. This is a good place to retry the upload.
+                  break
+                }
+            }
+        }
+    }
+        
+    func saveBodyMeasurement(){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let measureRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("bodyMeasurements").document()
+    
+            do {
+                try measureRef.setData(from: measurement, merge: true)
+            }
+            catch {
+            }
+    }
+    
+    func getBodyMeasurements(){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("bodyMeasurements").order(by: "date", descending: true)
+        
+        self.measurementListener = docRef.addSnapshotListener { (querySnapshot, error) in
+            
+                    guard let documents = querySnapshot?.documents else {
+                            print("No documents")
+                        return
+                    }
+            
+            self.measurements = documents.map { (querySnapshot) -> BodyMeasurement in
+                
+                let result = Result {
+                    try querySnapshot.data(as: BodyMeasurement.self)
+                }
+                switch result {
+                case .success(let measurement):
+                    if let measurement = measurement {
+                        return measurement
+                    }
+                    else {
+                        print ("Document does not exists")
+                    }
+                case .failure:
+                    print("error decoding schema...")
+                }
+                return BodyMeasurement()
+            }
         }
     }
         
