@@ -82,16 +82,16 @@ struct Dashboard: View{
                             NavigationLink(destination:FoodView()){}.isDetailLink(false).hidden()
                         }
                     }
-                    
-                    Section{
-                        HStack{
-                            NavigationLink(destination: NewMeasurementView(showMeasurementView: $showMeasurementView), isActive:$showMeasurementView){
-                                    Image(systemName: "alarm").foregroundColor(.accentColor)
-                                    Text("Tijd voor een nieuwe meting")
+                    if self.userModel.isNewMeasurementDay {
+                        Section{
+                            HStack{
+                                NavigationLink(destination: NewMeasurementView(showMeasurementView: $showMeasurementView), isActive:$showMeasurementView){
+                                        Image(systemName: "alarm").foregroundColor(.accentColor)
+                                        Text("Tijd voor een nieuwe meting")
+                                }
                             }
                         }
                     }
-                    
                     
                     Section(header:Text("Trainingen deze week")){
                         HStack{

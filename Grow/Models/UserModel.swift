@@ -129,6 +129,7 @@ class UserDataModel: ObservableObject{
     
     @Published var user = User()
     @Published var userImages = UserImages()
+    @Published var isNewMeasurementDay: Bool = false
     @Published var measurement = BodyMeasurement()
     @Published var measurements = [BodyMeasurement()]
     @Published var errorMessage: String?
@@ -478,6 +479,7 @@ class UserDataModel: ObservableObject{
     
     func getBodyMeasurements(){
         
+        var docCount:Int = 0
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
@@ -499,6 +501,17 @@ class UserDataModel: ObservableObject{
                 switch result {
                 case .success(let measurement):
                     if let measurement = measurement {
+                        if docCount == 0 {
+                            let calendar = Calendar.current
+                            let startOfNow = calendar.startOfDay(for: Date())
+                            let startOfTimeStamp = calendar.startOfDay(for: measurement.date)
+                                   let components = calendar.dateComponents([.weekOfMonth], from: startOfTimeStamp, to: startOfNow)
+                                   let week = components.weekOfMonth!
+                            if week >= 3 {
+                                self.isNewMeasurementDay = true
+                            }
+                        }
+                        docCount += 1
                         return measurement
                     }
                     else {

@@ -308,7 +308,7 @@ class StatisticsDataModel: ObservableObject {
                     let routineString:String = routine.id.uuidString
                     
                     self.trainingStatsListener = db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics")
-                        .whereField("routineID", isEqualTo: routineString).order(by: "trainingDate", descending: true).limit(to: 10).addSnapshotListener { (querySnapshot, error) in
+                        .whereField("routineID", isEqualTo: routineString).order(by: "trainingDate", descending: false).limit(to: 10).addSnapshotListener { (querySnapshot, error) in
                             
                             guard let documents = querySnapshot?.documents else {
                                 print("No documents")

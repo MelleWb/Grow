@@ -16,7 +16,7 @@ pod 'FirebaseFirestoreSwift'
 pod 'Firebase/Storage'
 pod 'Firebase/Messaging'
 pod 'Cache'
-pod 'ActionSheetPicker-3.0'
+pod 'Introspect'
 
 # add pods for any other desired Firebase products
 # https://firebase.google.com/docs/ios/setup#available-pods

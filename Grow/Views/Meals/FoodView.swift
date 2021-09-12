@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Firebase
-import ActionSheetPicker_3_0
 
 struct FoodView: View {
     

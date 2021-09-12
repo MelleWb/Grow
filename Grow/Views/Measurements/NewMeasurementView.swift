@@ -76,9 +76,8 @@ struct NewMeasurementView: View {
                     } else {
                         VStack{
                             Text("Voorkant")
-                            Image(systemName: "plus")
-                                .resizable()
-                                .frame(width: 25, height: 25, alignment: .center)
+                            Image("TorsoFront")
+                                .frame(alignment: .center)
                         }.frame(width: geometry.size.width/3.5)
                         .onTapGesture {
                             self.showFrontImagePicker = true
@@ -95,9 +94,8 @@ struct NewMeasurementView: View {
                     } else {
                         VStack{
                             Text("Zijkant")
-                            Image(systemName: "plus")
-                                .resizable()
-                                .frame(width: 25, height: 25, alignment: .center)
+                            Image("TorsoSide")
+                                .frame(alignment: .center)
                         }.frame(width: geometry.size.width/3.5)
                         .onTapGesture {
                             self.showSideImagePicker = true
@@ -114,9 +112,8 @@ struct NewMeasurementView: View {
                     } else {
                         VStack{
                             Text("Achterkant")
-                            Image(systemName: "plus")
-                                .resizable()
-                                .frame(width: 25, height: 25, alignment: .center)
+                            Image("TorsoBack")
+                                .frame(alignment: .center)
                         }.frame(width: geometry.size.width/3.5)
                         .onTapGesture {
                             self.showBackImagePicker = true

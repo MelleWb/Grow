@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Introspect
 
 struct ProgressIndicator<Content>: View where Content: View {
 
@@ -32,6 +33,9 @@ struct ProgressIndicator<Content>: View where Content: View {
                 .opacity(self.isShowing ? 1 : 0)
 
             }
+        }
+        .introspectTabBarController { (UITabBarController) in
+            UITabBarController.tabBar.isHidden = isShowing
         }
     }
 
