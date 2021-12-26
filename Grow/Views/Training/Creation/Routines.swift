@@ -6,7 +6,6 @@
 //
 import SwiftUI
 import Firebase
-import KeyboardToolbar
 
 struct ReviewSchema: View{
     @ObservedObject var newSchema: TrainingDataModel
@@ -97,13 +96,13 @@ struct AddSchema: View{
     @Environment(\.presentationMode) private var presentationMode
     @State var showAddRoutine: Bool = false
     @State var routine: Routine?
-    @StateObject var newSchema = TrainingDataModel()
+    @ObservedObject var newEmptySchema = TrainingDataModel()
     var schema: Schema?
     
     var body: some View{
         NavigationView{
             VStack{
-                SchemaBody(newSchema: newSchema)
+                SchemaBody(newSchema: newEmptySchema)
             }.navigationBarTitle(Text("Schema"), displayMode: .inline)
         .navigationBarItems(leading:
                                 Button(action: {
@@ -115,7 +114,7 @@ struct AddSchema: View{
                               , trailing:
                             Button(action: {
                             //dismiss the sheet & save the training
-                                let success: Bool = self.newSchema.createTraining()
+                                let success: Bool = self.newEmptySchema.createTraining()
                                 if success{
                                     presentationMode.wrappedValue.dismiss()
                                 }
@@ -131,7 +130,7 @@ struct AddSchema: View{
         }
     }
     func deleteRoutine(indexSet: IndexSet) {
-        self.newSchema.schema.routines.remove(atOffsets: indexSet)
+        self.newEmptySchema.schema.routines.remove(atOffsets: indexSet)
     }
 }
 
@@ -142,23 +141,15 @@ struct AddRoutine : View{
     var routine: Routine
     @State var routineType: String
     
-    let toolbarItems: [KeyboardToolbarItem] = [.dismissKeyboard]
+    let routineArray = ["Upper 1","Upper 2","Upper 3","Lower 1","Lower 2","Lower 3","Full Body 1","Full Body 2","Full Body 3","Push 1","Push 2","Push 3","Pull 1","Pull 2","Pull 3"]
     
     var body: some View{
             VStack{
                 Form{
                     Picker(selection: $routineType, label: Text("Trainingstype")) {
-                        Text("Upper").tag("Upper")
-                        Text("Lower").tag("Lower")
-                        Text("Full Body").tag("Full Body")
-                        Text("Push").tag("Push")
-                        Text("Pull").tag("Pull")
-                        Text("Chest").tag("Chest")
-                        Text("Back").tag("Back")
-                        Text("Shoulders").tag("Shoulders")
-                        Text("Arms").tag("Arms")
-                        Text("Legs").tag("Legs")
-                                    
+                        ForEach(routineArray, id:\.self) { routine in
+                            Text(routine).tag(routine)
+                        }
                     }
                     .onChange(of: routineType) { tag in
                         newSchema.updateRoutineType(for: routine, to: routineType)
@@ -189,7 +180,6 @@ struct AddRoutine : View{
                     }
                 }
                 }
-                .keyboardToolbar(toolbarItems)
         }
     }
 }

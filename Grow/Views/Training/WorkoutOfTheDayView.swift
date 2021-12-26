@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import KeyboardToolbar
 
 struct WorkoutOfTheDayView: View {
     
@@ -28,23 +27,30 @@ struct WorkoutOfTheDayView: View {
             return "Set \(setNumber)"
         }
     }
-    
-    let toolbarItems: [KeyboardToolbarItem] = [.dismissKeyboard]
-    
 
     var body: some View {
-        Form{
-            List{
-                ForEach(self.trainingModel.routine.superset!, id: \.self){ set in
-                    Section(header: Text(self.setOrSuperset(set: set))){
-                        ForEach(set.exercises!, id:\.self) {exercise in
-                            ExerciseRow(exercise: exercise, amountOfSets: set.sets ?? 0)
-                            }
+        List{
+            ForEach(self.trainingModel.routine.superset!, id: \.self){ set in
+                Section(header: Text(self.setOrSuperset(set: set))){
+                    ForEach(set.exercises!, id:\.self) {exercise in
+                        ExerciseRow(exercise: exercise, amountOfSets: set.sets ?? 0)
                         }
                     }
                 }
-            }.modifier(AdaptsKeyboard())
-        .keyboardToolbar(toolbarItems)
+            }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                
+                Button(action: {
+                    hideKeyboard()
+                },label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                        .foregroundColor(.accentColor)
+                })
+            }
+        }
+        
         .listStyle(InsetGroupedListStyle())
         .navigationTitle("Training van vandaag")
         .navigationBarItems(trailing:

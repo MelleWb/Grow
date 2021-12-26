@@ -9,29 +9,91 @@ import SwiftUI
 import Firebase
 
 struct SettingsView: View {
-    @EnvironmentObject var foodModel : FoodDataModel
+    
+    @EnvironmentObject var foodModel: FoodDataModel
+    @EnvironmentObject var userModel: UserDataModel
+    @State var showProfileView: Bool = false
+    
+    //IAP
+    @ObservedObject var storeManager = StoreManager()
     
     var body: some View {
         NavigationView{
             VStack{
                 List{
-                    Section(header:Text("Voeding")){
+                    Section{
                         HStack{
                             ZStack{
                                 Button(""){}
                                 NavigationLink(destination: ManageProductOverview()){
-                                        Image("food")
-                                            .resizable()
-                                            .frame(width: 20, height: 20, alignment: .leading)
-                                        Text("Beheer producten")
+                                    Image(systemName: "doc.text")
+                                        .resizable()
+                                        .foregroundColor(.accentColor)
+                                        .frame(width: 15, height: 20, alignment: .center)
+                                        Text("Producten")
                                     }
                             }
                         }
+                        HStack{
+                            ZStack{
+                                Button(""){}
+                                NavigationLink(destination: Profile()){
+                                    Image(systemName: "person.crop.circle")
+                                        .resizable()
+                                        .foregroundColor(.accentColor)
+                                        .frame(width: 20, height: 20, alignment: .center)
+                                        Text("Profiel")
+                                    }
+                            }
+                        }
+                        
                     }
+                    ForEach(self.storeManager.myProducts, id: \.self) { product in
+                    HStack {
+                           VStack(alignment: .leading) {
+                               Text(product.localizedTitle)
+                                   .font(.headline)
+                               Text(product.localizedDescription)
+                                   .font(.caption2)
+                           }
+                           Spacer()
+//                           if UserDefaults.standard.bool(forKey: product.productIdentifier) {
+//                               Text ("Gekocht")
+//                                   .foregroundColor(.green)
+//                           } else {
+                               Button(action: {
+                                   let _ = self.storeManager.purchaseProduct(product: product)
+                               }) {
+                                   Text("€ \(product.price)")
+                               }
+                                   .foregroundColor(.blue)
+//                           }
+                       }
+                }
             }
-        }.listStyle(InsetGroupedListStyle())
+
+        }
+            .toolbar(content: {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        self.storeManager.restoreProducts()
+                    }) {
+                        Text("Herstel aankopen")
+                    }
+                }
+            })
+            .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Instellingen"))
     }
+        
+        .navigationViewStyle(.stack)
+        .onAppear(perform: {
+            storeManager.startObserving()
+            storeManager.getProducts()
+        })
+        .onDisappear {
+            storeManager.stopObserving()
+        }
 }
 
     struct ManageProductOverview : View {

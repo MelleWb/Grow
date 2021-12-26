@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Firebase
-import ImageViewer
 
 struct CompareMeasurements: View {
     @Binding var selectedMeasurements: [BodyMeasurement]?
@@ -22,26 +21,6 @@ struct CompareMeasurements: View {
     @State var newFrontImage: UIImage = UIImage(named: "TorsoFront")!
     @State var newSideImage: UIImage = UIImage(named: "TorsoSide")!
     @State var newBackImage: UIImage = UIImage(named: "TorsoBack")!
-
-
-    func loadImage(for url: String, completion: @escaping (UIImage?) -> Void){
-        let storage = Storage.storage()
-        let imageRef = storage.reference(forURL: url)
-        let defaultImage: UIImage = UIImage(named: "TorsoFront")!
-
-        // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
-        imageRef.getData(maxSize: 1 * 4000 * 4000) { data, error in
-            if error != nil {
-                completion(defaultImage)
-          } else {
-            if let image = UIImage(data: data!){
-                completion(image)
-            } else {
-                completion(defaultImage)
-            }
-          }
-        }
-    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -113,37 +92,37 @@ struct CompareMeasurements: View {
             self.selectedMeasurements?.sort(by: {$0.date < $1.date})
             
             // get old photos
-            if self.selectedMeasurements![0].frontImageUrl != "" {
-                loadImage(for: self.selectedMeasurements![0].frontImageUrl, completion: {image in
-                    self.oldFrontImage = image!
+            if self.selectedMeasurements![0].largeFrontImageUrl != "" {
+                ImageManager.loadImage(for: self.selectedMeasurements![0].largeFrontImageUrl, completion: {image in
+                    self.oldFrontImage = image
                 })
             }
-            if self.selectedMeasurements![0].sideImageUrl != "" {
-                loadImage(for: self.selectedMeasurements![0].sideImageUrl, completion: {image in
-                    self.oldSideImage = image!
+            if self.selectedMeasurements![0].largeSideImageUrl != "" {
+                ImageManager.loadImage(for: self.selectedMeasurements![0].largeSideImageUrl, completion: {image in
+                    self.oldSideImage = image
                 })
             }
-            if self.selectedMeasurements![0].backImageUrl != "" {
-                loadImage(for: self.selectedMeasurements![0].backImageUrl, completion: {image in
-                    self.oldBackImage = image!
+            if self.selectedMeasurements![0].largeBackImageUrl != "" {
+                ImageManager.loadImage(for: self.selectedMeasurements![0].largeBackImageUrl, completion: {image in
+                    self.oldBackImage = image
                 })
             }
             
             //Get new photos
             
-            if self.selectedMeasurements![1].frontImageUrl != "" {
-                loadImage(for: self.selectedMeasurements![1].frontImageUrl, completion: {image in
-                    self.newFrontImage = image!
+            if self.selectedMeasurements![1].largeFrontImageUrl != "" {
+                ImageManager.loadImage(for: self.selectedMeasurements![1].largeFrontImageUrl, completion: {image in
+                    self.newFrontImage = image
                 })
             }
-            if self.selectedMeasurements![1].sideImageUrl != "" {
-                loadImage(for: self.selectedMeasurements![1].sideImageUrl, completion: {image in
-                    self.newSideImage = image!
+            if self.selectedMeasurements![1].largeSideImageUrl != "" {
+                ImageManager.loadImage(for: self.selectedMeasurements![1].largeSideImageUrl, completion: {image in
+                    self.newSideImage = image
                 })
             }
-            if self.selectedMeasurements![1].backImageUrl != "" {
-                loadImage(for: self.selectedMeasurements![1].backImageUrl, completion: {image in
-                    self.newBackImage = image!
+            if self.selectedMeasurements![1].largeBackImageUrl != "" {
+                ImageManager.loadImage(for: self.selectedMeasurements![1].largeBackImageUrl, completion: {image in
+                    self.newBackImage = image
                 })
             }
         })

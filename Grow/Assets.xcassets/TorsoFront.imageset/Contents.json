@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "frontTorso.png",
+      "filename" : "FrontFixed.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "frontTorso-1.png",
+      "filename" : "FrontFixed-1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "frontTorso-2.png",
+      "filename" : "FrontFixed-2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

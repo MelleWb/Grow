@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Firebase
-import ImageViewer
 import Introspect
 
 struct MeasurementOverview: View {
@@ -52,6 +51,9 @@ struct MeasurementOverview: View {
                    }
                 }
             }
+            .onAppear(perform: {
+                self.userModel.getBodyMeasurements()
+            })
             .navigationTitle(Text("Metingen"))
             .navigationBarItems(leading: (
                 Button(action: {
@@ -98,33 +100,19 @@ struct MeasurementOverview: View {
 struct MeasurementRow: View{
     
     @State var measurement: BodyMeasurement
+    
     @State var frontImage: UIImage = UIImage(named: "TorsoFront")!
     @State var sideImage: UIImage = UIImage(named: "TorsoSide")!
     @State var backImage: UIImage = UIImage(named: "TorsoBack")!
+    
+    @State var largeFrontImage: UIImage = UIImage(named: "TorsoFront")!
+    @State var largeSideImage: UIImage = UIImage(named: "TorsoSide")!
+    @State var largeBackImage: UIImage = UIImage(named: "TorsoBack")!
     
     @Binding var imageForViewer: Image
     @Binding var showImageViewer: Bool
     @Binding var compare : Bool
     @Binding var selectedMeasurements: [BodyMeasurement]?
-    
-    func loadImage(for url: String, completion: @escaping (UIImage) -> Void){
-        let storage = Storage.storage()
-        let imageRef = storage.reference(forURL: url)
-        let defaultImage: UIImage = UIImage(named: "errorLoading")!
-
-        // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
-        imageRef.getData(maxSize: 1 * 4000 * 4000) { data, error in
-            if error != nil {
-                completion(defaultImage)
-          } else {
-            if let image = UIImage(data: data!){
-                completion(image)
-            } else {
-                completion(defaultImage)
-            }
-          }
-        }
-    }
     
     var body: some View{
         VStack(alignment:.leading){
@@ -186,7 +174,13 @@ struct MeasurementRow: View{
                         }
                     }
                     Button(action: {
-                        self.imageForViewer = Image(uiImage: frontImage)
+                        self.imageForViewer = Image(uiImage: UIImage(named:"TorsoFront")!)
+                        
+                        if measurement.largeFrontImageUrl != "" {
+                            ImageManager.loadImage(for: measurement.largeFrontImageUrl, completion: { image in
+                                self.imageForViewer = Image(uiImage: image)
+                            })
+                        }
                         self.showImageViewer = true
                     }, label:{
                         Image(uiImage: frontImage)
@@ -195,7 +189,14 @@ struct MeasurementRow: View{
                     }).shadow(radius: 5)
                     
                     Button(action: {
-                        self.imageForViewer = Image(uiImage: sideImage)
+                        self.imageForViewer = Image(uiImage: UIImage(named:"TorsoSide")!)
+                        
+                        if measurement.largeSideImageUrl != "" {
+                            ImageManager.loadImage(for: measurement.largeSideImageUrl, completion: { image in
+                                self.imageForViewer = Image(uiImage: image)
+                            })
+                        }
+                        
                         self.showImageViewer = true
                     }, label:{
                         Image(uiImage: sideImage)
@@ -204,7 +205,14 @@ struct MeasurementRow: View{
                     }).shadow(radius: 5)
                     
                     Button(action: {
-                        self.imageForViewer = Image(uiImage: backImage)
+                        self.imageForViewer = Image(uiImage: UIImage(named:"TorsoBack")!)
+                        
+                        if measurement.largeBackImageUrl != "" {
+                            ImageManager.loadImage(for: measurement.largeBackImageUrl, completion: { image in
+                                self.imageForViewer = Image(uiImage: image)
+                            })
+                        }
+                        
                         self.showImageViewer = true
                     }, label:{
                         Image(uiImage: backImage)
@@ -216,18 +224,19 @@ struct MeasurementRow: View{
         }
         
         .onAppear(perform: {
-                if measurement.frontImageUrl != "" {
-                    loadImage(for: measurement.frontImageUrl, completion: {image in
+            
+                if measurement.smallFrontImageUrl != "" {
+                    ImageManager.loadImage(for: measurement.smallFrontImageUrl, completion: { image in
                         self.frontImage = image
                     })
                 }
-                if measurement.sideImageUrl != "" {
-                    loadImage(for: measurement.sideImageUrl, completion: {image in
+                if measurement.smallSideImageUrl != "" {
+                    ImageManager.loadImage(for: measurement.smallSideImageUrl, completion: { image in
                         self.sideImage = image
                     })
                 }
-                if measurement.backImageUrl != "" {
-                    loadImage(for: measurement.backImageUrl, completion: {image in
+                if measurement.smallBackImageUrl != "" {
+                    ImageManager.loadImage(for: measurement.smallBackImageUrl, completion: { image in
                         self.backImage = image
                     })
                 }

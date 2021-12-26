@@ -31,7 +31,7 @@ struct StaticWeekDaysView: View{
             ForEach(0..<weekDays.count){ i in
             Text(weekDays[i])
             }
-        }
+        }.listStyle(PlainListStyle())
     }
 }
 
@@ -57,6 +57,7 @@ struct DynamicTrainingDaysView: View {
                 }
             }.onMove(perform: moveRow)
         }.environment(\.editMode, self.$isEditMode)
+            .listStyle(PlainListStyle())
     }
     
     private func moveRow(source: IndexSet, destination: Int){

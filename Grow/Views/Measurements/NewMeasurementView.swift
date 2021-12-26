@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
-import KeyboardToolbar
+import Firebase
+import FirebaseFirestoreSwift
 
 struct NewMeasurementView: View {
+    
+    //@FocusState private var textFieldIsFocused: Bool
     
     @EnvironmentObject var userModel: UserDataModel
     
@@ -24,11 +27,11 @@ struct NewMeasurementView: View {
     
     @Binding var showMeasurementView: Bool
     @State var showLoadingIndicator: Bool = false
-    @State var uploadedItems:Int = 0
+    @State var showAlert: Bool = false
+    @State var uploadProgress: Double = 0
+    @State var uploadedPictures: Int = 0
     
     let frontImage: UIImage = UIImage(systemName: "plus")!
-    
-    let toolbarItems: [KeyboardToolbarItem] = [.dismissKeyboard]
     
     func loadFrontImage() {
         guard inputFrontImage != nil else { return }
@@ -38,6 +41,49 @@ struct NewMeasurementView: View {
     }
     func loadBackImage() {
         guard inputBackImage != nil else { return }
+    }
+    
+    func addMeasurementPicture(image: UIImage, name: String, width: CGFloat, height: CGFloat, completion: @escaping (Bool, String)-> Void){
+        
+        let storageRef = Storage.storage().reference().child("\(self.userModel.user.id!) \((UUID()))_\(Date())_\(name)")
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/png"
+        metadata.cacheControl = "public,max-age=4000"
+        
+        let image = userModel.resizeImage(image:image, targetSize: CGSize(width: width, height: height))!
+        
+        let uploadImage = storageRef.putData(image.pngData()!, metadata: metadata)
+        
+            uploadImage.observe(.progress) { snapshot in
+                self.uploadProgress = 100.0 * Double(snapshot.progress!.completedUnitCount)
+                   / Double(snapshot.progress!.totalUnitCount)
+            }
+            
+            uploadImage.observe(.success) { snapshot in
+                
+                snapshot.reference.downloadURL { url, error in
+                        completion(true, url!.absoluteString)
+                        }
+            }
+
+            uploadImage.observe(.failure) { snapshot in
+                if let error = snapshot.error as NSError? {
+                    completion(false, error.description)
+            }
+        }
+    }
+    
+    func uploadFinished() {
+        //Update the counter
+        uploadedPictures += 1
+        
+        //Now check if it uploaded 6 images. Only then save the bodymeasurement and close the view
+        if uploadedPictures == 6 {
+            self.userModel.saveBodyMeasurement()
+            self.showLoadingIndicator = false
+            self.showMeasurementView = false
+        }
     }
     
     var body: some View {
@@ -59,9 +105,7 @@ struct NewMeasurementView: View {
             })
         
         VStack{
-            
-        ProgressIndicator(isShowing: $showLoadingIndicator, loadingText: "Meting opslaan", content:{
-            
+
         GeometryReader{ geometry in
             List{
                 HStack{
@@ -136,31 +180,95 @@ struct NewMeasurementView: View {
                     }.padding()
                 }
             }.listStyle(PlainListStyle())
-        }.onReceive(self.userModel.$uploadedImages, perform: {count in
-            if count == 3 {
-                self.userModel.saveBodyMeasurement()
-                self.showLoadingIndicator = false
-                self.userModel.uploadedImages = 0
-                self.showMeasurementView = false
-            }
-        })
+        }
         .navigationTitle(Text("Nieuwe meting"))
         
         .navigationBarItems(trailing: Button("Opslaan"){
             
             self.showLoadingIndicator = true
             
-            self.userModel.addNewMeasurementPictures(images: inputFrontImage!, name: "Front")
-            self.userModel.addNewMeasurementPictures(images: inputSideImage!, name: "Side")
-            self.userModel.addNewMeasurementPictures(images: inputBackImage!, name: "Back")
+            self.addMeasurementPicture(image: inputFrontImage!, name: "SmallFront", width: 256, height: 341) { success, result in
+                if success == true {
+                    self.userModel.measurement.smallFrontImageUrl = result
+                    uploadFinished()
+                } else {
+                    self.showLoadingIndicator = false
+                    showAlert = true
+                }
+            }
+            
+            self.addMeasurementPicture(image: inputFrontImage!, name: "LargeFront", width: 768, height: 1024) { success, result in
+                if success == true {
+                    self.userModel.measurement.largeFrontImageUrl = result
+                    uploadFinished()
+                } else {
+                    self.showLoadingIndicator = false
+                    showAlert = true
+                }
+            }
+            
+            self.addMeasurementPicture(image: inputSideImage!, name: "SmallSide", width: 256, height: 341) { success, result in
+                if success == true {
+                    self.userModel.measurement.smallSideImageUrl = result
+                    uploadFinished()
+                } else {
+                    self.showLoadingIndicator = false
+                    showAlert = true
+                }
+            }
+            
+            self.addMeasurementPicture(image: inputSideImage!, name: "LargeSide", width: 768, height: 1024) { success, result in
+                if success == true {
+                    self.userModel.measurement.largeSideImageUrl = result
+                    uploadFinished()
+                } else {
+                    self.showLoadingIndicator = false
+                    showAlert = true
+                }
+            }
+            
+            self.addMeasurementPicture(image: inputBackImage!, name: "SmallBack", width: 256, height: 341) { success, result in
+                if success == true {
+                    self.userModel.measurement.smallBackImageUrl = result
+                    uploadFinished()
+                } else {
+                    self.showLoadingIndicator = false
+                    showAlert = true
+                }
+            }
+            
+            self.addMeasurementPicture(image: inputBackImage!, name: "LargeBack", width: 768, height: 1024) { success, result in
+                if success == true {
+                    self.userModel.measurement.largeBackImageUrl = result
+                    uploadFinished()
+                } else {
+                    self.showLoadingIndicator = false
+                    showAlert = true
+                }
+            }
         
         }.disabled(self.inputFrontImage == nil || self.inputSideImage == nil || self.inputBackImage == nil || self.weightInput == ""))
-        
-        .keyboardToolbar(toolbarItems)
-        
+
         .onTapGesture {
+            //self.textFieldIsFocused = false
             hideKeyboard()
         }
+            
+        .blur(radius: self.showLoadingIndicator ? 5 : 0)
+        .overlay(
+            ProgressView("Loading...")
+                .padding()
+                .background(Color.secondary.colorInvert())
+                .foregroundColor(Color.primary)
+                .cornerRadius(10)
+                .shadow(radius: 10)
+                .frame(width: 500, height: 250, alignment: .center)
+                .opacity(self.showLoadingIndicator ? 1 : 0)
+            )
+        .disabled(self.showLoadingIndicator)
+            
+        .alert(isPresented: $showAlert, content: {
+                Alert(title: Text("Oops"), message: Text("Er ging iets fout met uploaden"), dismissButton: .default(Text("Ok!")))})
         
         .sheet(isPresented: $showFrontImagePicker, onDismiss: loadFrontImage) {
             ImagePicker(image: self.$inputFrontImage)
@@ -171,7 +279,6 @@ struct NewMeasurementView: View {
         .sheet(isPresented: $showBackImagePicker, onDismiss: loadBackImage) {
             ImagePicker(image: self.$inputBackImage)
         }
-        })
         }
     }
 }

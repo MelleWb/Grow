@@ -32,7 +32,9 @@ struct TrainingHistoryOverview: View {
     func deleteTrainingHistory(at offsets: IndexSet) {
         let index: Int = offsets[offsets.startIndex]
         self.statisticsModel.removeTrainingHistory(for: index)
-        self.userModel.getTrainingStatsForCurrentWeek()
+        self.userModel.getTrainingStatsForCurrentWeek(){
+            //Wait for completion
+        }
     }
 }
 
@@ -61,7 +63,7 @@ struct TrainingHistoryDetail: View {
                             HStack{
                                 Text("Set: \(stats.set + 1)")
                                 Text("Reps: \(stats.reps ?? 0)")
-                                Text("Gewicht: \(stats.weight ?? 0)")
+                                Text("Gewicht: \(NumberHelper.roundNumbersMaxTwoDecimals(unit: stats.weight ?? 0))")
                             }
                     }.padding()
                     }

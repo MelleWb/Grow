@@ -10,38 +10,34 @@ import Firebase
 
 struct SceneDelegate : View{
 
-    @ObservedObject var userSettings = UserSettings()
+    @State var ViewToDisplay: Views?
     
-    @State var ViewToDisplay:String = ""
+    enum Views{
+        case dashboard, login
+    }
     
-    func setViewToDisplay(view: String){
+    func setViewToDisplay(view: Views){
         self.ViewToDisplay = view
     }
     
     var body: some View{
         VStack{
-            if ViewToDisplay == "Dashboard" {
+            if ViewToDisplay == .dashboard {
                 TabBarView()
                 } else {
-                    LoginView()
+                    Login()
                 }
         }.onAppear(perform: {
             Auth.auth().addStateDidChangeListener { auth, user in
             if user != nil {
                 let pushManager = PushNotificationManager(userID: user?.uid ?? "test")
                     pushManager.registerForPushNotifications()
-                setViewToDisplay(view: "Dashboard")
+                setViewToDisplay(view: .dashboard)
             } else {
-                setViewToDisplay(view: "Login")
+                setViewToDisplay(view: .login)
                 }
             }
         })
-        .environment(\.locale, Locale.init(identifier: "nl"))
-    }
-}
-
-struct SceneDelegate_Previews: PreviewProvider {
-    static var previews: some View {
-        SceneDelegate()
+        .environment(\.locale, Locale.init(identifier: "nl_NL"))
     }
 }

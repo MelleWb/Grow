@@ -123,7 +123,7 @@ struct ProgressBarVertical: View {
                 Rectangle()
                     .frame(width: 15, height: CGFloat(self.value) * 75)
                     .foregroundColor(Color.orange)
-                    .animation(.linear)
+                    .animation(Animation.linear(duration: 0.5), value: value)
                     .cornerRadius(45.0)
                     .offset(x: 10)
                 }
@@ -131,10 +131,10 @@ struct ProgressBarVertical: View {
                     Rectangle()
                         .frame(width: 15, height: CGFloat(self.value) * 75)
                         .foregroundColor(Color.green)
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: value)
                         .cornerRadius(45.0)
                         .offset(x: 10)
-            }
+                }
             Text(label)
                 .foregroundColor(.accentColor)
                 .font(.footnote)

@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Firebase
+import HealthKit
+import GoogleMobileAds
 
 struct TabBarView: View {
     
@@ -45,6 +47,7 @@ struct TabBarView: View {
 }
 
 struct Dashboard: View{
+    
     @EnvironmentObject var userModel : UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
@@ -52,12 +55,54 @@ struct Dashboard: View{
     @State var showProfileView: Bool = false
     @State private var isWorkOutPresented = false
     @State var showMeasurementView: Bool = false
+    @State var bodyWeight: Double = 0
+    @State var fatPercentage: Double = 0
+    @State var bannerView = GADBannerView()
 
+    private func loadAndDisplayMostRecentWeight() {
+        guard let weightSampleType = HKSampleType.quantityType(forIdentifier: .bodyMass) else {
+          print("Body Mass Sample Type is no longer available in HealthKit")
+          return
+        }
+            
+        HealthKitDataStore.getMostRecentSample(for: weightSampleType) { (sample, error) in
+              
+          guard let sample = sample else {
+                
+            if error != nil {
+              print("An Error occured")
+            }
+            return
+          }
+              
+            let weightInKilograms = sample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))
+            bodyWeight = weightInKilograms
+        }
+    }
+    
+    private func loadAndDisplayMostRecentFatPercentage() {
+        guard let fatPercentageSampleType = HKSampleType.quantityType(forIdentifier: .bodyFatPercentage) else {
+          print("Body Mass Sample Type is no longer available in HealthKit")
+          return
+        }
+            
+        HealthKitDataStore.getMostRecentSample(for: fatPercentageSampleType) { (sample, error) in
+              
+          guard let sample = sample else {
+                
+            if error != nil {
+              print("An Error occured")
+            }
+            return
+          }
+              
+            let fatPercentageDouble = sample.quantity.doubleValue(for: HKUnit.percent()) * 100
+            self.fatPercentage = fatPercentageDouble
+        }
+    }
     
     var body: some View {
         
-        ProgressIndicator(isShowing: self.$userModel.queryRunning, loadingText: "Profiel laden", content:{
-            
         NavigationView{
             VStack{
                 List{
@@ -76,10 +121,14 @@ struct Dashboard: View{
                                                 ContentViewLinearVet()
                                                 ContentViewLinearVezel()
                                                 }
+                                        
                                             }.padding(.top, 10)
                                              .padding(.bottom, 20)
                                         }
-                            NavigationLink(destination:FoodView()){}.isDetailLink(false).hidden()
+                            NavigationLink(destination:FoodView()){}.isDetailLink(false).opacity(0)
+                        }
+                        if 1==2{
+                            GoogleAddBanner()
                         }
                     }
                     if self.userModel.isNewMeasurementDay {
@@ -113,33 +162,45 @@ struct Dashboard: View{
                                 }.isDetailLink(false)
                                 }.padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
                             }
+                        
                         }
-                }
-                if showProfileView {
-                    NavigationLink(destination:UpdateProfile(showProfileView: $showProfileView), isActive: $showProfileView){
-                        UpdateProfile(showProfileView: $showProfileView)
-                    }.isDetailLink(false).hidden()
+                    Section{
+                        if bodyWeight != 0 {
+                            HStack{
+                                Text("Gewicht")
+                                Spacer()
+                                Text("\(NumberHelper.roundNumbersMaxTwoDecimals(unit: self.bodyWeight)) kg").font(.headline)
+                            }
+                            if fatPercentage != 0 {
+                                HStack{
+                                    Text("Vet percentage")
+                                    Spacer()
+                                    Text("\(NumberHelper.roundNumbersMaxTwoDecimals(unit: self.fatPercentage)) %").font(.headline)
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            
+            .blur(radius: self.userModel.queryRunning ? 5 : 0)
+            .overlay(
+                ProgressView("Loading...")
+                    .padding()
+                    .background(Color.secondary.colorInvert())
+                    .foregroundColor(Color.primary)
+                    .cornerRadius(10)
+                    .shadow(radius: 10)
+                    .frame(width: 500, height: 250, alignment: .center)
+                    .opacity(self.userModel.queryRunning ? 1 : 0)
+                )
+            .disabled(self.userModel.queryRunning)
             .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Dashboard"))
-            .navigationBarItems(
-                trailing: Button(action: {
-                    withAnimation {
-                        self.showProfileView.toggle()
-                    }
-                }) {
-                    Image(uiImage: (userModel.userImages.userImage ?? UIImage(named: "loadingImageCircle"))!)
-                        .resizable()
-                        .clipShape(Circle())
-                        .frame(width: 25, height: 25, alignment: .center)
-                })
-//        .sheet(isPresented: $showProfileSheetView) {
-//                    UpdateProfile(showProfileSheetView: $showProfileSheetView)
-//                    }
+            .onAppear(perform:{
+                self.loadAndDisplayMostRecentWeight()
+                self.loadAndDisplayMostRecentFatPercentage()
+            })
         }
-        })
     }
 }
 
@@ -157,7 +218,7 @@ struct TrainingCircle: View {
                 
                 Rectangle().frame(width: min(CGFloat(self.userModel.workoutDonePercentage)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                     .foregroundColor(.accentColor)
-                    .animation(.linear)
+                    .animation(Animation.linear(duration: 0.5), value: self.userModel.workoutDonePercentage)
             }
         }.cornerRadius(45.0).padding()
     }
@@ -191,7 +252,7 @@ struct ProgressBarCirle: View {
                         .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                         .foregroundColor(Color.green)
                         .rotationEffect(Angle(degrees: 270.0))
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
                 else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.9 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 0.95{
                 Circle()
@@ -199,7 +260,7 @@ struct ProgressBarCirle: View {
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                     .foregroundColor(Color.orange)
                     .rotationEffect(Angle(degrees: 270.0))
-                    .animation(.linear)
+                    .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
                 else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.95 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.05{
                 Circle()
@@ -207,7 +268,7 @@ struct ProgressBarCirle: View {
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                     .foregroundColor(Color.green)
                     .rotationEffect(Angle(degrees: 270.0))
-                    .animation(.linear)
+                    .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
                 else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 1.05 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.1{
                 Circle()
@@ -215,7 +276,7 @@ struct ProgressBarCirle: View {
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                     .foregroundColor(Color.orange)
                     .rotationEffect(Angle(degrees: 270.0))
-                    .animation(.linear)
+                    .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
                 else {
                     Circle()
@@ -223,7 +284,7 @@ struct ProgressBarCirle: View {
                         .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
                         .foregroundColor(Color.red)
                         .rotationEffect(Angle(degrees: 270.0))
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                     
                 }
                 VStack{
@@ -247,27 +308,27 @@ struct ProgressBarLinearDashboard: View {
                 if value <= 0.90 {
                 Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                     .foregroundColor(Color.red)
-                    .animation(.linear)
+                    .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else if value > 0.90 && value < 0.95 {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.orange)
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else if value > 0.95 && value < 1.05 {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.green)
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else if value > 1.05 && value < 1.1 {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.orange)
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.red)
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: value)
                 }
             }.cornerRadius(45.0)
             .offset(y: geometry.size.height/3.5)
@@ -288,17 +349,17 @@ struct FiberProgressBarLinearDashboard: View {
                 if value <= 0.90 {
                 Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                     .foregroundColor(Color.red)
-                    .animation(.linear)
+                    .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else if value > 0.9 && value < 0.95 {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.orange)
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.green)
-                        .animation(.linear)
+                        .animation(Animation.linear(duration: 0.5), value: value)
                 }
             }.cornerRadius(45.0)
             .offset(y: geometry.size.height/3.5)
