@@ -122,21 +122,42 @@ class StoreManager: NSObject, ObservableObject, SKProductsRequestDelegate, SKPay
         
         let request = createAppleURL(requestData: requestData, url: url)
         
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-          // convert data to Dictionary and view purchases
-          DispatchQueue.main.async {
-            
-              if let data = data, let decodedReceipt = try? JSONDecoder().decode(IAP_Receipt.self, from: data) {
-                  print(decodedReceipt)
-                  if decodedReceipt.status == 21007 {
-                      try? self.verifyReceipt(environment: .sandBox)
-                  } else {
-                      print(decodedReceipt.latest_receipt_info?[0].product_id ?? "Geen product ID")
-                  }
-              }
-          }
-        }.resume()
+            URLSession.shared.dataTask(with: request, completionHandler: {(data, response, error) in
+                        
+            do {
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.mutableContainers) as? NSDictionary{
+                    if jsonResponse["status"] as! Int == 21007 {
+                          try? self.verifyReceipt(environment: .sandBox)
+                      } else {
+                          if let date = self.getExpirationDateFromResponse(jsonResponse) {
+                          print(date)
+                              
+                      }
+                }
+                }
+            } catch let parseError {
+                print(parseError)
+            }
+        }).resume()
     }
+    
+    func getExpirationDateFromResponse(_ jsonResponse: NSDictionary) -> Date? {
+            
+            if let receiptInfo: NSArray = jsonResponse["latest_receipt_info"] as? NSArray {
+                
+                let lastReceipt = receiptInfo.lastObject as! NSDictionary
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd HH:mm:ss VV"
+                
+                if let expiresDate = lastReceipt["expires_date"] as? String {
+                    return formatter.date(from: expiresDate)
+                }
+                return nil
+            }
+            else {
+                return nil
+            }
+        }
     
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {

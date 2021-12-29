@@ -127,9 +127,7 @@ struct Dashboard: View{
                                         }
                             NavigationLink(destination:FoodView()){}.isDetailLink(false).opacity(0)
                         }
-                        if 1==2{
-                            GoogleAddBanner()
-                        }
+                        //GoogleAddBanner()
                     }
                     if self.userModel.isNewMeasurementDay {
                         Section{
