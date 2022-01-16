@@ -150,7 +150,7 @@ struct Dashboard: View{
                         }
                         if userModel.user.workoutOfTheDay != nil {
                             HStack{
-                                NavigationLink(destination: WorkoutOfTheDayView(showWOD: $isWorkOutPresented, schema: userModel.user.schema!, routine: userModel.user.workoutOfTheDay!),isActive:$isWorkOutPresented) {
+                                NavigationLink(destination: WorkoutOfTheDayView(showWOD: $isWorkOutPresented, routine: self.userModel.user.workoutOfTheDay!),isActive:$isWorkOutPresented) {
                                         HStack{
                                         Image(systemName: "bolt")
                                             .foregroundColor(.accentColor)

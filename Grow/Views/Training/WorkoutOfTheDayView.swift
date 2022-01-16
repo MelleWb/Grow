@@ -13,7 +13,7 @@ struct WorkoutOfTheDayView: View {
     @EnvironmentObject var userModel: UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
-    var schema: String
+//    var schema: String
     var routine:UUID
     @State var amountOfSets: Int = 0
     @State var showAlert: Bool = false
@@ -33,7 +33,7 @@ struct WorkoutOfTheDayView: View {
             ForEach(self.trainingModel.routine.superset!, id: \.self){ set in
                 Section(header: Text(self.setOrSuperset(set: set))){
                     ForEach(set.exercises!, id:\.self) {exercise in
-                        ExerciseRow(exercise: exercise, amountOfSets: set.sets ?? 0)
+                        ExerciseRow(exercise: exercise, amountOfSets: set.sets ?? 0, superset: set)
                         }
                     }
                 }
@@ -85,13 +85,20 @@ struct WorkoutOfTheDayView: View {
 struct ExerciseRow:View{
     
     @EnvironmentObject var statisticsModel: StatisticsDataModel
-    var exercise: Exercise
-    var amountOfSets: Int
+    @State var showExerciseChange: Bool = false
+    @State var exercise: Exercise
+    @State var amountOfSets: Int
+    @State var superset: Superset
 
     var body: some View{
         
+        if showExerciseChange{
+            NavigationLink(destination:ChangeExercise(exerciseToChange: exercise, showExerciseChange: $showExerciseChange, superset: superset),isActive:$showExerciseChange){
+                ChangeExercise(exerciseToChange: exercise, showExerciseChange: $showExerciseChange, superset: superset)
+            }.isDetailLink(false).hidden()
+        }
+        
         VStack(alignment: .leading){
-            ZStack{
                 Button(""){}
                 NavigationLink(destination:ExerciseDetailView(exercise: exercise)){
                     VStack(alignment: .leading){
@@ -99,8 +106,26 @@ struct ExerciseRow:View{
                         Text("\(String(amountOfSets)) sets van \(String(exercise.reps ?? 0)) reps").font(.subheadline)
                     }.padding(10)
                 }
-            }
-        }.padding(10)
+                }.swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    Button {
+                        // Copy function
+                        self.showExerciseChange = true
+                    } label: {
+                        Label("Verander", systemImage: "arrow.left.arrow.right")
+                    }
+                    .tint(.indigo)
+                }
+//                .contextMenu(menuItems: {
+//                    Button (action: {
+//                        self.showExerciseChange = true
+//                    }, label: {
+//                        Text("verander de oefening")
+//                        Image(systemName: "arrow.left.arrow.right")
+//                            .resizable()
+//                            .frame(width: 17, height: 20, alignment: .trailing)
+//                    })
+//                })
+//        }.padding(10)
         
         VStack(alignment: .center){
             HStack{
@@ -122,8 +147,8 @@ struct ExerciseRow:View{
 
 struct RepsRow:View{
     
-    var set: Int
-    var exercise: Exercise
+    @State var set: Int
+    @State var exercise: Exercise
     @State var placeholder: String = "reps"
     @State var repsInput: String = ""
     @EnvironmentObject var statisticsModel: StatisticsDataModel
@@ -154,8 +179,8 @@ struct RepsRow:View{
 
 struct WeightRow:View{
     
-    var set: Int
-    var exercise: Exercise
+    @State var set: Int
+    @State var exercise: Exercise
     @State var placeholder: String = "kg"
     @State var weight: Double?
     @State var weightInput: String = ""

@@ -138,6 +138,17 @@ class TrainingDataModel: ObservableObject{
         }
     }
     
+    func changeExcercise(toExercise: Exercise, forExercise: Exercise, superset: Superset){
+        //To do
+            if let supersetIndex = self.routine.superset?.firstIndex(where: { $0.id == superset.id }) {
+                print("superset is: \(supersetIndex)")
+                if let exerciseIndex = self.routine.superset![supersetIndex].exercises!.firstIndex(where: { $0.documentID == forExercise.documentID }) {
+                    self.routine.superset![supersetIndex].exercises![exerciseIndex] = toExercise
+            }
+        }
+        
+    }
+    
     func getAmountOfSets(for routine: Routine, for superset: Superset) -> Int{
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
             if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
