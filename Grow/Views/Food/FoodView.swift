@@ -206,7 +206,7 @@ struct FoodView: View {
             if enableSheet {
                 MealCopyCalendar(enableSheet: $enableSheet, date: $date, mealToCopy: mealToCopy)
             }
-        }.edgesIgnoringSafeArea(.all)
+        }
     }
 }
 

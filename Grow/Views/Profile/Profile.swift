@@ -237,7 +237,7 @@ struct Profile: View {
                 HeightActionSheet(enableHeightSheet: $enableHeightSheet)
             }
             
-        }.edgesIgnoringSafeArea(.all)
+        }
         
     }
 }
