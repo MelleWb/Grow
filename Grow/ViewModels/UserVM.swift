@@ -536,12 +536,9 @@ class UserDataModel: ObservableObject{
     
     func getGramsOfFats(kcal: Int) -> Int {
         
-        if let fatRatio = self.user.fatRatio {
-            let fat = (Double(kcal) * fatRatio)/9
-            return Int(fat)
-        } else {
-            return (kcal * (30/100))/9
-        }
+        let fatRatio:Double = (Double(kcal) * 0.3)
+        let fatGrams:Int = Int((fatRatio / 9).rounded())
+        return fatGrams
     }
     
     func calcKcal() throws {
