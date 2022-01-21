@@ -22,7 +22,19 @@ struct Register: View {
     @State var confirm_password: String = ""
     @State var isEmailValid : Bool   = true
     @State var birthDate = Date()
+    @State var weight: Int = 75
+    @State var height: Int = 170
+    @State var enableWeightSheet: Bool = false
+    @State var enableHeightSheet: Bool = false
     @FocusState private var focusedField: FocusFields?
+    
+    func isSheetEnabled() -> Bool {
+        if enableWeightSheet || enableHeightSheet  {
+            return true
+        } else {
+            return  false
+        }
+    }
     
     func checkPassword() {
         if new_password == confirm_password {
@@ -111,19 +123,23 @@ struct Register: View {
                     }
                 }.padding([.leading, .trailing], 30)
                 
-                VStack {
                     HStack{
                         Text("Gewicht")
-                        DatePicker("", selection: $birthDate, displayedComponents: .date)
-                    }
-                }.padding([.leading, .trailing], 30)
+                        Spacer()
+                        Button("\(weight)"){
+                            self.enableWeightSheet.toggle()
+                        }
+                    }.padding([.leading, .trailing], 30)
+                        .padding([.top, .bottom], 2.5)
                     
-                VStack {
                     HStack{
                         Text("Lengte")
-                        DatePicker("", selection: $birthDate, displayedComponents: .date)
-                    }
-                }.padding([.leading, .trailing], 30)
+                        Spacer()
+                        Button("\(height)"){
+                            self.enableHeightSheet.toggle()
+                        }
+                    }.padding([.leading, .trailing], 30)
+                        .padding([.top, .bottom], 2.5)
         
                     Button(action: {
                         checkPassword()
@@ -146,6 +162,13 @@ struct Register: View {
                         .foregroundColor(.accentColor)
                 })
             }
+        }
+        if enableWeightSheet {
+            InitializeWeight(enableWeightSheet: $enableWeightSheet, weight: $weight, height: $height)
+        }
+        
+        if enableHeightSheet {
+            InitializeHeight(enableHeightSheet: $enableHeightSheet, heigth: $height)
         }
     }
 }

@@ -1,5 +1,5 @@
 //
-//  InitializeWeight.swift
+//  InitializeHeight.swift
 //  Grow
 //
 //  Created by Melle Wittebrood on 21/01/2022.
@@ -7,35 +7,33 @@
 
 import SwiftUI
 
-struct InitializeWeight: View {
-
+struct InitializeHeight: View {
+        
     @EnvironmentObject var userModel: UserDataModel
-
-    @Binding var enableWeightSheet: Bool
-    @Binding var weight: Int
-    @Binding var height: Int
-
-
+        
+    @Binding var enableHeightSheet: Bool
+    @Binding var heigth: Int
+        
         var body: some View {
                 GeometryReader { gr in
                     VStack {
                         VStack {
-                            Text("Gewicht in kg")
+                            Text("Lengte in cm")
                                 .font(.headline)
                                 .foregroundColor(.gray)
                                 .padding(.top, 10)
-
-                            Picker("Gewicht", selection: $weight) {
-                                ForEach(50..<200) {
-                                    Text("\($0) kg").tag($0)
+                            
+                            Picker("Lengte in cm", selection: $heigth) {
+                                ForEach(100..<250) {
+                                    Text("\($0) cm").tag($0)
                                 }
                             }.pickerStyle(WheelPickerStyle())
-
+                            
                         }.background(RoundedRectangle(cornerRadius: 10)
                             .foregroundColor(Color.white).shadow(radius: 1))
                         VStack {
                             Button(action: {
-                                self.enableWeightSheet.toggle()
+                                self.enableHeightSheet.toggle()
                             }) {
                                 Text("Klaar").fontWeight(Font.Weight.bold)
                             }.padding()
@@ -46,3 +44,4 @@ struct InitializeWeight: View {
                 }
         }
     }
+

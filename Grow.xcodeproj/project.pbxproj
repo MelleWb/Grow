@@ -79,6 +79,7 @@
 		F05CBB09277B6F0F00C7E06F /* ChangeExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05CBB08277B6F0F00C7E06F /* ChangeExercise.swift */; };
 		F05CBB0B277F452C00C7E06F /* Register.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05CBB0A277F452C00C7E06F /* Register.swift */; };
 		F06E41F6279AFEDE0096D267 /* InitializeWeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06E41F5279AFEDE0096D267 /* InitializeWeight.swift */; };
+		F06E41F8279B0FE00096D267 /* InitializeHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06E41F7279B0FDF0096D267 /* InitializeHeight.swift */; };
 		F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043EE26B0942F002D5C65 /* DashboardView.swift */; };
 /* End PBXBuildFile section */
 
@@ -198,6 +199,7 @@
 		F05CBB08277B6F0F00C7E06F /* ChangeExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeExercise.swift; sourceTree = "<group>"; };
 		F05CBB0A277F452C00C7E06F /* Register.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Register.swift; sourceTree = "<group>"; };
 		F06E41F5279AFEDE0096D267 /* InitializeWeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializeWeight.swift; sourceTree = "<group>"; };
+		F06E41F7279B0FDF0096D267 /* InitializeHeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializeHeight.swift; sourceTree = "<group>"; };
 		F08043EE26B0942F002D5C65 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -411,6 +413,7 @@
 				85A9352E2763805F0053E693 /* Login.swift */,
 				F05CBB0A277F452C00C7E06F /* Register.swift */,
 				F06E41F5279AFEDE0096D267 /* InitializeWeight.swift */,
+				F06E41F7279B0FDF0096D267 /* InitializeHeight.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -736,6 +739,7 @@
 				85DF0607268C4CA400020559 /* AddExercise.swift in Sources */,
 				8554BCE426E0BF0800651C3F /* SettingsView.swift in Sources */,
 				8534D7C926D27F0300FB41EE /* TrainingVolumeView.swift in Sources */,
+				F06E41F8279B0FE00096D267 /* InitializeHeight.swift in Sources */,
 				85A935312763F9DC0053E693 /* LinkButtonStyle.swift in Sources */,
 				856AB9FB276D2F8800A94125 /* StoreManager.swift in Sources */,
 				85E77740275A651F00D8996A /* Profile.swift in Sources */,
