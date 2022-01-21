@@ -51,7 +51,6 @@ struct Login: View {
         
         if showRegister{
             NavigationLink(destination:Register(),isActive:$showRegister){
-                Register()
             }
         }
         NavigationView{
