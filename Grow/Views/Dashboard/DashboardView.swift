@@ -180,7 +180,6 @@ struct Dashboard: View{
                     }
                 }
             }
-            .blur(radius: self.userModel.queryRunning ? 5 : 0)
             .overlay(
                 ProgressView("Loading...")
                     .padding()
@@ -191,6 +190,7 @@ struct Dashboard: View{
                     .frame(width: 500, height: 250, alignment: .center)
                     .opacity(self.userModel.queryRunning ? 1 : 0)
                 )
+            
             .disabled(self.userModel.queryRunning)
             .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Dashboard"))

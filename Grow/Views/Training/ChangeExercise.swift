@@ -59,6 +59,7 @@ struct ChangeExercise: View {
                                label: {
                                 VStack(alignment: .leading) {
                                     Text(exercise.name).font(.headline)
+                                        .foregroundColor(Color.black)
                                     Text(exercise.category).font(.subheadline)
                                         .foregroundColor(Color.black)
                                 }
