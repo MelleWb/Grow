@@ -190,11 +190,24 @@ struct Dashboard: View{
                     .frame(width: 500, height: 250, alignment: .center)
                     .opacity(self.userModel.queryRunning ? 1 : 0)
                 )
-            
             .disabled(self.userModel.queryRunning)
             .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Dashboard"))
             .onAppear(perform:{
+                
+                //Compare dates, if different (after 12.00AM), load new day
+                let modelDate = Calendar.current.dateComponents([.weekday], from: self.userModel.currentDate)
+                let dateNow = Calendar.current.dateComponents([.weekday], from: Date())
+                
+                if dateNow != modelDate {
+                    self.userModel.fetchUser(uid: Auth.auth().currentUser!.uid){
+                        self.foodModel.initiateFoodModel()
+                        self.trainingModel.initiateTrainingModel()
+                        self.statisticsModel.initiateStatistics()
+                        self.userModel.currentDate = Date()
+                    }
+                }
+                
                 self.loadAndDisplayMostRecentWeight()
                 self.loadAndDisplayMostRecentFatPercentage()
             })
@@ -248,7 +261,7 @@ struct ProgressBarCirle: View {
                     Circle()
                         .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                         .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
-                        .foregroundColor(Color.green)
+                        .foregroundColor(Color.red)
                         .rotationEffect(Angle(degrees: 270.0))
                         .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
@@ -260,7 +273,7 @@ struct ProgressBarCirle: View {
                     .rotationEffect(Angle(degrees: 270.0))
                     .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.95 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.05{
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal >= 0.95 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.05{
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
@@ -268,7 +281,7 @@ struct ProgressBarCirle: View {
                     .rotationEffect(Angle(degrees: 270.0))
                     .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 1.05 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.1{
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal >= 1.05 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.1{
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
@@ -313,12 +326,12 @@ struct ProgressBarLinearDashboard: View {
                         .foregroundColor(Color.orange)
                         .animation(Animation.linear(duration: 0.5), value: value)
                 }
-                else if value > 0.95 && value < 1.05 {
+                else if value >= 0.95 && value < 1.05 {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.green)
                         .animation(Animation.linear(duration: 0.5), value: value)
                 }
-                else if value > 1.05 && value < 1.1 {
+                else if value >= 1.05 && value < 1.1 {
                     Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
                         .foregroundColor(Color.orange)
                         .animation(Animation.linear(duration: 0.5), value: value)

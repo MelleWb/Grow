@@ -19,6 +19,7 @@ class UserDataModel: ObservableObject{
     @Published var errorMessage: String?
     @Published var queryRunning: Bool = true
     @Published var workoutDonePercentage: Float = 0.0
+    @Published var currentDate: Date = Date()
     var measurementListener: ListenerRegistration? = nil
     
     private enum UserError: Error {
@@ -31,12 +32,14 @@ class UserDataModel: ObservableObject{
     
     init(){
         if Auth.auth().currentUser?.uid != nil{
-            self.fetchUser(uid: Auth.auth().currentUser!.uid)
+            self.fetchUser(uid: Auth.auth().currentUser!.uid){
+                //Just wait until it's done
+            }
         }
     }
 
     
-    func fetchUser(uid: String) {
+    func fetchUser(uid: String, finished: () -> Void){
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
@@ -137,9 +140,8 @@ class UserDataModel: ObservableObject{
     
     func getDayForWeekPlan() -> Int{
         let dayOfWeek = Calendar.current.component(.weekday, from: Date())
-        let dayOfWeekString:String = Calendar.current.weekdaySymbols[dayOfWeek-1]
         
-        if dayOfWeekString == "Sunday"{
+        if dayOfWeek == 1{
             return 6
         }
         else {
@@ -426,7 +428,9 @@ class UserDataModel: ObservableObject{
           try docRef.setData(from: user, merge: true)
             
             //Immediately fetch new data
-            self.fetchUser(uid: user.id!)
+            self.fetchUser(uid: user.id!){
+                //Just wait until it's done
+            }
         }
         catch {
           print(error)

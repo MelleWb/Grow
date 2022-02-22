@@ -92,10 +92,10 @@ class FoodDataModel: ObservableObject{
     }
     
     func getDayOfWeekAsNumber(date: Date) -> Int{
+
         let dayOfWeek = Calendar.current.component(.weekday, from: date)
-        let dayOfWeekString:String = Calendar.current.weekdaySymbols[dayOfWeek-1]
         
-        if dayOfWeekString == "Sunday"{
+        if dayOfWeek == 1{
             return 6
         }
         else {
@@ -251,7 +251,6 @@ class FoodDataModel: ObservableObject{
         let diaryRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
         
         if self.foodDiary.id == "" {
-            print("I create a document")
             let newDiary = diaryRef.document()
             
             do {
@@ -261,7 +260,6 @@ class FoodDataModel: ObservableObject{
               print(error)
             }
         } else {
-            print("I reuse a document")
             let documentID = self.foodDiary.id!
             let existingDiary = diaryRef.document(documentID)
             do {
@@ -319,7 +317,6 @@ class FoodDataModel: ObservableObject{
         let mealRef = db.collection("meals")
         
         if meal.documentID == nil {
-            print("I create a document")
             let newMealRef = mealRef.document()
             
             do {
@@ -331,7 +328,6 @@ class FoodDataModel: ObservableObject{
                 return false
             }
         } else {
-            print("I reuse a document")
             let documentID = meal.documentID!
             let existingMealRef = mealRef.document(documentID)
             do {
@@ -435,6 +431,14 @@ class FoodDataModel: ObservableObject{
         return true
     }
     
+    func updateMealName(for meal: Meal, name: String) {
+        if let mealIndex = self.foodDiary.meals!.firstIndex(where: { $0.id == meal.id }) {
+            print(name)
+            self.foodDiary.meals![mealIndex].name = name
+            self.updateMeal(for: meal)
+        }
+    }
+    
     func updateProductInMeal(for meal: Meal, with product: Product, with selectedSize: SelectedProductDetails) -> Bool{
         if let mealIndex = self.foodDiary.meals!.firstIndex(where: { $0.id == meal.id }) {
             if self.foodDiary.meals![mealIndex].products != nil {
@@ -449,7 +453,6 @@ class FoodDataModel: ObservableObject{
     }
     
     func updateMeal(for meal: Meal){
-        print("Ik ben in updateMeal")
         if self.foodDiary.meals != nil {
             if let mealIndex = self.foodDiary.meals!.firstIndex(where: { $0.id == meal.id }) {
                 

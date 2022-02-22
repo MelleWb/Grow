@@ -18,6 +18,7 @@ pod 'Firebase/Messaging'
 pod 'Cache'
 pod 'Introspect'
 pod 'Google-Mobile-Ads-SDK'
+pod 'lottie-ios'
 
 # add pods for any other desired Firebase products
 # https://firebase.google.com/docs/ios/setup#available-pods

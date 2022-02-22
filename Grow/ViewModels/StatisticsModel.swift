@@ -432,9 +432,9 @@ class StatisticsDataModel: ObservableObject {
     func isValidTraining(for routine: Routine) -> Bool{
         var countOfSets: Int = 0
         
-        for superset in routine.superset! {
-            let sets:Int = superset.sets!
-            let exercises:Int = superset.exercises!.count
+        for superset in routine.superset {
+            let sets:Int = superset.sets
+            let exercises:Int = superset.exercises.count
             let calculation = sets * exercises
             countOfSets += calculation
             }

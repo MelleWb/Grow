@@ -186,6 +186,26 @@ struct Profile: View {
                             }
                         }
                     }
+                    Section("Trainingschema") {
+                        
+                        let trainingSchemaBinding = Binding(
+                            get: { self.userModel.user.schema },
+                            set: {
+                                do {
+                                    try self.userModel.updateUserElements(for: .WorkoutSchema, to: $0!)
+                                    }
+                                    catch{
+                                        self.showAlert.toggle()
+                                    }
+                                }
+                        )
+                        
+                        Picker(selection: trainingSchemaBinding, label: Text("Trainingschema")) {
+                            ForEach(self.trainingModel.fetchedSchemas) { schema in
+                                Text(schema.name).tag(schema.docID)
+                            }
+                        }
+                    }
                     HStack{
                         Spacer()
                         
@@ -208,11 +228,6 @@ struct Profile: View {
                     UITabBarController.tabBar.isHidden = false
                 }
             }
-
-            .blur(radius: isSheetEnabled() ? 1 : 0)
-            
-            .overlay(isSheetEnabled() ? Color.black.opacity(0.6) : nil)
-            
             .navigationTitle(Text("Profiel"))
             
             .navigationBarHidden(isSheetEnabled())

@@ -10,7 +10,7 @@ import SwiftUI
 struct ProductDetailView: View {
     
     @EnvironmentObject var foodModel: FoodDataModel
-    @Binding var shouldPopToRoot: Bool
+    @Binding var navigationAction: Int?
     @State var product:Product
     @State var meal: Meal
     @State var amount: String = "100"
@@ -106,7 +106,7 @@ struct ProductDetailView: View {
                 let success = self.foodModel.addProductToMeal(for: meal, with: self.product, with: createdProduct)
                 
                 if success {
-                        self.shouldPopToRoot = false
+                        self.navigationAction = 0
                 }
             }
             

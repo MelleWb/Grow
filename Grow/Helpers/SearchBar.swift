@@ -41,8 +41,8 @@ struct SearchBar: View {
                  }
                      .foregroundColor(.gray)
                      .padding(.leading, 13)
-                Rectangle()
-                    .foregroundColor(Color("lightGrey"))
+//                Rectangle()
+//                    .foregroundColor(Color("lightGrey"))
             }.frame(height: 40)
             .cornerRadius(13)
             .padding()

@@ -15,7 +15,7 @@ struct AddMealView : View {
     @State var searching = false
     @EnvironmentObject var foodModel : FoodDataModel
     @State var showAddProduct: Bool = false
-    @Binding var showAddMeal: Bool
+    @Binding var navigationAction: Int?
     
     var body: some View {
         VStack{
@@ -26,7 +26,7 @@ struct AddMealView : View {
                 }), id: \.self) { product in
                     ZStack{
                         Button(""){}
-                        NavigationLink(destination:ProductDetailView(shouldPopToRoot: $showAddMeal, product: product, meal: meal)){
+                        NavigationLink(destination:ProductDetailView(navigationAction: $navigationAction, product: product, meal: meal)){
                                     Text(product.name)
                         }.isDetailLink(false)
                     }
@@ -34,9 +34,9 @@ struct AddMealView : View {
            }
         }
         .listStyle(InsetGroupedListStyle())
-                .sheet(isPresented: $showAddProduct, content: {AddProductView(showAddProduct: $showAddProduct)})
+        .sheet(isPresented: $showAddProduct, content: {AddProductView(showAddProduct: $showAddProduct)})
             .toolbar(content: {Button(action: {
-                self.showAddProduct = true
+                self.showAddProduct.toggle()
             }) {
                 Text("Nieuw").foregroundColor(Color.init("textColor"))
             }})

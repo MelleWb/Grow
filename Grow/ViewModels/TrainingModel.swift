@@ -108,42 +108,42 @@ class TrainingDataModel: ObservableObject{
         }
     }
     
-    func addSuperset(for routine: Routine){
-        if let index = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            let superset: Superset = Superset()
-            if self.schema.routines[index].superset != nil {
-                self.schema.routines[index].superset?.append(superset)
-            } else {
-                self.schema.routines[index].superset? = [superset]
-            }
-        }
-    }
+//    func addSuperset(for routine: Routine){
+//        if let index = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
+//            let superset: Superset = Superset()
+//            if self.schema.routines[index].superset != nil {
+//                self.schema.routines[index].superset?.append(superset)
+//            } else {
+//                self.schema.routines[index].superset? = [superset]
+//            }
+//        }
+//    }
     
-    func getSupersetIndex(for routine: Routine, for superset: Superset) -> Int{
-        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-                return supersetIndex
-            }
-            return 0
-        }
-        return 0
-    }
+//    func getSupersetIndex(for routine: Routine, for superset: Superset) -> Int{
+//        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
+//            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
+//                return supersetIndex
+//            }
+//            return 0
+//        }
+//        return 0
+//    }
     
-    func updateSets(for routine: Routine, for superset: Superset, to amountOfSets: Int){
-        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-                    self.schema.routines[routineIndex].superset?[supersetIndex].sets = amountOfSets
-
-            }
-        }
-    }
+//    func updateSets(for routine: Routine, for superset: Superset, to amountOfSets: Int){
+//        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
+//            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
+//                    self.schema.routines[routineIndex].superset?[supersetIndex].sets = amountOfSets
+//
+//            }
+//        }
+//    }
     
     func changeExcercise(toExercise: Exercise, forExercise: Exercise, superset: Superset){
         //To do
-            if let supersetIndex = self.routine.superset?.firstIndex(where: { $0.id == superset.id }) {
+            if let supersetIndex = self.routine.superset.firstIndex(where: { $0.id == superset.id }) {
                 print("superset is: \(supersetIndex)")
-                if let exerciseIndex = self.routine.superset![supersetIndex].exercises!.firstIndex(where: { $0.documentID == forExercise.documentID }) {
-                    self.routine.superset![supersetIndex].exercises![exerciseIndex] = toExercise
+                if let exerciseIndex = self.routine.superset[supersetIndex].exercises.firstIndex(where: { $0.documentID == forExercise.documentID }) {
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex] = toExercise
             }
         }
         
@@ -151,8 +151,8 @@ class TrainingDataModel: ObservableObject{
     
     func getAmountOfSets(for routine: Routine, for superset: Superset) -> Int{
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-                return self.schema.routines[routineIndex].superset?[supersetIndex].sets ?? 0
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                return self.schema.routines[routineIndex].superset[supersetIndex].sets ?? 0
             }
             return 0
         }
@@ -161,10 +161,8 @@ class TrainingDataModel: ObservableObject{
     
     func getExercises(routine: Routine, for superset: Superset) -> [Exercise] {
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-                if self.schema.routines[routineIndex].superset![supersetIndex].exercises != nil {
-                    return self.schema.routines[routineIndex].superset![supersetIndex].exercises!
-                }
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                return self.schema.routines[routineIndex].superset[supersetIndex].exercises
             }
         }
         return [Exercise]()
@@ -172,15 +170,15 @@ class TrainingDataModel: ObservableObject{
     
     func updateExercises(for routine: Routine, for superset: Superset, with exercises: [Exercise]) {
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
                 // Just remove everything first
-                self.schema.routines[routineIndex].superset![supersetIndex].exercises?.removeAll()
+                self.schema.routines[routineIndex].superset[supersetIndex].exercises.removeAll()
                 
                 for exercise in exercises {
-                    if self.schema.routines[routineIndex].superset![supersetIndex].exercises != nil {
-                    self.schema.routines[routineIndex].superset![supersetIndex].exercises?.append(exercise)
+                    if self.schema.routines[routineIndex].superset[supersetIndex].exercises.isEmpty {
+                        self.schema.routines[routineIndex].superset[supersetIndex].exercises.append(exercise)
                     } else {
-                        self.schema.routines[routineIndex].superset![supersetIndex].exercises? = [(exercise)]
+                        self.schema.routines[routineIndex].superset[supersetIndex].exercises = [(exercise)]
                     }
                 }
             }
@@ -189,9 +187,9 @@ class TrainingDataModel: ObservableObject{
     
     func updateExerciseReps(for routine: Routine, for superset: Superset, for exercise: Exercise, to reps: Int) {
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-                if let exerciseIndex = self.schema.routines[routineIndex].superset![supersetIndex].exercises!.firstIndex(where: { $0.documentID == exercise.documentID }) {
-                    self.schema.routines[routineIndex].superset![supersetIndex].exercises![exerciseIndex].reps = reps
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                if let exerciseIndex = self.schema.routines[routineIndex].superset[supersetIndex].exercises.firstIndex(where: { $0.documentID == exercise.documentID }) {
+                    self.schema.routines[routineIndex].superset[supersetIndex].exercises[exerciseIndex].reps = reps
                 }
             }
         }
@@ -200,17 +198,17 @@ class TrainingDataModel: ObservableObject{
     
     func removeExercise(for routine: Routine, for superset: Superset, for exerciseIndex: Int){
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
                 
-                self.schema.routines[routineIndex].superset?[supersetIndex].exercises?.remove(at: exerciseIndex)
+                self.schema.routines[routineIndex].superset[supersetIndex].exercises.remove(at: exerciseIndex)
             }
         }
     }
     
     func removeSuperset(for superset: Superset, for routine: Routine ){
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-                schema.routines[routineIndex].superset?.remove(at: supersetIndex)
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                schema.routines[routineIndex].superset.remove(at: supersetIndex)
                 }
         }
     }
@@ -297,39 +295,40 @@ class TrainingDataModel: ObservableObject{
         }
     }
     
-    func createTraining() -> Bool{
-        
+    func createTraining(schema: Schema) -> Bool{
         // First create a proper schema name
+        var schema: Schema = schema
         var schemaName: String = ""
         var volume: Double = 0.0
-        let routineCount = self.schema.routines.count
+        let routineCount = schema.routines.count
         
-        schemaName += "\(routineCount)x-"
+        if schema.name == "" {
+            schemaName += "\(routineCount)x-"
         
-        for routines in self.schema.routines {
-            let routineSubstring = routines.type?.prefix(1) ?? "?"
-            schemaName += routineSubstring
-            
-            for set in routines.superset ?? []{
-                let exerciseCount: Double = Double(set.exercises?.count ?? 0)
-                for exercise in set.exercises ?? [] {
-                    volume += exerciseCount * Double(exercise.reps ?? 0)
+            for routines in self.schema.routines {
+                let routineSubstring = routines.type.prefix(1)
+                schemaName += routineSubstring
+                
+                for set in routines.superset{
+                    let exerciseCount: Double = Double(set.exercises.count)
+                    for exercise in set.exercises {
+                        volume += (exerciseCount * Double(exercise.reps))
+                    }
                 }
             }
+            
+            schemaName += "-Volume:\(volume)"
+            schema.name = schemaName
         }
-        
-        schemaName += "-Volume:\(volume)"
-        self.schema.name = schemaName
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
-        let saveSchema: Schema = self.schema
         let newSchemaRef = db.collection("schemas").document()
         
         do {
-            try newSchemaRef.setData(from: saveSchema, merge: true)
+            try newSchemaRef.setData(from: schema, merge: true)
         }
         catch let error {
             print(error)
@@ -338,34 +337,37 @@ class TrainingDataModel: ObservableObject{
         return true
     }
     
-    func updateTraining(){
+    func updateTraining(schema: Schema){
         // First create a proper schema name
+        var schema: Schema = schema
         var schemaName: String = ""
         var volume: Double = 0.0
-        let routineCount = self.schema.routines.count
+        let routineCount = schema.routines.count
         
-        schemaName += "\(routineCount)x-"
+        if schema.name == "" {
+            schemaName += "\(routineCount)x-"
         
-        for routines in self.schema.routines {
-            let routineSubstring = routines.type?.prefix(1) ?? "?"
-            schemaName += routineSubstring
-            
-            for set in routines.superset ?? []{
-                let exerciseCount: Double = Double(set.exercises?.count ?? 0)
-                for exercise in set.exercises ?? [] {
-                    volume += (exerciseCount * Double(exercise.reps ?? 0))
+            for routines in self.schema.routines {
+                let routineSubstring = routines.type.prefix(1)
+                schemaName += routineSubstring
+                
+                for set in routines.superset{
+                    let exerciseCount: Double = Double(set.exercises.count)
+                    for exercise in set.exercises {
+                        volume += (exerciseCount * Double(exercise.reps))
+                    }
                 }
             }
+            
+            schemaName += "-Volume:\(volume)"
+            schema.name = schemaName
         }
-        
-        schemaName += "-Volume:\(volume)"
-        self.schema.name = schemaName
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
-        let saveSchema: Schema = self.schema
+        let saveSchema: Schema = schema
         let newSchemaRef = db.collection("schemas").document(schema.docID!)
         
         do {
@@ -403,8 +405,8 @@ struct Schema: Codable, Hashable, Identifiable  {
 
 struct Routine: Codable, Hashable, Identifiable {
     var id = UUID()
-    var type: String?
-    var superset: [Superset]?
+    var type: String
+    var superset: [Superset]
     
     init(type: String = "Unknown",
          superset: [Superset] = [Superset]())
@@ -416,8 +418,8 @@ struct Routine: Codable, Hashable, Identifiable {
 
 struct Superset: Codable, Hashable, Identifiable {
     var id = UUID()
-    var sets: Int?
-    var exercises: [Exercise]?
+    var sets: Int
+    var exercises: [Exercise]
     
     init(sets: Int = 0,exercises: [Exercise] = [Exercise]()){
         self.sets = sets

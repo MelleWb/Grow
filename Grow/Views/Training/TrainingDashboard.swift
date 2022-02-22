@@ -63,31 +63,33 @@ struct TrainingOverview: View {
     
     @State private var showAddSchema = false
     @ObservedObject var schemas = TrainingDataModel()
+    @State private var action: Int? = 0
     
     var body: some View {
+        
+        NavigationLink(destination: CreateSchema(), tag: 1, selection: $action) {
+              EmptyView()
+          }
+        
         VStack{
             List {
                 ForEach(Array(schemas.fetchedSchemas.enumerated()), id: \.1) { index, schema in
                     ZStack{
                         Button(""){}
                         NavigationLink(destination: ReviewSchema(newSchema: schemas, schema: schema)){
-                            
                             Text(schema.name)
                         }
                     }
                 }.onDelete(perform:deleteSchema)
                  
-            }.sheet(isPresented:$showAddSchema) {
-                AddSchema()
-                    .allowAutoDismiss { false }
             }
-            
         }
+        
         .listStyle(InsetGroupedListStyle())
         .navigationBarTitle(Text("Schemas"), displayMode: .inline)
         .navigationBarItems(trailing:
                Button(action: {
-                    self.showAddSchema = true
+                    self.action = 1
                }) {
                    Image(systemName: "plus")
                }

@@ -19,8 +19,9 @@ struct WorkoutOfTheDayView: View {
     @State var showAlert: Bool = false
     
     func setOrSuperset(set: Superset) -> String{
-        let setNumber: Int = self.trainingModel.getSupersetIndex(for: self.trainingModel.routine, for: set) + 1
-        if set.exercises!.count>1{
+        //let setNumber: Int = self.$trainingModel.getSupersetIndex(for: self.trainingModel.routine, for: set) + 1
+        let setNumber = 1
+        if set.exercises.count>1{
             return "Superset \(setNumber)"
         }
         else{
@@ -30,10 +31,10 @@ struct WorkoutOfTheDayView: View {
 
     var body: some View {
         List{
-            ForEach(self.trainingModel.routine.superset!, id: \.self){ set in
+            ForEach(self.trainingModel.routine.superset, id: \.self){ set in
                 Section(header: Text(self.setOrSuperset(set: set))){
-                    ForEach(set.exercises!, id:\.self) {exercise in
-                        ExerciseRow(exercise: exercise, amountOfSets: set.sets ?? 0, superset: set)
+                    ForEach(set.exercises, id:\.self) {exercise in
+                        ExerciseRow(exercise: exercise, amountOfSets: set.sets, superset: set)
                         }
                     }
                 }
@@ -56,10 +57,6 @@ struct WorkoutOfTheDayView: View {
         .navigationBarItems(trailing:
                                 Button(action:{
                                     
-                                let isValid: Bool = self.statisticsModel.isValidTraining(for: self.trainingModel.routine)
-                                    
-                                    if isValid{
-                                    
                                         let success: Bool = self.statisticsModel.saveTraining(for: userModel.user.id!, for: routine)
                                         if success{
                                             self.trainingModel.initiateTrainingModel()
@@ -67,18 +64,14 @@ struct WorkoutOfTheDayView: View {
                                             self.showWOD = false
                                         
                                         } else {
-                                            print("some error")
+                                            self.showAlert.toggle()
                                         }
-                                    }
-                                    else {
-                                        self.showAlert = true
-                                    }
                                 }){
                                 Text("Opslaan").foregroundColor(.accentColor)
                                 }
         )
         .alert(isPresented: $showAlert, content: {
-                Alert(title: Text("Oops"), message: Text("Het lijkt erop dat je niet alle reps en gewichten hebt ingevuld"), dismissButton: .default(Text("Ok!")))})
+                Alert(title: Text("Oops"), message: Text("Er ging iets fout in het opslaan van je training"), dismissButton: .default(Text("Oke")))})
     }
 }
 
@@ -103,7 +96,7 @@ struct ExerciseRow:View{
                 NavigationLink(destination:ExerciseDetailView(exercise: exercise)){
                     VStack(alignment: .leading){
                         Text(exercise.name).font(.headline)
-                        Text("\(String(amountOfSets)) sets van \(String(exercise.reps ?? 0)) reps").font(.subheadline)
+                        Text("\(String(amountOfSets)) sets van \(String(exercise.reps)) reps").font(.subheadline)
                     }.padding(10)
                 }
                 }.swipeActions(edge: .leading, allowsFullSwipe: true) {
@@ -115,18 +108,7 @@ struct ExerciseRow:View{
                     }
                     .tint(.indigo)
                 }
-//                .contextMenu(menuItems: {
-//                    Button (action: {
-//                        self.showExerciseChange = true
-//                    }, label: {
-//                        Text("verander de oefening")
-//                        Image(systemName: "arrow.left.arrow.right")
-//                            .resizable()
-//                            .frame(width: 17, height: 20, alignment: .trailing)
-//                    })
-//                })
-//        }.padding(10)
-        
+
         VStack(alignment: .center){
             HStack{
                 ForEach(0..<amountOfSets, id: \.self) { index in

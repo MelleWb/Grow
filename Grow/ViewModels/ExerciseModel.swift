@@ -13,7 +13,7 @@ struct Exercise: Codable, Hashable, Identifiable {
     var id = UUID()
     @DocumentID var documentID: String?
     var name: String
-    var reps: Int?
+    var reps: Int
     var category: String
     var imageURL: String?
     var description: String?
@@ -21,9 +21,9 @@ struct Exercise: Codable, Hashable, Identifiable {
     
     init(
         id: UUID = UUID(),
-        documentID: String,
+        documentID: String? = nil,
         name: String? = nil,
-        reps: Int? = 0,
+        reps: Int = 0,
         category: String? = nil,
         imageURL: String? = nil,
         description: String? = nil,
@@ -31,11 +31,11 @@ struct Exercise: Codable, Hashable, Identifiable {
         
         self.id = id
         self.documentID = documentID
-        self.name = name ?? ""
+        self.name = name ?? "Naam"
         self.reps = reps
-        self.category = category ?? ""
-        self.imageURL = imageURL ?? ""
-        self.description = description ?? ""
+        self.category = category ?? "Categorie"
+        self.imageURL = imageURL ?? "Plaatje"
+        self.description = description ?? "Omschrijving"
         self.statistics = statistics
     }
 }

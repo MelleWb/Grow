@@ -161,10 +161,6 @@ struct CalorieOverview: View {
                 }
             )
             
-            .blur(radius: isSheetEnabled() ? 1 : 0)
-            .overlay(
-                isSheetEnabled() ? Color.black.opacity(0.6) : nil)
-            
             if enableExtraCalorieSheet {
                 ExtraSportCaloriesActionSheet(enableExtraCalorieSheet: $enableExtraCalorieSheet)
             }
@@ -176,6 +172,5 @@ struct CalorieOverview: View {
                 MacrosActionSheet(enableMacroSheet: $enableSportMacroSheet, calorieTotal: self.userModel.user.sportCalories?.kcal ?? 0, typeOfCalories: .SportCalories, macroSelection: [self.userModel.user.sportCalories?.carbs ?? 0, self.userModel.user.sportCalories?.protein ?? 0, self.userModel.user.sportCalories?.fat ?? 0])
             }
         }
-            .edgesIgnoringSafeArea(.all)
     }
 }

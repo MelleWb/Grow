@@ -9,9 +9,9 @@ import SwiftUI
 
 struct SelectSavedMeal: View {
     @EnvironmentObject var foodModel: FoodDataModel
-    @Binding var showGetMeal: Bool
     @State var searchText = ""
     @State var searching = false
+    @Binding var navigationAction: Int?
     
     var body: some View {
         VStack{
@@ -24,7 +24,8 @@ struct SelectSavedMeal: View {
                         ZStack{
                             Button(""){
                                 self.foodModel.addSavedMeal(meal: meal)
-                                self.showGetMeal = false
+                                navigationAction = 0
+                                
                             }
                             VStack(alignment: .leading){
                                 Text(meal.name ?? "").font(.headline).padding()

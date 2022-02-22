@@ -93,7 +93,7 @@ struct AddProductView: View {
             .navigationBarItems(trailing:
                                     Button(action: {self.showProductsNutritionView = true}) { Text("Volgende") }
                                     .disabled(self.product.name.isEmpty)
-        )}
+        )}.accentColor(Color.init("AccentColor"))
         }
 
     func deletePortion(at offsets: IndexSet) {

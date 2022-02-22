@@ -60,92 +60,94 @@ struct MacrosActionSheet: View {
     }
     
     var body: some View{
-        GeometryReader { gr in
-            VStack {
+        ZStack{
+            GeometryReader { gr in
                 VStack {
-                    HStack{
-                        Spacer()
-                        Button("Annuleer", role: .cancel){
-                            self.enableMacroSheet.toggle()
-                        }
-                    }.padding()
-                    Text("Verander je macros")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                        .padding(.top, 10)
-                    
-                        VStack{
-                            Text("Calorieën")
-                                .font(.headline)
-                            HStack{
-                                Text("\(calorieTotal)")
-                                Text(" / ")
-                                Text("\(calorieSum ?? 1)")
+                    VStack {
+                        HStack{
+                            Spacer()
+                            Button("Annuleer", role: .cancel){
+                                self.enableMacroSheet.toggle()
+                            }
+                        }.padding()
+                        Text("Verander je macros")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .padding(.top, 10)
+                        
+                            VStack{
+                                Text("Calorieën")
                                     .font(.headline)
-                            }
-                    }.padding()
-                    
-                    HStack{
-                        VStack{
-                            HStack(spacing:20){
-                                VStack{
-                                    Text("Koolh. (g)")
+                                HStack{
+                                    Text("\(calorieTotal)")
+                                    Text(" / ")
+                                    Text("\(calorieSum ?? 1)")
                                         .font(.headline)
-                                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.carbsPercentage ?? 0)) %")
                                 }
-                                VStack{
-                                    Text("Eiwitten (g)")
-                                        .font(.headline)
-                                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.proteinsPercentage ?? 0)) %")
-                                }
-                                VStack{
-                                    Text("Vetten (g)")
-                                        .font(.headline)
-                                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.fatsPercentage ?? 0)) %")
-                                }
-                            }
-                            
-                            let macroSelectionBinding = Binding<[Int]>(
-                                get: { self.macroSelection },
-                                set: {
-                                    self.macroSelection = $0
-                                        setMacroStates()
+                        }.padding()
+                        
+                        HStack{
+                            VStack{
+                                HStack(spacing:20){
+                                    VStack{
+                                        Text("Koolh. (g)")
+                                            .font(.headline)
+                                        Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.carbsPercentage ?? 0)) %")
                                     }
-                            )
-                            MultiWheelPicker(selections: macroSelectionBinding, data: macroData)
+                                    VStack{
+                                        Text("Eiwitten (g)")
+                                            .font(.headline)
+                                        Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.proteinsPercentage ?? 0)) %")
+                                    }
+                                    VStack{
+                                        Text("Vetten (g)")
+                                            .font(.headline)
+                                        Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.fatsPercentage ?? 0)) %")
+                                    }
+                                }
+                                
+                                let macroSelectionBinding = Binding<[Int]>(
+                                    get: { self.macroSelection },
+                                    set: {
+                                        self.macroSelection = $0
+                                            setMacroStates()
+                                        }
+                                )
+                                MultiWheelPicker(selections: macroSelectionBinding, data: macroData)
+                            }
                         }
                     }
-                }
-                .background(RoundedRectangle(cornerRadius: 10)
-                .foregroundColor(Color.white).shadow(radius: 1))
-                
-                VStack {
-                    Button(action: {
-                        if typeOfCalories == .RestCalories {
-                            self.userModel.user.restCalories!.kcal = self.calorieSum ?? 0
-                            self.userModel.user.restCalories!.carbs = self.carbs ?? 0
-                            self.userModel.user.restCalories!.protein = self.proteins ?? 0
-                            self.userModel.user.restCalories!.fat = self.fats ?? 0
-                            self.userModel.user.restCalories!.fiber = Int(Double(self.calorieSum ?? 0) * 0.014)
-                        } else if typeOfCalories == .SportCalories {
-                            self.userModel.user.sportCalories!.kcal = self.calorieSum ?? 0
-                            self.userModel.user.sportCalories!.carbs = self.carbs ?? 0
-                            self.userModel.user.sportCalories!.protein = self.proteins ?? 0
-                            self.userModel.user.sportCalories!.fat = self.fats ?? 0
-                            self.userModel.user.sportCalories!.fiber = Int(Double(self.calorieSum ?? 0) * 0.014)
+                    .background(RoundedRectangle(cornerRadius: 10)
+                    .foregroundColor(Color.white).shadow(radius: 1))
+                    
+                    VStack {
+                        Button(action: {
+                            if typeOfCalories == .RestCalories {
+                                self.userModel.user.restCalories!.kcal = self.calorieSum ?? 0
+                                self.userModel.user.restCalories!.carbs = self.carbs ?? 0
+                                self.userModel.user.restCalories!.protein = self.proteins ?? 0
+                                self.userModel.user.restCalories!.fat = self.fats ?? 0
+                                self.userModel.user.restCalories!.fiber = Int(Double(self.calorieSum ?? 0) * 0.014)
+                            } else if typeOfCalories == .SportCalories {
+                                self.userModel.user.sportCalories!.kcal = self.calorieSum ?? 0
+                                self.userModel.user.sportCalories!.carbs = self.carbs ?? 0
+                                self.userModel.user.sportCalories!.protein = self.proteins ?? 0
+                                self.userModel.user.sportCalories!.fat = self.fats ?? 0
+                                self.userModel.user.sportCalories!.fiber = Int(Double(self.calorieSum ?? 0) * 0.014)
+                            }
+                                
+                            self.enableMacroSheet.toggle()
+                        }) {
+                            Text("Klaar").fontWeight(Font.Weight.bold)
                         }
-                            
-                        self.enableMacroSheet.toggle()
-                    }) {
-                        Text("Klaar").fontWeight(Font.Weight.bold)
+                        .padding()
+                        .buttonStyle(SecondaryButtonStyle())
                     }
-                    .padding()
-                    .buttonStyle(SecondaryButtonStyle())
-                }
-            }.position(x: gr.size.width / 2 ,y: gr.size.height - 300)
-                .onAppear {
-                    setMacroStates()
-                }
-        }
+                }.position(x: gr.size.width / 2 ,y: gr.size.height - 300)
+                    .onAppear {
+                        setMacroStates()
+                    }
+            }.edgesIgnoringSafeArea(.all)
+        }.background(Color.black.opacity(0.6))
     }
 }

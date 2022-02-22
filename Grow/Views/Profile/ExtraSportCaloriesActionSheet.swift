@@ -13,6 +13,7 @@ struct ExtraSportCaloriesActionSheet: View {
     @Binding var enableExtraCalorieSheet: Bool
     
     var body: some View {
+        ZStack{
             GeometryReader { gr in
                 VStack {
                     VStack {
@@ -51,6 +52,7 @@ struct ExtraSportCaloriesActionSheet: View {
 
                     }
                 }.position(x: gr.size.width / 2 ,y: gr.size.height - 200)
-            }
+            }.edgesIgnoringSafeArea(.all)
+        }.background(Color.black.opacity(0.6))
     }
 }

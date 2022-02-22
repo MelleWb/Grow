@@ -13,15 +13,15 @@ struct FoodView: View {
     
     @EnvironmentObject var userModel : UserDataModel
     @EnvironmentObject var foodModel : FoodDataModel
-    @State var showAddMeal:Bool = false
     @State var enableSheet:Bool = false
-    @State var showGetMeal:Bool = false
     @State var moveMeal:Bool = false
     @State private var date = Date()
     @State private var text = ""
     @State var meal: Meal = Meal()
     @State var mealToCopy: Meal  = Meal()
-
+    @State private var navigationAction: Int? = 0
+    @FocusState var focusedField: UUID?
+    
     let dayNameFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale.init(identifier: "nl")
@@ -38,18 +38,15 @@ struct FoodView: View {
         self.foodModel.date = dateValue
         self.foodModel.dateHasChanged()
     }
-
-    if showAddMeal {
-        NavigationLink(destination: AddMealView(meal: meal, showAddMeal: self.$showAddMeal),isActive: self.$showAddMeal) {AddMealView(meal: meal, showAddMeal: self.$showAddMeal)}
-            .isDetailLink(false)
-            .navigationBarTitle("Voeg product toe")
-    }
+        
+        
+    NavigationLink(destination: AddMealView(meal: meal, navigationAction: $navigationAction), tag: 1, selection: $navigationAction) {
+          EmptyView()
+      }
     
-    if showGetMeal {
-        NavigationLink(destination: SelectSavedMeal(showGetMeal: self.$showGetMeal),isActive: self.$showGetMeal) {SelectSavedMeal(showGetMeal: self.$showAddMeal)}
-            .isDetailLink(false)
-            .navigationBarTitle("Voeg product toe")
-    }
+        NavigationLink(destination: SelectSavedMeal(navigationAction: $navigationAction), tag: 2, selection: $navigationAction) {
+          EmptyView()
+      }
         
     ZStack{
         VStack{
@@ -98,19 +95,50 @@ struct FoodView: View {
                                 Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.usersCalorieBudget.fat)).font(.subheadline).bold()
                                 Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.usersCalorieBudget.fiber)).font(.subheadline).bold()
                             }
+                            ZStack {
+                                VStack(alignment: .leading, spacing: 10){
+                                    ContentViewLinearKcalFood()
+                                    ContentViewLinearKoolhFood()
+                                    ContentViewLinearEiwitFood()
+                                    ContentViewLinearVetFood()
+                                    ContentViewLinearVezelFood()
+                                }
+                                VerticalLeftFoodBar()
+                                VerticalFoodBar()
+                                VerticalRightFoodBar()
+                            }
                             VStack(alignment: .leading, spacing: 10){
-                                ContentViewLinearKcalFood()
-                                ContentViewLinearKoolhFood()
-                                ContentViewLinearEiwitFood()
-                                ContentViewLinearVetFood()
-                                ContentViewLinearVezelFood()
-                                    }
-                            VStack(alignment: .leading, spacing: 10){
-                                Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.usersCalorieLeftOver.kcal )).font(.subheadline).bold()
-                                Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.usersCalorieLeftOver.carbs)).font(.subheadline).bold()
-                                Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.usersCalorieLeftOver.protein)).font(.subheadline).bold()
-                                Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.usersCalorieLeftOver.fat)).font(.subheadline).bold()
-                                Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.usersCalorieLeftOver.fiber)).font(.subheadline).bold()
+                                
+                                if -self.foodModel.foodDiary.usersCalorieLeftOver.kcal > 0 {
+                                    Text("+\(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.kcal ))").font(.subheadline).bold()
+                                } else {
+                                    Text(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.kcal)).font(.subheadline).bold()
+                                }
+                                
+                                if -self.foodModel.foodDiary.usersCalorieLeftOver.carbs > 0 {
+                                    Text("+\(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.carbs))").font(.subheadline).bold()
+                                } else {
+                                    Text(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.carbs)).font(.subheadline).bold()
+                                }
+                                
+                                if -self.foodModel.foodDiary.usersCalorieLeftOver.protein > 0 {
+                                    Text("+\(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.protein))").font(.subheadline).bold()
+                                } else {
+                                    Text(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.protein)).font(.subheadline).bold()
+                                }
+                                
+                                if -self.foodModel.foodDiary.usersCalorieLeftOver.fat > 0 {
+                                    Text("+\(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.fat ))").font(.subheadline).bold()
+                                } else {
+                                    Text(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.fat)).font(.subheadline).bold()
+                                }
+                                
+                                if -self.foodModel.foodDiary.usersCalorieLeftOver.fiber > 0 {
+                                    Text("+\(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.fiber))").font(.subheadline).bold()
+                                } else {
+                                    Text(NumberHelper.roundedNumbersFromDouble(unit:-self.foodModel.foodDiary.usersCalorieLeftOver.fiber)).font(.subheadline).bold()
+                                }
+
                             }
                                 }.padding(.top, 10)
                         }
@@ -120,12 +148,12 @@ struct FoodView: View {
                 Section{
                     HStack{
                         Button(action: {
-                            self.showGetMeal = true
+                            self.navigationAction = 2
                         }) {
                             HStack{
                                 Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
                                 Text("Kies Maaltijd").foregroundColor(.accentColor)
-                                        }
+                            }
                         }
                     }
                 }
@@ -133,7 +161,7 @@ struct FoodView: View {
                 ForEach(self.foodModel.foodDiary.meals ?? [], id:\.self){ meal in
                             Section{
                                 HStack{
-                                    ShowMealHeader(enableSheet: $enableSheet, mealToCopy: $mealToCopy, meal: meal)
+                                    ShowMealHeader(enableSheet: $enableSheet, mealToCopy: $mealToCopy, meal: meal, focusedField: _focusedField)
                                     Spacer()
                                     Text("\(NumberHelper.roundedNumbersFromDouble(unit:meal.kcal)) Kcal")
                                 }
@@ -161,8 +189,11 @@ struct FoodView: View {
                                 ProductForMeal(meal:meal)
 
                                 
-                                Button(action:{self.showAddMeal = true
-                                        self.meal = meal},label:{
+                                Button(action:{
+                                    self.navigationAction = 1
+                                    self.meal = meal
+                                    
+                                },label:{
                                     HStack{
                                         Image(systemName: "plus").foregroundColor(.accentColor)
                                         Text("Voeg product toe").foregroundColor(.accentColor)
@@ -185,8 +216,6 @@ struct FoodView: View {
             }
         }
             .frame(alignment: .bottomLeading)
-            .blur(radius: enableSheet ? 1 : 0)
-            .overlay(enableSheet ? Color.black.opacity(0.6) : nil)
             
             .onReceive(foodModel.$date) { date in
                 self.foodModel.dateHasChanged()
@@ -205,6 +234,18 @@ struct FoodView: View {
             
             if enableSheet {
                 MealCopyCalendar(enableSheet: $enableSheet, date: $date, mealToCopy: mealToCopy)
+            }
+        }.toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                
+                Button(action: {
+                    self.focusedField = nil
+                    
+                },label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                        .foregroundColor(.accentColor)
+                })
             }
         }
     }
@@ -254,6 +295,10 @@ struct ShowMealHeader: View {
     @Binding var mealToCopy: Meal
     @State var showSaveAsMeal: Bool = false
     @State var meal: Meal
+    @State var mealName: String = ""
+    @FocusState var focusedField: UUID?
+    @State var mealNameUUID: UUID = UUID()
+    
     
     var body: some View{
         
@@ -268,7 +313,13 @@ struct ShowMealHeader: View {
             let mealIndex: Int = (foodModel.getMealIndex(for: meal) ?? 0) + 1
         
             HStack{
-                Text("Maaltijd \(mealIndex)")
+                TextField(meal.name ?? "Maaltijd \(mealIndex)", text: $mealName, onEditingChanged: { (isBegin) in
+                    if isBegin {
+                        //Don't do anything, we only want to do it when done typing
+                    } else {
+                        self.foodModel.updateMealName(for: meal, name: mealName)
+                    }
+                }).focused($focusedField, equals: mealNameUUID)
                     .padding()
                     .contextMenu(menuItems: {
                         VStack{                            Text("\(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.meals![foodModel.getMealIndex(for: meal)!].kcal)) Calorieën")
@@ -310,8 +361,9 @@ struct ShowMealHeader: View {
                         })
                     })
             }.onAppear {
-                print("Ik print meal")
-                print(meal)
+                if meal.name != nil {
+                    self.mealName = meal.name!
+                }
             }
         }
     }
