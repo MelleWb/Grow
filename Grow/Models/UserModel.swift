@@ -30,10 +30,19 @@ struct User: Codable {
     var schema: String?
     var weekPlan: [DayPlan]?
     var workoutOfTheDay: UUID?
-
     var restCalories: Macros?
     var sportCalories: Macros?
     var extraCaloriePercentage: Int?
+    var membership: MemberShip?
+}
+
+struct MemberShip: Codable, Identifiable, Hashable {
+    var id = UUID()
+    var product: String?
+    var isPremiumMember: Bool?
+    var isRenewable: Bool?
+    var startDate: Date?
+    var endDate: Date?
 }
 
 

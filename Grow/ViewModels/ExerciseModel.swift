@@ -47,7 +47,7 @@ class ExerciseDataModel: ObservableObject{
     private var db = Firestore.firestore()
     
     init(){
-        fetchData()
+        //fetchData()
     }
     
     func fetchData() {

@@ -53,6 +53,9 @@ struct ExerciseOverview: View {
                    .onDelete(perform: delete)
                 }
             }
+            .onAppear(perform: {
+                self.exerciseModel.fetchData()
+            })
             .listStyle(InsetGroupedListStyle())
             .navigationTitle("Oefeningen")
             .navigationBarItems(trailing: (

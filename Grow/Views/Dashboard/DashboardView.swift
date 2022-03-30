@@ -196,10 +196,9 @@ struct Dashboard: View{
             .onAppear(perform:{
                 
                 //Compare dates, if different (after 12.00AM), load new day
-                let modelDate = Calendar.current.dateComponents([.weekday], from: self.userModel.currentDate)
-                let dateNow = Calendar.current.dateComponents([.weekday], from: Date())
+                let isSameDay:Bool = self.userModel.isSameDay(date1: self.userModel.currentDate, date2: Date())
                 
-                if dateNow != modelDate {
+                if !isSameDay {
                     self.userModel.fetchUser(uid: Auth.auth().currentUser!.uid){
                         self.foodModel.initiateFoodModel()
                         self.trainingModel.initiateTrainingModel()

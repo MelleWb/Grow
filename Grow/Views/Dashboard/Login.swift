@@ -58,7 +58,7 @@ struct Login: View {
             ScrollView(showsIndicators: false){
                 
                 Text("Welkom!")
-                  .font(.largeTitle).foregroundColor(Color.black)
+                  .font(.largeTitle).foregroundColor(Color.init("blackWhite"))
                   .padding([.top, .bottom], 40)
                             
                 Image("menuImage")
@@ -106,7 +106,7 @@ struct Login: View {
         }
         .padding([.leading, .trailing], 27.5)
         .background(
-            LinearGradient(gradient: Gradient(colors: [.white, Color.init("LoginBackground")]), startPoint: .top, endPoint: .bottom)
+            LinearGradient(gradient: Gradient(colors: [Color.init("textField"), Color.init("LoginBackground")]), startPoint: .top, endPoint: .bottom)
                     .edgesIgnoringSafeArea(.all).opacity(0.5))
         .onSubmit {
             if focusedField == .username {

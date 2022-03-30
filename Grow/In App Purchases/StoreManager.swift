@@ -13,6 +13,7 @@ class StoreManager: NSObject, ObservableObject, SKProductsRequestDelegate, SKPay
     
     @Published var myProducts = [SKProduct]()
     @Published var transactionState: SKPaymentTransactionState?
+    @Published var transactionDates = [Date]()
     
     enum NetworkError : Error {
         case httpError
@@ -130,8 +131,7 @@ class StoreManager: NSObject, ObservableObject, SKProductsRequestDelegate, SKPay
                           try? self.verifyReceipt(environment: .sandBox)
                       } else {
                           if let date = self.getExpirationDateFromResponse(jsonResponse) {
-                          print(date)
-                              
+                              self.transactionDates.append(date)
                       }
                 }
                 }

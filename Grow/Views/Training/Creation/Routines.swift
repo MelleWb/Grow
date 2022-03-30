@@ -187,35 +187,35 @@ struct SelectionCell: View {
 }
 
 
-struct AmountOfSets : View {
-    
-    @ObservedObject var newSchema: TrainingDataModel
-    var routine: Routine
-    var superset: Superset
-    
-    @State var reps: String = ""
-       @State var sets: String = ""
-       
-       var body: some View {
-           
-           
-           let setsProxy = Binding<String>(
-            get: { String(self.superset.sets)},
-               set: {
-                   if let value = NumberFormatter().number(from: $0) {
-                       //self.newSchema.updateSets(for: routine, for: superset, to: value.intValue)
-                   }
-               }
-           )
-            
-        VStack(alignment: .leading){
-               HStack{
-                   Text("Sets: ")
-                   TextField("Sets", text: setsProxy)
-                        .frame(width: 60, height: 40)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.numberPad)
-               }
-        }
-    }
-}
+//struct AmountOfSets : View {
+//
+//    @ObservedObject var newSchema: TrainingDataModel
+//    var routine: Routine
+//    var superset: Superset
+//
+//    @State var reps: String = ""
+//       @State var sets: String = ""
+//
+//       var body: some View {
+//
+//
+//           let setsProxy = Binding<String>(
+//            get: { String(self.superset.sets)},
+//               set: {
+//                   if let value = NumberFormatter().number(from: $0) {
+//                       //self.newSchema.updateSets(for: routine, for: superset, to: value.intValue)
+//                   }
+//               }
+//           )
+//
+//        VStack(alignment: .leading){
+//               HStack{
+//                   Text("Sets: ")
+//                   TextField("Sets", text: setsProxy)
+//                        .frame(width: 60, height: 40)
+//                        .textFieldStyle(RoundedBorderTextFieldStyle())
+//                        .keyboardType(.numberPad)
+//               }
+//        }
+//    }
+//}

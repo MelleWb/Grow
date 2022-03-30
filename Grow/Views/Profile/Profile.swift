@@ -20,6 +20,8 @@ struct Profile: View {
     @State var enableHeightSheet: Bool = false
     @State var showAlert: Bool = false
     
+    @State private var searchTermTraining: String = ""
+    
     func isSheetEnabled() -> Bool {
         if enableWeightSheet || enableHeightSheet {
             return true
@@ -27,6 +29,12 @@ struct Profile: View {
             return  false
         }
     }
+    
+    var filteredSchemas: [Schema] {
+        self.trainingModel.fetchedSchemas.filter {
+            searchTermTraining.isEmpty ? true : $0.name.lowercased().contains(searchTermTraining.lowercased())
+            }
+        }
     
     var body: some View {
         ZStack{
@@ -201,7 +209,8 @@ struct Profile: View {
                         )
                         
                         Picker(selection: trainingSchemaBinding, label: Text("Trainingschema")) {
-                            ForEach(self.trainingModel.fetchedSchemas) { schema in
+                            PickerSearchBar(text: $searchTermTraining, placeholder: "Schema zoeken")
+                            ForEach(filteredSchemas, id:\.self) { schema in
                                 Text(schema.name).tag(schema.docID)
                             }
                         }

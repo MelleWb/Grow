@@ -121,7 +121,7 @@ struct MeasurementRow: View{
                     .font(.headline)
                     .padding()
                 Spacer()
-                Text("\(NumberHelper.roundedNumbersFromDouble(unit: measurement.weight ?? 0)) kg")
+                Text("\( measurement.weight ?? 0) kg")
                     .padding()
             }
                 HStack{

@@ -46,10 +46,27 @@ class TrainingDataModel: ObservableObject{
         }
     }
     
-    func  resetUser(user:  User){
+    func resetUser(user:  User){
         self.user = user
         self.loadRoutineFromSchema()
     }
+    
+    func getTodaysRoutine() -> UUID{
+        let dayOfWeek: Int = self.getDayForWeekPlan()
+        return self.user.weekPlan![dayOfWeek].routine!
+    }
+    
+    func getDayForWeekPlan() -> Int{
+        let dayOfWeek = Calendar.current.component(.weekday, from: Date())
+        
+        if dayOfWeek == 1{
+            return 6
+        }
+        else {
+            return dayOfWeek - 2
+        }
+    }
+    
     
     func loadRoutineFromSchema(){
         
@@ -69,8 +86,10 @@ class TrainingDataModel: ObservableObject{
                 if let document = document {
                   do {
                     self.schema = try document.data(as: Schema.self)!
+                      
+                      let todaysRoutine = self.getTodaysRoutine()
                     
-                    if let index = self.schema.routines.firstIndex(where: { $0.id == self.user.workoutOfTheDay }) {
+                    if let index = self.schema.routines.firstIndex(where: { $0.id == todaysRoutine }) {
                             self.routine = self.schema.routines[index]
                         }
                   }
@@ -108,42 +127,20 @@ class TrainingDataModel: ObservableObject{
         }
     }
     
-//    func addSuperset(for routine: Routine){
-//        if let index = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-//            let superset: Superset = Superset()
-//            if self.schema.routines[index].superset != nil {
-//                self.schema.routines[index].superset?.append(superset)
-//            } else {
-//                self.schema.routines[index].superset? = [superset]
-//            }
-//        }
-//    }
-    
-//    func getSupersetIndex(for routine: Routine, for superset: Superset) -> Int{
-//        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-//            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-//                return supersetIndex
-//            }
-//            return 0
-//        }
-//        return 0
-//    }
-    
-//    func updateSets(for routine: Routine, for superset: Superset, to amountOfSets: Int){
-//        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
-//            if let supersetIndex = self.schema.routines[routineIndex].superset?.firstIndex(where: { $0.id == superset.id }) {
-//                    self.schema.routines[routineIndex].superset?[supersetIndex].sets = amountOfSets
-//
-//            }
-//        }
-//    }
-    
     func changeExcercise(toExercise: Exercise, forExercise: Exercise, superset: Superset){
         //To do
             if let supersetIndex = self.routine.superset.firstIndex(where: { $0.id == superset.id }) {
-                print("superset is: \(supersetIndex)")
-                if let exerciseIndex = self.routine.superset[supersetIndex].exercises.firstIndex(where: { $0.documentID == forExercise.documentID }) {
-                    self.routine.superset[supersetIndex].exercises[exerciseIndex] = toExercise
+                if let exerciseIndex = self.routine.superset[supersetIndex].exercises.firstIndex(where: { $0.id == forExercise.id }) {
+                    
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].name = toExercise.name
+                    
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].description = toExercise.description
+                    
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].statistics = toExercise.statistics
+                    
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].documentID = toExercise.documentID
+                    
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].id = toExercise.id
             }
         }
         
@@ -152,7 +149,7 @@ class TrainingDataModel: ObservableObject{
     func getAmountOfSets(for routine: Routine, for superset: Superset) -> Int{
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
             if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
-                return self.schema.routines[routineIndex].superset[supersetIndex].sets ?? 0
+                return self.schema.routines[routineIndex].superset[supersetIndex].sets
             }
             return 0
         }
@@ -231,7 +228,7 @@ class TrainingDataModel: ObservableObject{
     func getRoutineType(for routine: Routine) -> String {
         
         if let index = self.schema.routines.firstIndex(where: { $0.id == routine.id}) {
-            return self.schema.routines[index].type ?? ""
+            return self.schema.routines[index].type
         }
         return ""
     }

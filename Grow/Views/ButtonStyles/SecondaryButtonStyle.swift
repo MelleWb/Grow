@@ -14,8 +14,8 @@ struct SecondaryButtonStyle: ButtonStyle {
         configuration.label
            .font(.headline)
             .frame(maxWidth: .infinity, minHeight: height, maxHeight: height)
-            .foregroundColor(.accentColor)
-            .background(Color.white)
+            .foregroundColor(Color.init("Color"))
+            .background(Color.init("textField"))
             .cornerRadius(15.0)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
     }

@@ -13,8 +13,7 @@ struct WorkoutOfTheDayView: View {
     @EnvironmentObject var userModel: UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
-//    var schema: String
-    var routine:UUID
+    @State var routine:UUID
     @State var amountOfSets: Int = 0
     @State var showAlert: Bool = false
     
@@ -51,7 +50,9 @@ struct WorkoutOfTheDayView: View {
                 })
             }
         }
-        
+        .onAppear(perform: {
+            self.statisticsModel.getStatisticsForCurrentRoutine()
+        })
         .listStyle(InsetGroupedListStyle())
         .navigationTitle("Training van vandaag")
         .navigationBarItems(trailing:

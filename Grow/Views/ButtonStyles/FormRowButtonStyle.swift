@@ -12,7 +12,7 @@ struct FormRowButtonStyle: ButtonStyle {
     
     func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
-            .foregroundColor(Color.black)
+            .foregroundColor(Color.init("blackWhite"))
             .scaleEffect(configuration.isPressed ? 1.2 : 1.0)
     }
 }

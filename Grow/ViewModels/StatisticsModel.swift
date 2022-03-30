@@ -44,7 +44,6 @@ class StatisticsDataModel: ObservableObject {
                     self.trainingStatsListener?.remove()
                 }
                 self.getStatisticsForCurrentSchema()
-                self.loadTrainingHistory()
             }
             catch {
               print(error)
@@ -238,11 +237,27 @@ class StatisticsDataModel: ObservableObject {
         return value
     }
     
+    func getTodaysRoutine() -> UUID{
+        let dayOfWeek: Int = self.getDayForWeekPlan()
+        return self.user.weekPlan![dayOfWeek].routine!
+    }
+    
+    func getDayForWeekPlan() -> Int{
+        let dayOfWeek = Calendar.current.component(.weekday, from: Date())
+        
+        if dayOfWeek == 1{
+            return 6
+        }
+        else {
+            return dayOfWeek - 2
+        }
+    }
+    
     func getStatisticsForCurrentRoutine(){
         
         if self.user.id != "" && self.user.workoutOfTheDay != nil && self.user.workoutOfTheDay?.uuidString != ""{
         
-            let routine:String = self.user.workoutOfTheDay!.uuidString
+            let routine:String = self.getTodaysRoutine().uuidString
                 
             let settings = FirestoreSettings()
             settings.isPersistenceEnabled = true
@@ -303,7 +318,7 @@ class StatisticsDataModel: ObservableObject {
                 //Get routines for current schema
                 for routine in schema.routines {
                     
-                    var routineStats: RoutineStatistics = RoutineStatistics(type: routine.type ?? "")
+                    var routineStats: RoutineStatistics = RoutineStatistics(type: routine.type )
                     
                     let routineString:String = routine.id.uuidString
                     
@@ -361,7 +376,7 @@ class StatisticsDataModel: ObservableObject {
             settings.isPersistenceEnabled = true
             let db = Firestore.firestore()
             
-            trainingHistoryListener = db.collection("users").document(self.user.id!).collection("trainingStatistics").order(by: "trainingDate", descending: true).addSnapshotListener { (querySnapshot, error) in
+            trainingHistoryListener = db.collection("users").document(self.user.id!).collection("trainingStatistics").order(by: "trainingDate", descending: true).limit(to: 10).addSnapshotListener { (querySnapshot, error) in
                 guard let documents = querySnapshot?.documents else {
                     print("No documents")
                     return

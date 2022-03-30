@@ -83,7 +83,7 @@ struct CalorieOverview: View {
                             Spacer()
                             Button("\(self.userModel.user.extraCaloriePercentage ?? 0) %"){
                                 self.enableExtraCalorieSheet.toggle()
-                            }.foregroundColor(.black)
+                            }.foregroundColor(Color.init("blackWhite"))
                         }
                     }
                     Section("Calorie budget sportdag") {

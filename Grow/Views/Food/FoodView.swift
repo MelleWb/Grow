@@ -40,7 +40,7 @@ struct FoodView: View {
     }
         
         
-    NavigationLink(destination: AddMealView(meal: meal, navigationAction: $navigationAction), tag: 1, selection: $navigationAction) {
+    NavigationLink(destination: AddProductToMealList(meal: meal, navigationAction: $navigationAction), tag: 1, selection: $navigationAction) {
           EmptyView()
       }
     

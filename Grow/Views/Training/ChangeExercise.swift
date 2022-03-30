@@ -45,12 +45,6 @@ struct ChangeExercise: View {
                     ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
                         return exercise.name.range(of: searchText, options: .caseInsensitive) != nil || searchText == ""
                     }), id: \.self) { exercise in
-//                        NavigationLink( destination: ExerciseDetailView(exercise: exercise)) {
-//                                    VStack(alignment: .leading) {
-//                                        Text(exercise.name).font(.headline)
-//                                        Text(exercise.category).font(.subheadline)
-//                                    }
-//                        }
                         Button(action: {
                             trainingModel.changeExcercise(toExercise: exercise, forExercise: exerciseToChange, superset: superset)
                             self.showExerciseChange.toggle()
@@ -59,9 +53,9 @@ struct ChangeExercise: View {
                                label: {
                                 VStack(alignment: .leading) {
                                     Text(exercise.name).font(.headline)
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(Color.init("blackWhite"))
                                     Text(exercise.category).font(.subheadline)
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(Color.init("blackWhite"))
                                 }
                         })
                    }
@@ -71,15 +65,9 @@ struct ChangeExercise: View {
             }
             .listStyle(InsetGroupedListStyle())
             .navigationTitle("Training")
-//            .navigationBarItems(trailing: (
-//                            Button(action: {
-//                                withAnimation {
-//                                    self.showAddExerciseSheetView.toggle()
-//                                }
-//                            }) {
-//                                Image(systemName: "plus")
-//                            })
-//                        )
+            .onAppear(perform: {
+                self.exerciseModel.fetchData()
+            })
         .sheet(isPresented: $showAddExerciseSheetView) {
             AddExercise(showAddExerciseSheetView: $showAddExerciseSheetView)
         }

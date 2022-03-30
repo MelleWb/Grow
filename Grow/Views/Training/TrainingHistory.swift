@@ -28,13 +28,14 @@ struct TrainingHistoryOverview: View {
             }
         }.listStyle(InsetGroupedListStyle())
         .navigationTitle(Text("Training historie"))
+        .onAppear {
+            self.statisticsModel.loadTrainingHistory()
+        }
     }
     func deleteTrainingHistory(at offsets: IndexSet) {
         let index: Int = offsets[offsets.startIndex]
         self.statisticsModel.removeTrainingHistory(for: index)
-        self.userModel.getTrainingStatsForCurrentWeek(){
-            //Wait for completion
-        }
+        self.userModel.getTrainingStatsForCurrentWeek()
     }
 }
 

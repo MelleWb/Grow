@@ -17,6 +17,9 @@ class FoodDataModel: ObservableObject{
     @Published var foodDiary = FoodDiary()
     @Published var products = [Product()]
     @Published var savedMeals = [Meal()]
+    
+    @Published var slimProductList = SlimProductList()
+    
     var user = User()
     var foodDiaryListener: ListenerRegistration? = nil
     var mealListener: ListenerRegistration? = nil
@@ -36,7 +39,6 @@ class FoodDataModel: ObservableObject{
     func  resetUser(user:  User){
         self.user = user
         self.getFoodDiary()
-        self.fetchProducts()
     }
     
     func initiateFoodModel(){
@@ -52,7 +54,7 @@ class FoodDataModel: ObservableObject{
             do{
                 self.user = try document.data(as: User.self)!
                 self.getFoodDiary()
-                self.fetchProducts()
+                self.fetchSlimProductList()
                 self.getMeals()
             }
             catch {
@@ -221,6 +223,8 @@ class FoodDataModel: ObservableObject{
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         let prodRef = db.collection("foodProducts")
+        let slimProdRef = db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg")
+        
         var docRef: DocumentReference? = nil
         
         if product.documentID != "" {
@@ -229,13 +233,80 @@ class FoodDataModel: ObservableObject{
             docRef = prodRef.document()
         }
         
+        //MARK: Add/Update the slim version of the product
+        var slimProduct:SlimProduct?
+        var slimProductList = self.slimProductList
+        
+        if let slimProdIndex:Int = self.slimProductList.products.firstIndex(where: { $0.documentID == docRef!.documentID }){
+            slimProduct = self.slimProductList.products[slimProdIndex]
+            slimProduct!.name = product.name
+            slimProductList.products.remove(at: slimProdIndex)
+            slimProductList.products.append(slimProduct!)
+        } else {
+            slimProduct = SlimProduct(documentID: docRef!.documentID, name: product.name)
+            slimProductList.products.append(slimProduct!)
+        }
+
         do {
             try docRef!.setData(from: product, merge: true)
+            try slimProdRef.setData(from: slimProductList, merge:true)
             return true
         }
         catch {
           print(error)
             return false
+        }
+    }
+    
+    func deleteProduct(documentID: String){
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+
+        db.collection("foodProducts").document(documentID).delete() { err in
+            if let err = err {
+                print("Error removing document: \(err)")
+            } else {
+                var slimProductList = self.slimProductList
+
+                if let slimProdIndex:Int = slimProductList.products.firstIndex(where: { $0.documentID == documentID }){
+
+                    slimProductList.products.remove(at: slimProdIndex)
+                    let slimProdRef = db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg")
+
+                    do {
+                        try slimProdRef.setData(from: slimProductList, merge: true)
+                    } catch{
+                        print("Error in deleting the slim product")
+                    }
+                }
+            }
+        }
+    }
+    
+    func getProductDetails(documentID: String, completion: @escaping(Product?, String) -> Void) {
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        var returnProduct: Product = Product()
+        
+        db.collection("foodProducts").document(documentID).getDocument { documentSnapShot, err in
+            
+            guard let document = documentSnapShot else {
+                    print("No documents")
+                    completion(nil, "Error")
+                return
+            }
+            
+            do {
+                returnProduct = try document.data(as: Product.self)!
+                completion(returnProduct, "")
+            } catch {
+                print("Error in parsing the product document")
+                completion(nil, "Error")
+            }
         }
     }
     
@@ -341,39 +412,91 @@ class FoodDataModel: ObservableObject{
         }
     }
     
-    func fetchProducts(){
+//    func fetchProducts(){
+//
+//        let settings = FirestoreSettings()
+//        settings.isPersistenceEnabled = true
+//        let db = Firestore.firestore()
+//
+//
+//        productListener = db.collection("foodProducts").addSnapshotListener { (querySnapshot, error) in
+//
+//                guard let documents = querySnapshot?.documents else {
+//                        print("No documents")
+//                    return
+//                }
+//
+//                self.products = documents.map { (queryDocumentSnapshot) -> Product in
+//
+//                    let result = Result {
+//                        try queryDocumentSnapshot.data(as: Product.self)
+//                    }
+//                    switch result {
+//                    case .success(let stats):
+//                        if let stats = stats {
+//                            return stats
+//                        }
+//                        else {
+//                            print ("Document does not exists")
+//                        }
+//                    case .failure(let error):
+//                        print("error decoding schema: \(error)")
+//                    }
+//                    return Product()
+//                }
+//            }
+//    }
+    
+    func fetchSlimProductList() {
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
-        
-        productListener = db.collection("foodProducts").addSnapshotListener { (querySnapshot, error) in
-
-                guard let documents = querySnapshot?.documents else {
-                        print("No documents")
-                    return
-                }
-                
-                self.products = documents.map { (queryDocumentSnapshot) -> Product in
-                    
-                    let result = Result {
-                        try queryDocumentSnapshot.data(as: Product.self)
-                    }
-                    switch result {
-                    case .success(let stats):
-                        if let stats = stats {
-                            return stats
-                        }
-                        else {
-                            print ("Document does not exists")
-                        }
-                    case .failure(let error):
-                        print("error decoding schema: \(error)")
-                    }
-                    return Product()
-                }
+        db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg").addSnapshotListener { documentSnapshot, error in
+            
+            guard let document = documentSnapshot else {
+              print("Error fetching document: \(error!)")
+              return
             }
+            
+            do {
+                self.slimProductList = try document.data(as: SlimProductList.self)!
+            } catch {
+                
+                print("error in parsing slim document list")
+            }
+        }
+    }
+    
+    func mergeSlimProductList() {
+        
+        //MARK: Only use this to completely overwrite the SlimProductList
+        
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        let db = Firestore.firestore()
+        
+        let prodRef = db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg")
+        
+        //Clean up the published var
+        self.slimProductList = SlimProductList()
+        
+        //Set the published var to a var for this method
+        var productList = self.slimProductList
+        
+        //Loop through products and set the product
+        for product in self.products {
+            let product: SlimProduct = SlimProduct(documentID: product.documentID ?? "", name: product.name)
+            productList.products.append(product)
+        }
+        
+        do {
+            try prodRef.setData(from: productList, merge: true)
+            
+        } catch {
+            print("error")
+        }
     }
     
     func addMeal(){
@@ -731,4 +854,20 @@ struct ProductPortion: Codable, Hashable, Identifiable{
         self.name = name
         self.amount = amount
     }
+}
+
+struct SlimProductList: Codable, Hashable, Identifiable{
+    var id = UUID()
+    var products: [SlimProduct]
+    
+    init(id:UUID = UUID(), products:[SlimProduct] = []){
+        self.id = id
+        self.products = products
+    }
+}
+
+struct SlimProduct: Codable, Hashable{
+    var id:UUID = UUID()
+    var documentID: String
+    var name: String
 }

@@ -42,7 +42,7 @@ struct WeightActionSheet: View {
                         }.pickerStyle(WheelPickerStyle())
                         
                     }.background(RoundedRectangle(cornerRadius: 10)
-                        .foregroundColor(Color.white).shadow(radius: 1))
+                        .foregroundColor(Color.init("textField")).shadow(radius: 1))
                     VStack {
                         Button(action: {
                             self.enableWeightSheet.toggle()

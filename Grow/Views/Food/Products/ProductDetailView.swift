@@ -10,9 +10,14 @@ import SwiftUI
 struct ProductDetailView: View {
     
     @EnvironmentObject var foodModel: FoodDataModel
-    @Binding var navigationAction: Int?
-    @State var product:Product
+    
+    @State var product:Product = Product()
+    
     @State var meal: Meal
+    @State var documentID:String
+    @Binding var navigationAction: Int?
+    
+    
     @State var amount: String = "100"
     @State var amountInput: String = ""
     @State var portionAmount: Int = 1
@@ -113,9 +118,23 @@ struct ProductDetailView: View {
 
         }})
         .onAppear(perform:{
-            if let value = NumberFormatter().number(from: amount) {
-                self.updateCalories(portion: value.intValue)
-            }
+            
         })
+        .onAppear(perform:{
+            
+            //First get the product details
+            self.foodModel.getProductDetails(documentID: documentID, completion: { product, error in
+                if let product = product {
+                    self.product = product
+                    
+                    if let value = NumberFormatter().number(from: amount) {
+                        self.updateCalories(portion: value.intValue)
+                    }
+                    
+                } else {
+                    self.navigationAction = 0
+                }
+                })
+            })
     }
 }

@@ -8,6 +8,7 @@
 import Foundation
 import Firebase
 import FirebaseFirestoreSwift
+import SwiftUI
 
 class UserDataModel: ObservableObject{
     
@@ -22,6 +23,8 @@ class UserDataModel: ObservableObject{
     @Published var currentDate: Date = Date()
     var measurementListener: ListenerRegistration? = nil
     
+    @ObservedObject var storeManager = StoreManager()
+    
     private enum UserError: Error {
         case NoUserID
         case NoSchemaFound
@@ -31,6 +34,9 @@ class UserDataModel: ObservableObject{
     }
     
     init(){
+        storeManager.startObserving()
+        storeManager.getProducts()
+        
         if Auth.auth().currentUser?.uid != nil{
             self.fetchUser(uid: Auth.auth().currentUser!.uid){
                 //Just wait until it's done
@@ -56,6 +62,9 @@ class UserDataModel: ObservableObject{
             do {
                 self.user = try document.data(as: User.self)!
                 
+                //Check membership
+                self.checkMemberShip()
+                
                 //Fetch weekplan and determine the weekstats
                 self.getWeekSchema(){
                     //Just wait until it's done
@@ -64,9 +73,7 @@ class UserDataModel: ObservableObject{
                 self.determineWorkoutOfTheDay()
                 
                 //Get training statistics
-                self.getTrainingStatsForCurrentWeek() {
-                    //Just wait until it's done
-                }
+                self.getTrainingStatsForCurrentWeek()
                 
                 //Get measurements
                 self.getBodyMeasurements()
@@ -81,6 +88,31 @@ class UserDataModel: ObservableObject{
           }
         }
       }
+    }
+    
+    func isSameDay(date1: Date, date2: Date) -> Bool {
+        let diff = Calendar.current.dateComponents([.day], from: date1, to: date2)
+        if diff.day == 0 {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    func checkMemberShip() {
+        for date in storeManager.transactionDates {
+            print(date)
+        }
+        
+        if self.user.membership != nil {
+            if self.user.membership!.endDate! <= Date () {
+                for date in storeManager.transactionDates {
+                    self.user.membership!.endDate = date
+                    self.updateUser()
+                }
+            }
+        }
+        storeManager.stopObserving()
     }
     
     func getWeekSchema(finished: () -> Void){
@@ -165,8 +197,10 @@ class UserDataModel: ObservableObject{
     
     func determineWorkoutOfTheDay() {
         let dayOfWeek: Int = self.getDayForWeekPlan()
+        
         if self.user.weekPlan == nil {
             // don't determine the workout of today
+            print("Weekplan is nil, don't determine the WoD")
         } else {
             if self.user.weekPlan![dayOfWeek].isTrainingDay != nil{
                 if self.user.weekPlan![dayOfWeek].isTrainingDay! {
@@ -187,32 +221,30 @@ class UserDataModel: ObservableObject{
         return self.user.weekPlan![dayOfWeek].routine!
     }
     
-    func getTrainingStatsForCurrentWeek(finished: () -> Void){
+    func getTrainingStatsForCurrentWeek(){
         
         let settings = FirestoreSettings()
         settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let dateArray: [Date] = DateHelper.calcWeekDates()
-
-        let docRef = db.collection("users").document(user.id!).collection("trainingStatistics")
-            .whereField("trainingDate", isGreaterThanOrEqualTo: dateArray[0])
-            .whereField("trainingDate", isLessThanOrEqualTo: dateArray[1])
         
-        docRef.getDocuments() { (querySnapshot, err) in
-                    if let err = err {
-                        print("Error getting documents: \(err)")
-                    } else {
-                        var workoutsDone: Int = 0
-                        for _ in querySnapshot!.documents {
-                            workoutsDone += 1
-                        }
-                        
-                        //calculate the progress
-                        self.workoutDonePercentage = Float(workoutsDone)/Float(self.getAmountOfWorkOuts())
+        db.collection("users").document(user.id!).collection("trainingStatistics")
+            .whereField("trainingDate", isGreaterThanOrEqualTo: dateArray[0])
+            .whereField("trainingDate", isLessThanOrEqualTo: dateArray[1]).addSnapshotListener { (querySnapshot, err) in
+                
+                if let err = err {
+                    print("Error getting documents: \(err)")
+                } else {
+                    var workoutsDone: Int = 0
+                    for _ in querySnapshot!.documents {
+                        workoutsDone += 1
                     }
-        }
-        finished()
+                    
+                    //calculate the progress
+                    self.workoutDonePercentage = Float(workoutsDone)/Float(self.getAmountOfWorkOuts())
+                }
+            }
     }
     
     enum UserKey : String {
