@@ -21,20 +21,7 @@ struct Register: View {
     @State var new_password: String = ""
     @State var confirm_password: String = ""
     @State var isEmailValid : Bool   = true
-    @State var birthDate = Date()
-    @State var weight: Int = 75
-    @State var height: Int = 170
-    @State var enableWeightSheet: Bool = false
-    @State var enableHeightSheet: Bool = false
     @FocusState private var focusedField: FocusFields?
-    
-    func isSheetEnabled() -> Bool {
-        if enableWeightSheet || enableHeightSheet  {
-            return true
-        } else {
-            return  false
-        }
-    }
     
     func checkPassword() {
         if new_password == confirm_password {
@@ -58,7 +45,6 @@ struct Register: View {
         
         VStack(alignment: .leading, spacing: 15){
             ScrollView(showsIndicators: false){
-                VStack{
                 
                 VStack{
                 Text("Maak een account!")
@@ -116,39 +102,13 @@ struct Register: View {
                     .cornerRadius(15.0)
                     .padding([.leading, .trailing], 30)
                 
-                VStack {
-                    HStack{
-                        Text("Geboortedatum")
-                        DatePicker("", selection: $birthDate, displayedComponents: .date)
+                Button(action:{
+                    }) {
+                    NavigationLink(destination: SecondRegister()) {
+                    Text("Volgende")
                     }
-                }.padding([.leading, .trailing], 30)
-                
-                    HStack{
-                        Text("Gewicht")
-                        Spacer()
-                        Button("\(weight)"){
-                            self.enableWeightSheet.toggle()
-                        }
-                    }.padding([.leading, .trailing], 30)
-                        .padding([.top, .bottom], 2.5)
-                    
-                    HStack{
-                        Text("Lengte")
-                        Spacer()
-                        Button("\(height)"){
-                            self.enableHeightSheet.toggle()
-                        }
-                    }.padding([.leading, .trailing], 30)
-                        .padding([.top, .bottom], 2.5)
-        
-                    Button(action: {
-                        checkPassword()
-                    }, label: {
-                        Text("Aanmelden")
-                            .buttonStyle(PrimaryButtonStyle())
-                            .padding()
-                    })
-                }
+                }.buttonStyle(PrimaryButtonStyle())
+                .padding()
             }
         }
         .toolbar {
@@ -162,13 +122,6 @@ struct Register: View {
                         .foregroundColor(.accentColor)
                 })
             }
-        }
-        if enableWeightSheet {
-            InitializeWeight(enableWeightSheet: $enableWeightSheet, weight: $weight, height: $height)
-        }
-        
-        if enableHeightSheet {
-            InitializeHeight(enableHeightSheet: $enableHeightSheet, heigth: $height)
         }
     }
 }

@@ -92,6 +92,7 @@
 		F06E41F6279AFEDE0096D267 /* InitializeWeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06E41F5279AFEDE0096D267 /* InitializeWeight.swift */; };
 		F06E41F8279B0FE00096D267 /* InitializeHeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06E41F7279B0FDF0096D267 /* InitializeHeight.swift */; };
 		F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08043EE26B0942F002D5C65 /* DashboardView.swift */; };
+		F0D6607827F4553D00B45174 /* SecondRegister.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0D6607727F4553D00B45174 /* SecondRegister.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -223,6 +224,7 @@
 		F06E41F5279AFEDE0096D267 /* InitializeWeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializeWeight.swift; sourceTree = "<group>"; };
 		F06E41F7279B0FDF0096D267 /* InitializeHeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializeHeight.swift; sourceTree = "<group>"; };
 		F08043EE26B0942F002D5C65 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		F0D6607727F4553D00B45174 /* SecondRegister.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondRegister.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -450,6 +452,7 @@
 				8554BCE326E0BF0800651C3F /* SettingsView.swift */,
 				85A9352E2763805F0053E693 /* Login.swift */,
 				F05CBB0A277F452C00C7E06F /* Register.swift */,
+				F0D6607727F4553D00B45174 /* SecondRegister.swift */,
 				F06E41F5279AFEDE0096D267 /* InitializeWeight.swift */,
 				F06E41F7279B0FDF0096D267 /* InitializeHeight.swift */,
 			);
@@ -780,6 +783,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0D6607827F4553D00B45174 /* SecondRegister.swift in Sources */,
 				85E77744275AB8A100D8996A /* CalorieOverview.swift in Sources */,
 				852DBDFF26E7F6D5000ABE3C /* MeasurementOverview.swift in Sources */,
 				854F1DDB2756BC0D009E70B7 /* UserModel.swift in Sources */,
