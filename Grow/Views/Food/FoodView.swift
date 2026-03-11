@@ -17,8 +17,10 @@ struct FoodView: View {
     @State private var text = ""
     @State var meal: Meal = Meal()
     @State var mealToCopy: Meal  = Meal()
+    @State private var mealToSave: Meal?
     @State private var showAddProductToMeal = false
     @State private var showSelectSavedMeal = false
+    @State private var showSaveAsMeal = false
     @FocusState var focusedField: UUID?
     
     let dayNameFormatter: DateFormatter = {
@@ -150,7 +152,16 @@ struct FoodView: View {
                 ForEach(self.foodModel.foodDiary.meals ?? [], id:\.self){ meal in
                             Section{
                                 HStack{
-                                    ShowMealHeader(enableSheet: $enableSheet, mealToCopy: $mealToCopy, meal: meal, focusedField: _focusedField)
+                                    ShowMealHeader(
+                                        enableSheet: $enableSheet,
+                                        mealToCopy: $mealToCopy,
+                                        meal: meal,
+                                        onSaveAsMeal: {
+                                            self.mealToSave = meal
+                                            self.showSaveAsMeal = true
+                                        },
+                                        focusedField: _focusedField
+                                    )
                                     Spacer()
                                     Text("\(NumberHelper.roundedNumbersFromDouble(unit:meal.kcal)) Kcal")
                                 }
@@ -224,6 +235,11 @@ struct FoodView: View {
             .navigationDestination(isPresented: $showSelectSavedMeal) {
                 SelectSavedMeal(isPresented: $showSelectSavedMeal)
             }
+            .navigationDestination(isPresented: $showSaveAsMeal) {
+                if let mealToSave {
+                    SaveAsMeal(meal: mealToSave)
+                }
+            }
             .navigationBarHidden(enableSheet)
             .navigationBarBackButtonHidden(enableSheet)
             
@@ -287,8 +303,8 @@ struct ShowMealHeader: View {
     @EnvironmentObject var foodModel : FoodDataModel
     @Binding var enableSheet: Bool
     @Binding var mealToCopy: Meal
-    @State var showSaveAsMeal: Bool = false
     @State var meal: Meal
+    let onSaveAsMeal: () -> Void
     @State var mealName: String = ""
     @FocusState var focusedField: UUID?
     @State var mealNameUUID: UUID = UUID()
@@ -320,7 +336,7 @@ struct ShowMealHeader: View {
                             Text("\(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.foodDiary.meals![foodModel.getMealIndex(for: meal)!].fiber)) Vezels")
                             }
                         Button (action: {
-                            self.showSaveAsMeal = true
+                            onSaveAsMeal()
                         }, label: {
                             Text("Sla maaltijd op")
                             Image(systemName: "square.and.arrow.down")
@@ -351,9 +367,6 @@ struct ShowMealHeader: View {
                 if meal.name != nil {
                     self.mealName = meal.name!
                 }
-            }
-            .navigationDestination(isPresented: $showSaveAsMeal) {
-                SaveAsMeal(meal: meal)
             }
         }
     }

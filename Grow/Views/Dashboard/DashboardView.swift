@@ -133,8 +133,11 @@ struct Dashboard: View{
                                 Button {
                                     showMeasurementView = true
                                 } label: {
+                                    HStack{
                                         Image(systemName: "alarm").foregroundColor(.accentColor)
                                         Text("Tijd voor een nieuwe meting")
+                                            .font(.subheadline).foregroundColor(Color.init("blackWhite"))
+                                    }
                                 }
                             }
                         }
@@ -161,7 +164,7 @@ struct Dashboard: View{
                                             Text("Start je training van vandaag").font(.subheadline).foregroundColor(Color.init("blackWhite"))
                                         }
                                 }
-                                }.padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
+                                }
                             }
                         
                         }
@@ -231,19 +234,23 @@ struct TrainingCircle: View {
     @EnvironmentObject var userModel: UserDataModel
     
     var body: some View {
-        
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
-                    .opacity(0.1)
-                    .foregroundColor(.accentColor)
-                    
-                
-                Rectangle().frame(width: min(CGFloat(self.userModel.workoutDonePercentage)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                    .foregroundColor(.accentColor)
+                Capsule()
+                    .fill(Color.accentColor.opacity(0.1))
+
+                Capsule()
+                    .fill(Color.accentColor)
+                    .frame(
+                        width: min(
+                            max(CGFloat(self.userModel.workoutDonePercentage), 0) * geometry.size.width,
+                            geometry.size.width
+                        )
+                    )
                     .animation(Animation.linear(duration: 0.5), value: self.userModel.workoutDonePercentage)
             }
-        }.cornerRadius(45.0).padding()
+        }
+        .frame(maxWidth: .infinity, minHeight: 12, maxHeight: 12)
     }
 }
 
@@ -277,7 +284,7 @@ struct ProgressBarCirle: View {
                         .rotationEffect(Angle(degrees: 270.0))
                         .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.9 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 0.95{
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.9 && self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal < 0.95{
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
@@ -285,7 +292,7 @@ struct ProgressBarCirle: View {
                     .rotationEffect(Angle(degrees: 270.0))
                     .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal >= 0.95 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.05{
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal >= 0.95 && self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal < 1.05{
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
@@ -293,7 +300,7 @@ struct ProgressBarCirle: View {
                     .rotationEffect(Angle(degrees: 270.0))
                     .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
                 }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal >= 1.05 && self.foodModel.foodDiary.usersCalorieUsedPercentage.kcal < 1.1{
+                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal >= 1.05 && self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal < 1.1{
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
@@ -458,6 +465,16 @@ struct ContentViewLinearVezel: View {
             FiberProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fiber).frame(height: 7.5)
             
         }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        Dashboard()
+            .environmentObject(UserDataModel(autostart: false, runStartupSideEffects: false))
+            .environmentObject(TrainingDataModel(autostart: false, runStartupSideEffects: false))
+            .environmentObject(StatisticsDataModel(autostart: false, runStartupSideEffects: false))
+            .environmentObject(FoodDataModel(autostart: false, runStartupSideEffects: false))
     }
 }
 

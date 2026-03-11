@@ -22,6 +22,7 @@ class FoodDataModel: ObservableObject{
     
     var user = User()
     var foodDiaryListener: ListenerRegistration? = nil
+    var todaysFoodDiaryListener: ListenerRegistration? = nil
     var mealListener: ListenerRegistration? = nil
     var productListener: ListenerRegistration? = nil
     
@@ -59,6 +60,7 @@ class FoodDataModel: ObservableObject{
     func  resetUser(user:  User){
         self.user = user
         self.getFoodDiary()
+        self.getTodaysFoodDiary()
     }
     
     func initiateFoodModel(){
@@ -76,6 +78,7 @@ class FoodDataModel: ObservableObject{
                 }
 
                 self.getFoodDiary()
+                self.getTodaysFoodDiary()
                 self.fetchSlimProductList()
                 self.getMeals()
             case .failure(let error):
@@ -144,6 +147,26 @@ class FoodDataModel: ObservableObject{
             if isToday{
                 self.todaysDiary =  self.foodDiary
             }
+        }
+    }
+
+    func getTodaysFoodDiary() {
+        guard let userID = sessionProvider.currentUserID else {
+            return
+        }
+
+        todaysFoodDiaryListener?.remove()
+        todaysFoodDiaryListener = foodDataLoader.observeFoodDiary(userID: userID, date: Date()) { result in
+            switch result {
+            case .success(let diary):
+                self.todaysDiary = diary ?? FoodDiary()
+            case .failure:
+                print("error decoding schema...")
+                self.todaysDiary = FoodDiary()
+            }
+
+            self.setCaloriesForDiary(for: \.todaysDiary, date: Date())
+            self.updateUsersCalories(for: \.todaysDiary)
         }
     }
     
@@ -472,60 +495,76 @@ class FoodDataModel: ObservableObject{
         }
     }
     
-    func updateUsersCalories(){
+    func updateUsersCalories(for keyPath: ReferenceWritableKeyPath<FoodDataModel, FoodDiary> = \.foodDiary){
         
         //Reset all values back to nil by created a clean object
-        self.foodDiary.usersCalorieUsed = Calories()
-        self.foodDiary.usersCalorieLeftOver = self.foodDiary.usersCalorieBudget
-        self.foodDiary.usersCalorieUsedPercentage = CaloriesPercentages()
+        self[keyPath: keyPath].usersCalorieUsed = Calories()
+        self[keyPath: keyPath].usersCalorieLeftOver = self[keyPath: keyPath].usersCalorieBudget
+        self[keyPath: keyPath].usersCalorieUsedPercentage = CaloriesPercentages()
         
-        if self.foodDiary.meals != nil {
-            for meal in foodDiary.meals! {
+        if self[keyPath: keyPath].meals != nil {
+            for meal in self[keyPath: keyPath].meals! {
                 if meal.products != nil {
                     for product in meal.products! {
                         //First set the calories Used before we calculate the percentages
                         
-                        self.foodDiary.usersCalorieUsed.kcal += product.selectedProductDetails?.kcal ?? 0
-                        self.foodDiary.usersCalorieLeftOver.kcal = self.foodDiary.usersCalorieBudget.kcal - self.foodDiary.usersCalorieUsed.kcal
+                        self[keyPath: keyPath].usersCalorieUsed.kcal += product.selectedProductDetails?.kcal ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.kcal = self[keyPath: keyPath].usersCalorieBudget.kcal - self[keyPath: keyPath].usersCalorieUsed.kcal
                         
-                        self.foodDiary.usersCalorieUsed.carbs += product.selectedProductDetails?.carbs ?? 0
-                        self.foodDiary.usersCalorieLeftOver.carbs = self.foodDiary.usersCalorieBudget.carbs - self.foodDiary.usersCalorieUsed.carbs
+                        self[keyPath: keyPath].usersCalorieUsed.carbs += product.selectedProductDetails?.carbs ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.carbs = self[keyPath: keyPath].usersCalorieBudget.carbs - self[keyPath: keyPath].usersCalorieUsed.carbs
                         
-                        self.foodDiary.usersCalorieUsed.protein += product.selectedProductDetails?.protein ?? 0
-                        self.foodDiary.usersCalorieLeftOver.protein = self.foodDiary.usersCalorieBudget.protein - self.foodDiary.usersCalorieUsed.protein
+                        self[keyPath: keyPath].usersCalorieUsed.protein += product.selectedProductDetails?.protein ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.protein = self[keyPath: keyPath].usersCalorieBudget.protein - self[keyPath: keyPath].usersCalorieUsed.protein
                         
-                        self.foodDiary.usersCalorieUsed.fat += product.selectedProductDetails?.fat ?? 0
-                        self.foodDiary.usersCalorieLeftOver.fat = self.foodDiary.usersCalorieBudget.fat - self.foodDiary.usersCalorieUsed.fat
+                        self[keyPath: keyPath].usersCalorieUsed.fat += product.selectedProductDetails?.fat ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.fat = self[keyPath: keyPath].usersCalorieBudget.fat - self[keyPath: keyPath].usersCalorieUsed.fat
                         
-                        self.foodDiary.usersCalorieUsed.fiber += product.selectedProductDetails?.fiber ?? 0
-                        self.foodDiary.usersCalorieLeftOver.fiber = self.foodDiary.usersCalorieBudget.fiber - self.foodDiary.usersCalorieUsed.fiber
+                        self[keyPath: keyPath].usersCalorieUsed.fiber += product.selectedProductDetails?.fiber ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.fiber = self[keyPath: keyPath].usersCalorieBudget.fiber - self[keyPath: keyPath].usersCalorieUsed.fiber
                     }
                 }
             }
         }
-        self.updateUsersCaloriePercentages()
+        self.updateUsersCaloriePercentages(for: keyPath)
     }
     
-    func updateUsersCaloriePercentages(){
-        self.foodDiary.usersCalorieUsedPercentage.kcal = Float(self.foodDiary.usersCalorieUsed.kcal) / Float(self.foodDiary.usersCalorieBudget.kcal)
-        
-        self.foodDiary.usersCalorieUsedPercentage.carbs = Float(self.foodDiary.usersCalorieUsed.carbs) / Float(self.foodDiary.usersCalorieBudget.carbs)
-        
-        self.foodDiary.usersCalorieUsedPercentage.protein = Float(self.foodDiary.usersCalorieUsed.protein) / Float(self.foodDiary.usersCalorieBudget.protein)
-        
-        self.foodDiary.usersCalorieUsedPercentage.fat = Float(self.foodDiary.usersCalorieUsed.fat) / Float(self.foodDiary.usersCalorieBudget.fat)
-        
-        self.foodDiary.usersCalorieUsedPercentage.fiber = Float(self.foodDiary.usersCalorieUsed.fiber) / Float(self.foodDiary.usersCalorieBudget.fiber)
+    func updateUsersCaloriePercentages(for keyPath: ReferenceWritableKeyPath<FoodDataModel, FoodDiary> = \.foodDiary){
+        self[keyPath: keyPath].usersCalorieUsedPercentage.kcal = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.kcal,
+            budget: self[keyPath: keyPath].usersCalorieBudget.kcal
+        )
+
+        self[keyPath: keyPath].usersCalorieUsedPercentage.carbs = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.carbs,
+            budget: self[keyPath: keyPath].usersCalorieBudget.carbs
+        )
+
+        self[keyPath: keyPath].usersCalorieUsedPercentage.protein = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.protein,
+            budget: self[keyPath: keyPath].usersCalorieBudget.protein
+        )
+
+        self[keyPath: keyPath].usersCalorieUsedPercentage.fat = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.fat,
+            budget: self[keyPath: keyPath].usersCalorieBudget.fat
+        )
+
+        self[keyPath: keyPath].usersCalorieUsedPercentage.fiber = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.fiber,
+            budget: self[keyPath: keyPath].usersCalorieBudget.fiber
+        )
     }
     
-    func setCaloriesForDiary(){
+    func setCaloriesForDiary(for keyPath: ReferenceWritableKeyPath<FoodDataModel, FoodDiary> = \.foodDiary, date: Date? = nil){
 
-        let dayOfWeek = self.getDayOfWeekAsNumber(date: self.date)
+        let effectiveDate = date ?? self.date
+        let dayOfWeek = self.getDayOfWeekAsNumber(date: effectiveDate)
 
-        self.foodDiary.usersCalorieBudget = Self.calorieBudget(for: self.user, dayOfWeek: dayOfWeek)
+        self[keyPath: keyPath].usersCalorieBudget = Self.calorieBudget(for: self.user, dayOfWeek: dayOfWeek)
         
         //Initiate the usersCalorieLeftOver and set it equal to the budget the first time
-        self.foodDiary.usersCalorieLeftOver = self.foodDiary.usersCalorieBudget
+        self[keyPath: keyPath].usersCalorieLeftOver = self[keyPath: keyPath].usersCalorieBudget
     }
 
     static func calorieBudget(for user: User, dayOfWeek: Int) -> Calories {
@@ -539,6 +578,15 @@ class FoodDataModel: ObservableObject{
             fat: Double(sourceMacros?.fat ?? 0),
             fiber: Double(sourceMacros?.fiber ?? 0)
         )
+    }
+
+    static func safePercentage(used: Double, budget: Double) -> Float {
+        guard budget > 0 else {
+            return 0
+        }
+
+        let value = Float(used / budget)
+        return value.isFinite ? value : 0
     }
     
 }

@@ -7,6 +7,15 @@
 
 import SwiftUI
 
+private func safeProgressWidth(value: Float, availableWidth: CGFloat) -> CGFloat {
+    guard value.isFinite, availableWidth.isFinite, availableWidth > 0 else {
+        return 0
+    }
+
+    let proposedWidth = CGFloat(value * 0.8) * availableWidth
+    return min(max(proposedWidth, 0), availableWidth)
+}
+
 //struct PreviewVerticalBar: View {
 //    var body: some View {
 //        ZStack {
@@ -84,27 +93,27 @@ struct ProgressBarLinear: View {
                     .foregroundColor(Color(UIColor.gray))
                 
                 if value <= 0.90 {
-                    Rectangle().frame(width: min(CGFloat(self.value*0.8)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                    Rectangle().frame(width: safeProgressWidth(value: self.value, availableWidth: geometry.size.width), height: geometry.size.height/2)
                     .foregroundColor(Color.red)
                     .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else if value > 0.90 && value < 0.95 {
-                    Rectangle().frame(width: min(CGFloat(self.value*0.8)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                    Rectangle().frame(width: safeProgressWidth(value: self.value, availableWidth: geometry.size.width), height: geometry.size.height/2)
                         .foregroundColor(Color.orange)
                         .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else if value >= 0.95 && value < 1.05 {
-                    Rectangle().frame(width: min(CGFloat(self.value*0.8)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                    Rectangle().frame(width: safeProgressWidth(value: self.value, availableWidth: geometry.size.width), height: geometry.size.height/2)
                         .foregroundColor(Color.green)
                         .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else if value >= 1.05 && value < 1.1 {
-                    Rectangle().frame(width: min(CGFloat(self.value*0.8)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                    Rectangle().frame(width: safeProgressWidth(value: self.value, availableWidth: geometry.size.width), height: geometry.size.height/2)
                         .foregroundColor(Color.orange)
                         .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else {
-                    Rectangle().frame(width: min(CGFloat(self.value*0.8)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                    Rectangle().frame(width: safeProgressWidth(value: self.value, availableWidth: geometry.size.width), height: geometry.size.height/2)
                         .foregroundColor(Color.red)
                         .animation(Animation.linear(duration: 0.5), value: value)
                 }
@@ -125,17 +134,17 @@ struct FiberProgressBarLinear: View {
                     .foregroundColor(Color(UIColor.gray))
                 
                 if value <= 0.90 {
-                Rectangle().frame(width: min(CGFloat(self.value*0.8)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                Rectangle().frame(width: safeProgressWidth(value: self.value, availableWidth: geometry.size.width), height: geometry.size.height/2)
                     .foregroundColor(Color.red)
                     .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else if value > 0.9 && value < 0.95 {
-                    Rectangle().frame(width: min(CGFloat(self.value*0.8)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                    Rectangle().frame(width: safeProgressWidth(value: self.value, availableWidth: geometry.size.width), height: geometry.size.height/2)
                         .foregroundColor(Color.orange)
                         .animation(Animation.linear(duration: 0.5), value: value)
                 }
                 else {
-                    Rectangle().frame(width: min(CGFloat(self.value*0.8)*geometry.size.width, geometry.size.width), height: geometry.size.height/2)
+                    Rectangle().frame(width: safeProgressWidth(value: self.value, availableWidth: geometry.size.width), height: geometry.size.height/2)
                         .foregroundColor(Color.green)
                         .animation(Animation.linear(duration: 0.5), value: value)
                 }
@@ -200,4 +209,3 @@ struct ContentViewLinearVezelFood: View {
                     }
     }
 }
-
