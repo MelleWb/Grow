@@ -21,34 +21,59 @@ class StatisticsDataModel: ObservableObject {
     var trainingHistoryListener: ListenerRegistration? = nil
     var trainingStatsListener: ListenerRegistration? = nil
     var user = User()
+    private let sessionProvider: SessionProviding
+    private let userRepository: UserRepository
+    private let schemaRepository: SchemaRepository
+    private let statisticsDataLoader: StatisticsDataLoading
+    private let statisticsDataWriter: StatisticsDataWriting
+    private let runStartupSideEffects: Bool
     
-    init(){
+    init(
+        sessionProvider: SessionProviding = FirebaseSessionProvider(),
+        userRepository: UserRepository = FirestoreUserRepository(),
+        schemaRepository: SchemaRepository = FirestoreSchemaRepository(),
+        statisticsDataLoader: StatisticsDataLoading = FirestoreStatisticsDataLoader(),
+        statisticsDataWriter: StatisticsDataWriting = FirestoreStatisticsDataWriter(),
+        autostart: Bool = true,
+        runStartupSideEffects: Bool = true
+    ){
+        self.sessionProvider = sessionProvider
+        self.userRepository = userRepository
+        self.schemaRepository = schemaRepository
+        self.statisticsDataLoader = statisticsDataLoader
+        self.statisticsDataWriter = statisticsDataWriter
+        self.runStartupSideEffects = runStartupSideEffects
+
+        guard autostart else {
+            return
+        }
+
         self.initiateStatistics()
     }
     
     func initiateStatistics(){
-        
-        let db = Firestore.firestore()
-        
-        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid)
+        guard let uid = sessionProvider.currentUserID else {
+            return
+        }
 
-        docRef.getDocument { (document, error) in
-          if let document = document, document.exists {
-            do{
-                self.user = try document.data(as: User.self)
+        userRepository.fetchUser(uid: uid) { result in
+            switch result {
+            case .success(let user):
+                self.user = user
+
+                guard self.runStartupSideEffects else {
+                    return
+                }
+
                 self.getStatisticsForCurrentRoutine()
                 
                 if self.trainingStatsListener != nil {
                     self.trainingStatsListener?.remove()
                 }
                 self.getStatisticsForCurrentSchema()
+            case .failure(let error):
+                print(error)
             }
-            catch {
-              print(error)
-            }
-          } else {
-            print("User document does not exist")
-          }
         }
     }
     
@@ -245,131 +270,76 @@ class StatisticsDataModel: ObservableObject {
     }
     
     func getStatisticsForCurrentRoutine(){
+        let dayOfWeek = self.getDayForWeekPlan()
+
         guard
-            self.user.id != "",
-            let routineID = self.user.workoutOfTheDay ?? self.getTodaysRoutine()
+            let userID = self.user.id,
+            let routineID = UserDataModel.routineID(for: self.user, dayOfWeek: dayOfWeek)
         else {
             return
         }
 
-        let routine = routineID.uuidString
-        let db = Firestore.firestore()
-
-        db.collection("users").document(self.user.id!).collection("trainingStatistics")
-            .whereField("routineID", isEqualTo: routine).order(by: "trainingDate", descending: true).limit(to: 1).getDocuments(completion: { (querySnapshot, error) in
-
-                guard let documents = querySnapshot?.documents else {
-                        print("No documents")
-                    return
-                }
-                
-            let _ = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
-                    
-                    let result = Result {
-                        try queryDocumentSnapshot.data(as: TrainingStatistics.self)
-                    }
-                    switch result {
-                    case .success(let stats):
-                        self.trainingStatistics = stats
-                        return stats
-                    case .failure(let error):
-                        print("error decoding schema: \(error)")
-                    }
-                    return TrainingStatistics()
-                }
-            })
+        statisticsDataLoader.fetchCurrentRoutineTrainingStatistics(userID: userID, routineID: routineID) { result in
+            switch result {
+            case .success(let statistics):
+                self.trainingStatistics = statistics ?? TrainingStatistics()
+            case .failure(let error):
+                print("error decoding schema: \(error)")
+                self.trainingStatistics = TrainingStatistics()
+            }
+        }
     }
     
     func getStatisticsForCurrentSchema(){
         
         if self.schemaStatistics.routineStats == nil && self.user.schema != nil {
         var schema:Schema = Schema()
-        
-        let db = Firestore.firestore()
-        
-            let docRef = db.collection("schemas").document(self.user.schema!)
-        
-        docRef.getDocument { document, error in
-          if (error as NSError?) != nil {
-              print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
-          }
-          else {
-            if let document = document {
-              do {
-                schema = try document.data(as: Schema.self)
+        schemaRepository.fetchSchema(id: self.user.schema!) { result in
+            switch result {
+            case .success(let loadedSchema):
+                schema = loadedSchema
                 
                 //Get routines for current schema
                 for routine in schema.routines {
                     
                     var routineStats: RoutineStatistics = RoutineStatistics(type: routine.type )
-                    
-                    let routineString:String = routine.id.uuidString
-                    
-                    self.trainingStatsListener = db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics")
-                        .whereField("routineID", isEqualTo: routineString).order(by: "trainingDate", descending: false).limit(to: 10).addSnapshotListener { (querySnapshot, error) in
-                            
-                            guard let documents = querySnapshot?.documents else {
-                                print("No documents")
-                                return
-                            }
-                            
-                            routineStats.trainingStats = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
-                                
-                                let result = Result {
-                                    try queryDocumentSnapshot.data(as: TrainingStatistics.self)
-                                }
-                                switch result {
-                                case .success(let stats):
-                                    return stats
-                                case .failure(let error):
-                                    print("error decoding schema: \(error)")
-                                }
-                                return TrainingStatistics(routineID: UUID(), trainingDate: Date(), trainingVolume: 0)
-                            }
+
+                    guard let userID = self.user.id else {
+                        continue
+                    }
+
+                    self.trainingStatsListener = self.statisticsDataLoader.observeRoutineTrainingStatistics(userID: userID, routineID: routine.id) { result in
+                        switch result {
+                        case .success(let trainingStatistics):
+                            routineStats.trainingStats = trainingStatistics
                             if self.schemaStatistics.routineStats != nil {
                                 self.schemaStatistics.routineStats?.append(routineStats)
-                                } else {
-                                    self.schemaStatistics.routineStats = [routineStats]
-                                }
-                            //Calculate the percentages now
+                            } else {
+                                self.schemaStatistics.routineStats = [routineStats]
+                            }
                             self.getSchemaStatisticsInPercentages()
+                        case .failure(let error):
+                            print("error decoding schema: \(error)")
                         }
+                    }
                 }
-                
-              }
-              catch {
+            case .failure(let error):
                 print(error)
-              }
             }
-          }
         }
         }
     }
     
     func loadTrainingHistory(){
         
-        if self.user.id != nil {
-        
-            let db = Firestore.firestore()
-            
-            trainingHistoryListener = db.collection("users").document(self.user.id!).collection("trainingStatistics").order(by: "trainingDate", descending: true).limit(to: 10).addSnapshotListener { (querySnapshot, error) in
-                guard let documents = querySnapshot?.documents else {
-                    print("No documents")
-                    return
-                }
-                
-                self.trainingHistory = documents.map { (queryDocumentSnapshot) -> TrainingStatistics in
-                    
-                    let result = Result {
-                        try queryDocumentSnapshot.data(as: TrainingStatistics.self)
-                    }
-                    switch result {
-                    case .success(let history):
-                        return history
-                    case .failure(let error):
-                        print("error decoding schema: \(error)")
-                    }
-                    return TrainingStatistics()
+        if let userID = self.user.id {
+            trainingHistoryListener = statisticsDataLoader.observeTrainingHistory(userID: userID) { result in
+                switch result {
+                case .success(let history):
+                    self.trainingHistory = history
+                case .failure(let error):
+                    print("error decoding schema: \(error)")
+                    self.trainingHistory = []
                 }
             }
         }
@@ -377,12 +347,14 @@ class StatisticsDataModel: ObservableObject {
     
     func removeTrainingHistory(for index: Int){
         let documentID = self.trainingHistory[index].documentID ?? ""
-        
-        let db = Firestore.firestore()
-        
-        db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics").document(documentID).delete() { err in
-            if let err = err {
-                print("Error removing document: \(err)")
+
+        guard let userID = sessionProvider.currentUserID else {
+            return
+        }
+
+        statisticsDataWriter.deleteTrainingHistory(userID: userID, documentID: documentID) { result in
+            if case .failure(let error) = result {
+                print("Error removing document: \(error)")
             }
         }
     }
@@ -451,35 +423,13 @@ class StatisticsDataModel: ObservableObject {
         
         let trainingStatisticsObject: TrainingStatistics = TrainingStatistics(routineID: routineID, trainingDate: date, trainingVolume: volume, exerciceStatistics: exerciseStatistics)
         
-        let db = Firestore.firestore()
-        
-        
-        //Update each exercise in Firebase
-        for exercise in exerciseStatistics {
-            let exerciseStats = db.collection("users").document(user).collection("exerciseStatistics").document()
-            
-            do {
-                try exerciseStats.setData(from: exercise, merge: true)
-            }
-            catch {
+        statisticsDataWriter.saveTraining(userID: user, exerciseStatistics: exerciseStatistics, trainingStatistics: trainingStatisticsObject) { result in
+            if case .failure = result {
                 success = false
-                return success
             }
         }
-            
-        //Update the training in Firebase
-            
-            let trainingStats = db.collection("users").document(user).collection("trainingStatistics").document()
-            
-            do {
-                try trainingStats.setData(from: trainingStatisticsObject, merge: true)
-            }
-            catch {
-                success = false
-                return success
-            }
-            return success
-      }
+        return success
+    }
     
     func getRepsForSet(for exercise: Exercise, for set: Int) -> Int {
         if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID ==  exercise.id && $0.set == set}) {

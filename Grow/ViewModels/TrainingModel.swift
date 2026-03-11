@@ -31,30 +31,57 @@ class TrainingDataModel: ObservableObject{
     var user = User()
     
     private var db = Firestore.firestore()
+    private let sessionProvider: SessionProviding
+    private let userRepository: UserRepository
+    private let schemaRepository: SchemaRepository
+    private let trainingDataLoader: TrainingDataLoading
+    private let trainingDataWriter: TrainingDataWriting
+    private let runStartupSideEffects: Bool
     
-    init(){
-        fetchData()
+    init(
+        sessionProvider: SessionProviding = FirebaseSessionProvider(),
+        userRepository: UserRepository = FirestoreUserRepository(),
+        schemaRepository: SchemaRepository = FirestoreSchemaRepository(),
+        trainingDataLoader: TrainingDataLoading = FirestoreTrainingDataLoader(),
+        trainingDataWriter: TrainingDataWriting = FirestoreTrainingDataWriter(),
+        autostart: Bool = true,
+        runStartupSideEffects: Bool = true
+    ){
+        self.sessionProvider = sessionProvider
+        self.userRepository = userRepository
+        self.schemaRepository = schemaRepository
+        self.trainingDataLoader = trainingDataLoader
+        self.trainingDataWriter = trainingDataWriter
+        self.runStartupSideEffects = runStartupSideEffects
+
+        guard autostart else {
+            return
+        }
+
+        if runStartupSideEffects {
+            fetchData()
+        }
         initiateTrainingModel()
     }
     
     func initiateTrainingModel(){
-        
-        let db = Firestore.firestore()
-        
-        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid)
+        guard let uid = sessionProvider.currentUserID else {
+            return
+        }
 
-        docRef.getDocument { (document, error) in
-          if let document = document, document.exists {
-            do{
-                self.user = try document.data(as: User.self)
+        userRepository.fetchUser(uid: uid) { result in
+            switch result {
+            case .success(let user):
+                self.user = user
+
+                guard self.runStartupSideEffects else {
+                    return
+                }
+
                 self.loadRoutineFromSchema()
+            case .failure(let error):
+                print(error)
             }
-            catch {
-              print(error)
-            }
-          } else {
-            print("User document does not exist")
-          }
         }
     }
     
@@ -88,34 +115,29 @@ class TrainingDataModel: ObservableObject{
     
     
     func loadRoutineFromSchema(){
+        let dayOfWeek = self.getDayForWeekPlan()
+
         guard
             let schemaID = self.user.schema,
-            let todaysRoutine = self.user.workoutOfTheDay ?? self.getTodaysRoutine()
+            let todaysRoutine = UserDataModel.routineID(for: self.user, dayOfWeek: dayOfWeek)
         else {
             self.routine = Routine()
             return
         }
 
-        let db = Firestore.firestore()
-        let docRef = db.collection("schemas").document(schemaID)
+        schemaRepository.fetchSchema(id: schemaID) { result in
+            switch result {
+            case .success(let schema):
+                self.schema = schema
 
-        docRef.getDocument { document, error in
-            if (error as NSError?) != nil {
-                print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
-            } else if let document = document {
-                do {
-                    self.schema = try document.data(as: Schema.self)
-
-                    if let index = self.schema.routines.firstIndex(where: { $0.id == todaysRoutine }) {
-                        self.routine = self.schema.routines[index]
-                    } else {
-                        self.routine = Routine()
-                    }
-                }
-                catch {
-                    print(error)
+                if let index = self.schema.routines.firstIndex(where: { $0.id == todaysRoutine }) {
+                    self.routine = self.schema.routines[index]
+                } else {
                     self.routine = Routine()
                 }
+            case .failure(let error):
+                print(error)
+                self.routine = Routine()
             }
         }
     }
@@ -247,52 +269,25 @@ class TrainingDataModel: ObservableObject{
     }
         
     func fetchData() {
-        
-        let db = Firestore.firestore()
-        
-        db.collection("schemas").addSnapshotListener { (querySnapshot, error) in
-                guard let documents = querySnapshot?.documents else {
-                    print("No documents")
-                    return
-                }
-                
-                self.fetchedSchemas = documents.map { (queryDocumentSnapshot) -> Schema in
-                    
-                    let result = Result {
-                        try queryDocumentSnapshot.data(as: Schema.self)
-                    }
-                    switch result {
-                    case .success(let schema):
-                        return Schema(id: schema.id, docID: schema.docID, type: schema.type, name: schema.name, routines: schema.routines)
-                    case .failure(let error):
-                        print("error decoding schema: \(error)")
-                    }
-                    
-                    return Schema(type: "", name: "test")
-                }
+        _ = trainingDataLoader.observeSchemas { result in
+            switch result {
+            case .success(let schemas):
+                self.fetchedSchemas = schemas
+            case .failure(let error):
+                print("error decoding schema: \(error)")
+                self.fetchedSchemas = []
             }
         }
+    }
     
     func getTrainingSchema(for schemaDocID: String){
-        
-        let db = Firestore.firestore()
-        
-        let docRef = db.collection("schemas").document(schemaDocID)
-          
-        docRef.getDocument { document, error in
-          if (error as NSError?) != nil {
-              print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
-          }
-          else {
-            if let document = document {
-              do {
-                self.schema = try document.data(as: Schema.self)
-              }
-              catch {
+        trainingDataWriter.fetchSchema(documentID: schemaDocID) { result in
+            switch result {
+            case .success(let schema):
+                self.schema = schema
+            case .failure(let error):
                 print(error)
-              }
             }
-          }
         }
     }
     
@@ -322,18 +317,14 @@ class TrainingDataModel: ObservableObject{
             schema.name = schemaName
         }
         
-        let db = Firestore.firestore()
-        
-        let newSchemaRef = db.collection("schemas").document()
-        
-        do {
-            try newSchemaRef.setData(from: schema, merge: true)
+        var success = true
+        trainingDataWriter.createSchema(schema) { result in
+            if case .failure(let error) = result {
+                print(error)
+                success = false
+            }
         }
-        catch let error {
-            print(error)
-            return false
-        }
-        return true
+        return success
     }
     
     func updateTraining(schema: Schema){
@@ -362,16 +353,11 @@ class TrainingDataModel: ObservableObject{
             schema.name = schemaName
         }
         
-        let db = Firestore.firestore()
-        
         let saveSchema: Schema = schema
-        let newSchemaRef = db.collection("schemas").document(schema.docID!)
-        
-        do {
-            try newSchemaRef.setData(from: saveSchema, merge: true)
-        }
-        catch let error {
-            print(error)
+        trainingDataWriter.updateSchema(saveSchema) { result in
+            if case .failure(let error) = result {
+                print(error)
+            }
         }
     }
 }

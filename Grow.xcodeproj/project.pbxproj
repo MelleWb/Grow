@@ -55,6 +55,9 @@
 		859B9452268B9A1B003F58F2 /* ExerciseOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 859B9451268B9A1B003F58F2 /* ExerciseOverview.swift */; };
 		859B9454268B9A37003F58F2 /* ExerciseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 859B9453268B9A37003F58F2 /* ExerciseModel.swift */; };
 		85A68CA5275B702300C1A5AA /* WeightActionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A68CA4275B702300C1A5AA /* WeightActionSheet.swift */; };
+		85A74D882F61A3D900D74F9E /* ModelDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A74D872F61A3D900D74F9E /* ModelDecodingTests.swift */; };
+		85A74D8A2F61A9F900D74F9E /* FirebaseDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A74D892F61A9F900D74F9E /* FirebaseDependencies.swift */; };
+		85A74D8C2F61AA1000D74F9E /* StartupIsolationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A74D8B2F61AA1000D74F9E /* StartupIsolationTests.swift */; };
 		85A80F4B27B6582C00248258 /* PreviewBars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A80F4A27B6582C00248258 /* PreviewBars.swift */; };
 		85A9352F2763805F0053E693 /* Login.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A9352E2763805F0053E693 /* Login.swift */; };
 		85A935312763F9DC0053E693 /* LinkButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A935302763F9DB0053E693 /* LinkButtonStyle.swift */; };
@@ -177,6 +180,9 @@
 		859B9451268B9A1B003F58F2 /* ExerciseOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseOverview.swift; sourceTree = "<group>"; };
 		859B9453268B9A37003F58F2 /* ExerciseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseModel.swift; sourceTree = "<group>"; };
 		85A68CA4275B702300C1A5AA /* WeightActionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightActionSheet.swift; sourceTree = "<group>"; };
+		85A74D872F61A3D900D74F9E /* ModelDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDecodingTests.swift; sourceTree = "<group>"; };
+		85A74D892F61A9F900D74F9E /* FirebaseDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseDependencies.swift; sourceTree = "<group>"; };
+		85A74D8B2F61AA1000D74F9E /* StartupIsolationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupIsolationTests.swift; sourceTree = "<group>"; };
 		85A80F4A27B6582C00248258 /* PreviewBars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewBars.swift; sourceTree = "<group>"; };
 		85A9352E2763805F0053E693 /* Login.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Login.swift; sourceTree = "<group>"; };
 		85A935302763F9DB0053E693 /* LinkButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkButtonStyle.swift; sourceTree = "<group>"; };
@@ -305,6 +311,8 @@
 			children = (
 				851AFF4A2673D6DC0092DA9B /* GrowTests.swift */,
 				851AFF4C2673D6DC0092DA9B /* Info.plist */,
+				85A74D872F61A3D900D74F9E /* ModelDecodingTests.swift */,
+				85A74D8B2F61AA1000D74F9E /* StartupIsolationTests.swift */,
 			);
 			path = GrowTests;
 			sourceTree = "<group>";
@@ -381,6 +389,7 @@
 				850C966426FF691500051772 /* LoadImage.swift */,
 				850C966626FFA29600051772 /* HealthKit.swift */,
 				850B592C27693DCD008DA670 /* GoogleAdsManager.swift */,
+				85A74D892F61A9F900D74F9E /* FirebaseDependencies.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -685,6 +694,7 @@
 				857E622E2684B80900A3A9A4 /* ImagePicker.swift in Sources */,
 				85597D7726A2C166005375F7 /* DisableAutoDismiss.swift in Sources */,
 				850B59292769297D008DA670 /* FoodCharts.swift in Sources */,
+				85A74D8A2F61A9F900D74F9E /* FirebaseDependencies.swift in Sources */,
 				85827C1A27EDB62300B34D9C /* SplashScreen.swift in Sources */,
 				854F1DD827557870009E70B7 /* ChevronButtonStyle.swift in Sources */,
 				857E622A268472D600A3A9A4 /* Helpers.swift in Sources */,
@@ -696,6 +706,8 @@
 		851AFF422673D6DC0092DA9B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
+				85A74D882F61A3D900D74F9E /* ModelDecodingTests.swift in Sources */,
+				85A74D8C2F61AA1000D74F9E /* StartupIsolationTests.swift in Sources */,
 				851AFF4B2673D6DC0092DA9B /* GrowTests.swift in Sources */,
 			);
 		};
@@ -947,7 +959,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = GrowTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -971,7 +983,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = GrowTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -993,6 +1005,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = GrowUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1012,6 +1025,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = GrowUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
