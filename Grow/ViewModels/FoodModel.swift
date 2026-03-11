@@ -22,45 +22,68 @@ class FoodDataModel: ObservableObject{
     
     var user = User()
     var foodDiaryListener: ListenerRegistration? = nil
+    var todaysFoodDiaryListener: ListenerRegistration? = nil
     var mealListener: ListenerRegistration? = nil
     var productListener: ListenerRegistration? = nil
     
     @Published var todaysDiary = FoodDiary()
     @Published var otherDaysIntake = [FoodDiary()]
+    private let sessionProvider: SessionProviding
+    private let userRepository: UserRepository
+    private let foodDataLoader: FoodDataLoading
+    private let foodDataWriter: FoodDataWriting
+    private let runStartupSideEffects: Bool
     
     private enum ErrorType : Error {
         case NullPointer
     }
     
-    init(){
-        self.initiateFoodModel()
+    init(
+        sessionProvider: SessionProviding = FirebaseSessionProvider(),
+        userRepository: UserRepository = FirestoreUserRepository(),
+        foodDataLoader: FoodDataLoading = FirestoreFoodDataLoader(),
+        foodDataWriter: FoodDataWriting = FirestoreFoodDataWriter(),
+        autostart: Bool = true,
+        runStartupSideEffects: Bool = true
+    ){
+        self.sessionProvider = sessionProvider
+        self.userRepository = userRepository
+        self.foodDataLoader = foodDataLoader
+        self.foodDataWriter = foodDataWriter
+        self.runStartupSideEffects = runStartupSideEffects
+
+        if autostart {
+            self.initiateFoodModel()
+        }
     }
     
     func  resetUser(user:  User){
         self.user = user
         self.getFoodDiary()
+        self.getTodaysFoodDiary()
     }
     
     func initiateFoodModel(){
-        
-        let db = Firestore.firestore()
-        
-        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid)
+        guard let uid = sessionProvider.currentUserID else {
+            return
+        }
 
-        docRef.getDocument { (document, error) in
-          if let document = document, document.exists {
-            do{
-                self.user = try document.data(as: User.self)
+        userRepository.fetchUser(uid: uid) { result in
+            switch result {
+            case .success(let user):
+                self.user = user
+
+                guard self.runStartupSideEffects else {
+                    return
+                }
+
                 self.getFoodDiary()
+                self.getTodaysFoodDiary()
                 self.fetchSlimProductList()
                 self.getMeals()
+            case .failure(let error):
+                print(error)
             }
-            catch {
-              print(error)
-            }
-          } else {
-            print("User document does not exist")
-          }
         }
     }
     
@@ -105,41 +128,19 @@ class FoodDataModel: ObservableObject{
     }
     
     func getFoodDiary(){
-        
-        let db = Firestore.firestore()
-        
-        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
-        
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month, .day], from: date)
-        let start = calendar.date(from: components)!
-        let end = calendar.date(byAdding: .day, value: 1, to: start)!
-        let queryRef = docRef
-           .whereField("date", isGreaterThan: start)
-           .whereField("date", isLessThan: end)
-            .limit(to: 1)
-        
-        foodDiaryListener = queryRef.addSnapshotListener { (querySnapshot, error) in
-            
-                    guard let documents = querySnapshot?.documents else {
-                            print("No documents")
-                        return
-                    }
-            
-            let _:[FoodDiary] = documents.map { (querySnapshot) -> FoodDiary in
-                
-                let result = Result {
-                    try querySnapshot.data(as: FoodDiary.self)
-                }
-                switch result {
-                case .success(let stats):
-                    self.foodDiary = stats
-                    return stats
-                case .failure:
-                    print("error decoding schema...")
-                }
-                return FoodDiary()
+        guard let userID = sessionProvider.currentUserID else {
+            return
+        }
+
+        foodDiaryListener = foodDataLoader.observeFoodDiary(userID: userID, date: date) { result in
+            switch result {
+            case .success(let diary):
+                self.foodDiary = diary ?? FoodDiary()
+            case .failure:
+                print("error decoding schema...")
+                self.foodDiary = FoodDiary()
             }
+
             self.setCaloriesForDiary()
             self.updateUsersCalories()
             let isToday = Calendar.current.isDateInToday(self.date)
@@ -148,123 +149,78 @@ class FoodDataModel: ObservableObject{
             }
         }
     }
+
+    func getTodaysFoodDiary() {
+        guard let userID = sessionProvider.currentUserID else {
+            return
+        }
+
+        todaysFoodDiaryListener?.remove()
+        todaysFoodDiaryListener = foodDataLoader.observeFoodDiary(userID: userID, date: Date()) { result in
+            switch result {
+            case .success(let diary):
+                self.todaysDiary = diary ?? FoodDiary()
+            case .failure:
+                print("error decoding schema...")
+                self.todaysDiary = FoodDiary()
+            }
+
+            self.setCaloriesForDiary(for: \.todaysDiary, date: Date())
+            self.updateUsersCalories(for: \.todaysDiary)
+        }
+    }
     
     func copyMeal(meal: Meal){
-        
-        let db = Firestore.firestore()
-        
-        let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
-        
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month, .day], from: date)
-        let start = calendar.date(from: components)!
-        let end = calendar.date(byAdding: .day, value: 1, to: start)!
-        let queryRef = docRef
-           .whereField("date", isGreaterThan: start)
-           .whereField("date", isLessThan: end)
-            .limit(to: 1)
-
-            queryRef.getDocuments() { (querySnapshot, err) in
-                if let err = err {
-                    print("Error getting documents: \(err)")
-                } else {
-                    if querySnapshot!.documents.count > 0 {
-                        for document in querySnapshot!.documents {
-                            do{
-                                var diaryToCopyInto: FoodDiary = try document.data(as: FoodDiary.self)
-                                if diaryToCopyInto.meals == nil {
-                                    diaryToCopyInto.meals = [meal]
-                                } else {
-                                    diaryToCopyInto.meals!.append(meal)
-                                }
-                                do {
-                                    try docRef.document(document.documentID).setData(from: diaryToCopyInto, merge: true)
-                                }
-                                catch {
-                                  print(error)
-                                }
-                            }
-                            catch{
-                                print("error")
-                            }
-                        }
-                    } else {
-                        var diaryToCopyInto: FoodDiary = FoodDiary()
-                        //set the meal to the created diary and set the date correct
-                        diaryToCopyInto.meals = [meal]
-                        diaryToCopyInto.date = self.date
-                            do {
-                                try docRef.document().setData(from: diaryToCopyInto)
-                            }
-                            catch {
-                              print(error)
-                            }
-                    }
-                }
-            }
-            //self.saveCopiedMeal(meal: meal)
+        guard let userID = sessionProvider.currentUserID else {
+            return
         }
+
+        foodDataWriter.copyMeal(userID: userID, date: date, meal: meal) { result in
+            if case .failure(let error) = result {
+                print(error)
+            }
+        }
+    }
     
     func createProduct(product: Product) -> Bool{
-        
-        let db = Firestore.firestore()
-        let prodRef = db.collection("foodProducts")
-        let slimProdRef = db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg")
-        
-        var docRef: DocumentReference? = nil
-        
-        if product.documentID != "" {
-            docRef = prodRef.document(product.documentID!)
-        } else {
-            docRef = prodRef.document()
-        }
-        
-        //MARK: Add/Update the slim version of the product
-        var slimProduct:SlimProduct?
         var slimProductList = self.slimProductList
-        
-        if let slimProdIndex:Int = self.slimProductList.products.firstIndex(where: { $0.documentID == docRef!.documentID }){
+        var slimProduct: SlimProduct?
+
+        let documentID = (product.documentID?.isEmpty == false) ? product.documentID! : UUID().uuidString
+
+        if let slimProdIndex:Int = self.slimProductList.products.firstIndex(where: { $0.documentID == documentID }){
             slimProduct = self.slimProductList.products[slimProdIndex]
             slimProduct!.name = product.name
             slimProductList.products.remove(at: slimProdIndex)
             slimProductList.products.append(slimProduct!)
         } else {
-            slimProduct = SlimProduct(documentID: docRef!.documentID, name: product.name)
+            slimProduct = SlimProduct(documentID: documentID, name: product.name)
             slimProductList.products.append(slimProduct!)
         }
 
-        do {
-            try docRef!.setData(from: product, merge: true)
-            try slimProdRef.setData(from: slimProductList, merge:true)
-            return true
+        var productToSave = product
+        productToSave.documentID = documentID
+
+        var success = true
+        foodDataWriter.saveProduct(productToSave, slimProductList: slimProductList) { result in
+            if case .failure(let error) = result {
+                print(error)
+                success = false
+            }
         }
-        catch {
-          print(error)
-            return false
-        }
+        return success
     }
     
     func deleteProduct(documentID: String){
-        
-        let db = Firestore.firestore()
+        var slimProductList = self.slimProductList
 
-        db.collection("foodProducts").document(documentID).delete() { err in
-            if let err = err {
-                print("Error removing document: \(err)")
-            } else {
-                var slimProductList = self.slimProductList
+        if let slimProdIndex:Int = slimProductList.products.firstIndex(where: { $0.documentID == documentID }){
+            slimProductList.products.remove(at: slimProdIndex)
+        }
 
-                if let slimProdIndex:Int = slimProductList.products.firstIndex(where: { $0.documentID == documentID }){
-
-                    slimProductList.products.remove(at: slimProdIndex)
-                    let slimProdRef = db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg")
-
-                    do {
-                        try slimProdRef.setData(from: slimProductList, merge: true)
-                    } catch{
-                        print("Error in deleting the slim product")
-                    }
-                }
+        foodDataWriter.deleteProduct(documentID: documentID, slimProductList: slimProductList) { result in
+            if case .failure(let error) = result {
+                print("Error removing document: \(error)")
             }
         }
     }
@@ -293,93 +249,39 @@ class FoodDataModel: ObservableObject{
     }
     
     func saveDiary() {
-        
-        //Make sure the date of the foodDiary is right
+        guard let userID = sessionProvider.currentUserID else {
+            return
+        }
+
         self.foodDiary.date = self.date
-        
-        let db = Firestore.firestore()
-        
-        let diaryRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
-        
-        if self.foodDiary.id == "" {
-            let newDiary = diaryRef.document()
-            
-            do {
-                try newDiary.setData(from: self.foodDiary, merge: true)
-            }
-            catch {
-              print(error)
-            }
-        } else {
-            let documentID = self.foodDiary.id!
-            let existingDiary = diaryRef.document(documentID)
-            do {
-                try existingDiary.setData(from: self.foodDiary, merge: true)
-            }
-            catch {
-              print(error)
+        foodDataWriter.saveDiary(userID: userID, diary: self.foodDiary) { result in
+            if case .failure(let error) = result {
+                print(error)
             }
         }
     }
     
     func getMeals(){
-        
-        let db = Firestore.firestore()
-        
-        let docRef = db.collection("meals")
-        
-        mealListener = docRef.addSnapshotListener { (querySnapshot, error) in
-            
-                    guard let documents = querySnapshot?.documents else {
-                            print("No documents")
-                        return
-                    }
-            
-            self.savedMeals = documents.map { (querySnapshot) -> Meal in
-                
-                let result = Result {
-                    try querySnapshot.data(as: Meal.self)
-                }
-                switch result {
-                case .success(let stats):
-                    return stats
-                case .failure:
-                    print("error decoding schema...")
-                }
-                return Meal()
+        mealListener = foodDataLoader.observeMeals { result in
+            switch result {
+            case .success(let meals):
+                self.savedMeals = meals
+            case .failure:
+                print("error decoding schema...")
+                self.savedMeals = []
             }
         }
     }
     
     func saveMeal(for meal: Meal) -> Bool {
-        
-        let db = Firestore.firestore()
-        
-        let mealRef = db.collection("meals")
-        
-        if meal.documentID == nil {
-            let newMealRef = mealRef.document()
-            
-            do {
-                try newMealRef.setData(from: meal, merge: true)
-                return true
-            }
-            catch {
-              print(error)
-                return false
-            }
-        } else {
-            let documentID = meal.documentID!
-            let existingMealRef = mealRef.document(documentID)
-            do {
-                try existingMealRef.setData(from: meal, merge: true)
-                return true
-            }
-            catch {
-              print(error)
-                return false
+        var success = true
+        foodDataWriter.saveMeal(meal) { result in
+            if case .failure(let error) = result {
+                print(error)
+                success = false
             }
         }
+        return success
     }
     
 //    func fetchProducts(){
@@ -418,20 +320,11 @@ class FoodDataModel: ObservableObject{
 //    }
     
     func fetchSlimProductList() {
-        
-        let db = Firestore.firestore()
-        
-        db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg").addSnapshotListener { documentSnapshot, error in
-            
-            guard let document = documentSnapshot else {
-              print("Error fetching document: \(error!)")
-              return
-            }
-            
-            do {
-                self.slimProductList = try document.data(as: SlimProductList.self)
-            } catch {
-                
+        productListener = foodDataLoader.observeSlimProductList { result in
+            switch result {
+            case .success(let slimProductList):
+                self.slimProductList = slimProductList
+            case .failure:
                 print("error in parsing slim document list")
             }
         }
@@ -602,75 +495,98 @@ class FoodDataModel: ObservableObject{
         }
     }
     
-    func updateUsersCalories(){
+    func updateUsersCalories(for keyPath: ReferenceWritableKeyPath<FoodDataModel, FoodDiary> = \.foodDiary){
         
         //Reset all values back to nil by created a clean object
-        self.foodDiary.usersCalorieUsed = Calories()
-        self.foodDiary.usersCalorieLeftOver = self.foodDiary.usersCalorieBudget
-        self.foodDiary.usersCalorieUsedPercentage = CaloriesPercentages()
+        self[keyPath: keyPath].usersCalorieUsed = Calories()
+        self[keyPath: keyPath].usersCalorieLeftOver = self[keyPath: keyPath].usersCalorieBudget
+        self[keyPath: keyPath].usersCalorieUsedPercentage = CaloriesPercentages()
         
-        if self.foodDiary.meals != nil {
-            for meal in foodDiary.meals! {
+        if self[keyPath: keyPath].meals != nil {
+            for meal in self[keyPath: keyPath].meals! {
                 if meal.products != nil {
                     for product in meal.products! {
                         //First set the calories Used before we calculate the percentages
                         
-                        self.foodDiary.usersCalorieUsed.kcal += product.selectedProductDetails?.kcal ?? 0
-                        self.foodDiary.usersCalorieLeftOver.kcal = self.foodDiary.usersCalorieBudget.kcal - self.foodDiary.usersCalorieUsed.kcal
+                        self[keyPath: keyPath].usersCalorieUsed.kcal += product.selectedProductDetails?.kcal ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.kcal = self[keyPath: keyPath].usersCalorieBudget.kcal - self[keyPath: keyPath].usersCalorieUsed.kcal
                         
-                        self.foodDiary.usersCalorieUsed.carbs += product.selectedProductDetails?.carbs ?? 0
-                        self.foodDiary.usersCalorieLeftOver.carbs = self.foodDiary.usersCalorieBudget.carbs - self.foodDiary.usersCalorieUsed.carbs
+                        self[keyPath: keyPath].usersCalorieUsed.carbs += product.selectedProductDetails?.carbs ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.carbs = self[keyPath: keyPath].usersCalorieBudget.carbs - self[keyPath: keyPath].usersCalorieUsed.carbs
                         
-                        self.foodDiary.usersCalorieUsed.protein += product.selectedProductDetails?.protein ?? 0
-                        self.foodDiary.usersCalorieLeftOver.protein = self.foodDiary.usersCalorieBudget.protein - self.foodDiary.usersCalorieUsed.protein
+                        self[keyPath: keyPath].usersCalorieUsed.protein += product.selectedProductDetails?.protein ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.protein = self[keyPath: keyPath].usersCalorieBudget.protein - self[keyPath: keyPath].usersCalorieUsed.protein
                         
-                        self.foodDiary.usersCalorieUsed.fat += product.selectedProductDetails?.fat ?? 0
-                        self.foodDiary.usersCalorieLeftOver.fat = self.foodDiary.usersCalorieBudget.fat - self.foodDiary.usersCalorieUsed.fat
+                        self[keyPath: keyPath].usersCalorieUsed.fat += product.selectedProductDetails?.fat ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.fat = self[keyPath: keyPath].usersCalorieBudget.fat - self[keyPath: keyPath].usersCalorieUsed.fat
                         
-                        self.foodDiary.usersCalorieUsed.fiber += product.selectedProductDetails?.fiber ?? 0
-                        self.foodDiary.usersCalorieLeftOver.fiber = self.foodDiary.usersCalorieBudget.fiber - self.foodDiary.usersCalorieUsed.fiber
+                        self[keyPath: keyPath].usersCalorieUsed.fiber += product.selectedProductDetails?.fiber ?? 0
+                        self[keyPath: keyPath].usersCalorieLeftOver.fiber = self[keyPath: keyPath].usersCalorieBudget.fiber - self[keyPath: keyPath].usersCalorieUsed.fiber
                     }
                 }
             }
         }
-        self.updateUsersCaloriePercentages()
+        self.updateUsersCaloriePercentages(for: keyPath)
     }
     
-    func updateUsersCaloriePercentages(){
-        self.foodDiary.usersCalorieUsedPercentage.kcal = Float(self.foodDiary.usersCalorieUsed.kcal) / Float(self.foodDiary.usersCalorieBudget.kcal)
-        
-        self.foodDiary.usersCalorieUsedPercentage.carbs = Float(self.foodDiary.usersCalorieUsed.carbs) / Float(self.foodDiary.usersCalorieBudget.carbs)
-        
-        self.foodDiary.usersCalorieUsedPercentage.protein = Float(self.foodDiary.usersCalorieUsed.protein) / Float(self.foodDiary.usersCalorieBudget.protein)
-        
-        self.foodDiary.usersCalorieUsedPercentage.fat = Float(self.foodDiary.usersCalorieUsed.fat) / Float(self.foodDiary.usersCalorieBudget.fat)
-        
-        self.foodDiary.usersCalorieUsedPercentage.fiber = Float(self.foodDiary.usersCalorieUsed.fiber) / Float(self.foodDiary.usersCalorieBudget.fiber)
+    func updateUsersCaloriePercentages(for keyPath: ReferenceWritableKeyPath<FoodDataModel, FoodDiary> = \.foodDiary){
+        self[keyPath: keyPath].usersCalorieUsedPercentage.kcal = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.kcal,
+            budget: self[keyPath: keyPath].usersCalorieBudget.kcal
+        )
+
+        self[keyPath: keyPath].usersCalorieUsedPercentage.carbs = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.carbs,
+            budget: self[keyPath: keyPath].usersCalorieBudget.carbs
+        )
+
+        self[keyPath: keyPath].usersCalorieUsedPercentage.protein = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.protein,
+            budget: self[keyPath: keyPath].usersCalorieBudget.protein
+        )
+
+        self[keyPath: keyPath].usersCalorieUsedPercentage.fat = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.fat,
+            budget: self[keyPath: keyPath].usersCalorieBudget.fat
+        )
+
+        self[keyPath: keyPath].usersCalorieUsedPercentage.fiber = Self.safePercentage(
+            used: self[keyPath: keyPath].usersCalorieUsed.fiber,
+            budget: self[keyPath: keyPath].usersCalorieBudget.fiber
+        )
     }
     
-    func setCaloriesForDiary(){
+    func setCaloriesForDiary(for keyPath: ReferenceWritableKeyPath<FoodDataModel, FoodDiary> = \.foodDiary, date: Date? = nil){
 
-        let dayOfWeek = self.getDayOfWeekAsNumber(date: self.date)
-        
-        if user.weekPlan != nil{
+        let effectiveDate = date ?? self.date
+        let dayOfWeek = self.getDayOfWeekAsNumber(date: effectiveDate)
 
-            if user.weekPlan![dayOfWeek].isTrainingDay ?? false{
-                self.foodDiary.usersCalorieBudget.kcal = Double(self.user.sportCalories?.kcal ?? 0)
-                self.foodDiary.usersCalorieBudget.carbs = Double(self.user.sportCalories?.carbs ?? 0)
-                self.foodDiary.usersCalorieBudget.protein = Double(self.user.sportCalories?.protein ?? 0)
-                self.foodDiary.usersCalorieBudget.fat = Double(self.user.sportCalories?.fat ?? 0)
-                self.foodDiary.usersCalorieBudget.fiber = Double(self.user.sportCalories?.fiber ?? 0)
-            } else {
-                self.foodDiary.usersCalorieBudget.kcal = Double(self.user.restCalories?.kcal ?? 0)
-                self.foodDiary.usersCalorieBudget.carbs = Double(self.user.restCalories?.carbs ?? 0)
-                self.foodDiary.usersCalorieBudget.protein = Double(self.user.restCalories?.protein ?? 0)
-                self.foodDiary.usersCalorieBudget.fat = Double(self.user.restCalories?.fat ?? 0)
-                self.foodDiary.usersCalorieBudget.fiber = Double(self.user.restCalories?.fiber ?? 0)
-            }
-        }
+        self[keyPath: keyPath].usersCalorieBudget = Self.calorieBudget(for: self.user, dayOfWeek: dayOfWeek)
         
         //Initiate the usersCalorieLeftOver and set it equal to the budget the first time
-        self.foodDiary.usersCalorieLeftOver = self.foodDiary.usersCalorieBudget
+        self[keyPath: keyPath].usersCalorieLeftOver = self[keyPath: keyPath].usersCalorieBudget
+    }
+
+    static func calorieBudget(for user: User, dayOfWeek: Int) -> Calories {
+        let trainingDay = user.weekPlan?.indices.contains(dayOfWeek) == true && user.weekPlan?[dayOfWeek].isTrainingDay == true
+        let sourceMacros = trainingDay ? user.sportCalories : user.restCalories
+
+        return Calories(
+            kcal: Double(sourceMacros?.kcal ?? 0),
+            carbs: Double(sourceMacros?.carbs ?? 0),
+            protein: Double(sourceMacros?.protein ?? 0),
+            fat: Double(sourceMacros?.fat ?? 0),
+            fiber: Double(sourceMacros?.fiber ?? 0)
+        )
+    }
+
+    static func safePercentage(used: Double, budget: Double) -> Float {
+        guard budget > 0 else {
+            return 0
+        }
+
+        let value = Float(used / budget)
+        return value.isFinite ? value : 0
     }
     
 }

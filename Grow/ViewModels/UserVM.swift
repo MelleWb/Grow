@@ -24,7 +24,11 @@ class UserDataModel: ObservableObject{
     @Published var currentDate: Date = Date()
     var measurementListener: ListenerRegistration? = nil
     
-    private let storeManager = StoreManager()
+    private let sessionProvider: SessionProviding
+    private let userRepository: UserRepository
+    private let schemaRepository: SchemaRepository
+    private let storeManager: StoreManaging
+    private let runStartupSideEffects: Bool
     
     private enum UserError: Error {
         case NoUserID
@@ -34,65 +38,71 @@ class UserDataModel: ObservableObject{
         case IssueWithCalories
     }
     
-    init(){
-        storeManager.startObserving()
-        storeManager.getProducts()
-        
-        if Auth.auth().currentUser?.uid != nil{
-            self.fetchUser(uid: Auth.auth().currentUser!.uid){
-                //Just wait until it's done
-            }
+    init(
+        sessionProvider: SessionProviding = FirebaseSessionProvider(),
+        userRepository: UserRepository = FirestoreUserRepository(),
+        schemaRepository: SchemaRepository = FirestoreSchemaRepository(),
+        storeManager: StoreManaging = StoreManager(),
+        autostart: Bool = true,
+        runStartupSideEffects: Bool = true
+    ){
+        self.sessionProvider = sessionProvider
+        self.userRepository = userRepository
+        self.schemaRepository = schemaRepository
+        self.storeManager = storeManager
+        self.runStartupSideEffects = runStartupSideEffects
+
+        if autostart {
+            start()
+        }
+    }
+
+    func start() {
+        if runStartupSideEffects {
+            storeManager.startObserving()
+            storeManager.getProducts()
+        }
+
+        guard let uid = sessionProvider.currentUserID else {
+            queryRunning = false
+            return
+        }
+
+        self.fetchUser(uid: uid) {
+            // Just wait until it's done
         }
     }
 
     
     func fetchUser(uid: String, finished: @escaping () -> Void){
-        
-        let db = Firestore.firestore()
-        
-      let docRef = db.collection("users").document(uid)
-        
-      docRef.getDocument { document, error in
-        if (error as NSError?) != nil {
-            self.errorMessage = "Error getting document: \(error?.localizedDescription ?? "Unknown error")"
-            finished()
-        }
-        else {
-          if let document = document, document.exists {
-            do {
-                self.user = try document.data(as: User.self)
-                
-                //Check membership
+        userRepository.fetchUser(uid: uid) { result in
+            switch result {
+            case .success(let user):
+                self.user = user
+
+                guard self.runStartupSideEffects else {
+                    self.queryRunning = false
+                    finished()
+                    return
+                }
+
                 self.checkMemberShip()
-                
-                //Fetch weekplan and determine the weekstats
+
                 self.getWeekSchema(){
                     //Just wait until it's done
                 }
 
                 self.determineWorkoutOfTheDay()
-                
-                //Get training statistics
                 self.getTrainingStatsForCurrentWeek()
-                
-                //Get measurements
                 self.getBodyMeasurements()
-                
-                //Update query Running
                 self.queryRunning = false
                 finished()
-                
+            case .failure(let error):
+                self.errorMessage = "Error parsing user document: \(error.localizedDescription)"
+                self.queryRunning = false
+                finished()
             }
-            catch {
-              self.errorMessage = "Error parsing user document: \(error.localizedDescription)"
-              finished()
-            }
-          } else {
-              self.errorMessage = "User document does not exist"
-              finished()
-          }
         }
-      }
     }
     
     func isSameDay(date1: Date, date2: Date) -> Bool {
@@ -127,18 +137,11 @@ class UserDataModel: ObservableObject{
             if let schema = user.schema {
                 //If trainingSchema is not nil, get it and work with it
                 var trainingSchema: Schema = Schema()
-                let db = Firestore.firestore()
                 
-                let docRef = db.collection("schemas").document(schema)
-                  
-                docRef.getDocument { document, error in
-                  if (error as NSError?) != nil {
-                      print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
-                  }
-                  else {
-                    if let document = document {
-                      do {
-                        trainingSchema = try document.data(as: Schema.self)
+                schemaRepository.fetchSchema(id: schema) { result in
+                    switch result {
+                    case .success(let schema):
+                        trainingSchema = schema
                         let routineAmount:Int = trainingSchema.routines.count - 1
 
                         let weekDays: [String] = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"]
@@ -161,12 +164,9 @@ class UserDataModel: ObservableObject{
                                 self.user.weekPlan?.append(daySchema)
                             }
                         })
-                      }
-                      catch {
+                    case .failure(let error):
                         print(error)
-                      }
                     }
-                  }
                 }
                 finished()
             }
@@ -186,41 +186,55 @@ class UserDataModel: ObservableObject{
     }
     
     func getAmountOfWorkOuts() -> Int {
-        var count: Int = 0
-        
-        if user.weekPlan != nil{
-            for plan in user.weekPlan! {
-                if plan.isTrainingDay ?? false {
-                    count += 1
-                }
-            }
-        }
-        return count
+        Self.trainingDayCount(for: user.weekPlan)
     }
     
     func determineWorkoutOfTheDay() {
         let dayOfWeek: Int = self.getDayForWeekPlan()
+        let workoutOfTheDay = Self.workoutOfTheDay(for: self.user.weekPlan, dayOfWeek: dayOfWeek)
 
-        guard
-            let weekPlan = self.user.weekPlan,
-            weekPlan.indices.contains(dayOfWeek)
-        else {
-            self.user.workoutOfTheDay = nil
+        if self.user.weekPlan == nil || !(self.user.weekPlan?.indices.contains(dayOfWeek) ?? false) {
             print("Weekplan is nil or incomplete, don't determine the WoD")
-            return
         }
 
-        let dayPlan = weekPlan[dayOfWeek]
-        if dayPlan.isTrainingDay == true, let routine = dayPlan.routine {
-            self.user.workoutOfTheDay = routine
-        } else {
-            self.user.workoutOfTheDay = nil
-        }
+        self.user.workoutOfTheDay = workoutOfTheDay
     }
     
     func getTodaysRoutine() -> UUID{
         let dayOfWeek: Int = self.getDayForWeekPlan()
         return self.user.weekPlan![dayOfWeek].routine!
+    }
+
+    static func workoutOfTheDay(for weekPlan: [DayPlan]?, dayOfWeek: Int) -> UUID? {
+        guard
+            let weekPlan,
+            weekPlan.indices.contains(dayOfWeek)
+        else {
+            return nil
+        }
+
+        let dayPlan = weekPlan[dayOfWeek]
+        guard dayPlan.isTrainingDay == true else {
+            return nil
+        }
+
+        return dayPlan.routine
+    }
+
+    static func routineID(for user: User, dayOfWeek: Int) -> UUID? {
+        user.workoutOfTheDay ?? workoutOfTheDay(for: user.weekPlan, dayOfWeek: dayOfWeek)
+    }
+
+    static func trainingDayCount(for weekPlan: [DayPlan]?) -> Int {
+        guard let weekPlan else {
+            return 0
+        }
+
+        return weekPlan.reduce(into: 0) { count, dayPlan in
+            if dayPlan.isTrainingDay == true {
+                count += 1
+            }
+        }
     }
     
     func getTrainingStatsForCurrentWeek(){
