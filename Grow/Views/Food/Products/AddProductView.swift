@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Firebase
 
 struct AddProductView: View {
     @EnvironmentObject var foodModel : FoodDataModel
@@ -20,14 +19,7 @@ struct AddProductView: View {
     
     var body: some View {
         
-        NavigationView{
-            if showProductsNutritionView {
-                NavigationLink(
-                    destination: NewProductsNutritionView(product: product, showProductsNutritionView: $showProductsNutritionView, showAddProduct: $showAddProduct),
-                            isActive: $showProductsNutritionView
-                        ) {}.isDetailLink(true).hidden().frame(width: 0, height: 0, alignment: .top)
-            }
-            
+        NavigationStack{
             Form{
                 Section{
                    HStack{
@@ -90,6 +82,9 @@ struct AddProductView: View {
                     }
         }.listStyle(InsetGroupedListStyle())
             .navigationTitle(Text(self.product.name))
+            .navigationDestination(isPresented: $showProductsNutritionView) {
+                NewProductsNutritionView(product: product, showProductsNutritionView: $showProductsNutritionView, showAddProduct: $showAddProduct)
+            }
             .navigationBarItems(trailing:
                                     Button(action: {self.showProductsNutritionView = true}) { Text("Volgende") }
                                     .disabled(self.product.name.isEmpty)

@@ -10,7 +10,6 @@ import SwiftUI
 struct ExerciseDescription:View {
     
     @State var exercise: Exercise
-    @ObservedObject var exerciseStatsModel = StatisticsDataModel()
     
     var body: some View{
         VStack{
@@ -22,7 +21,7 @@ struct ExerciseDescription:View {
 struct ExerciseDetailView: View {
     
     @State var exercise: Exercise
-    @StateObject var exerciseStatsModel = StatisticsDataModel()
+    @StateObject private var exerciseStatsModel = StatisticsDataModel()
     @State var showExerciseDescription: Bool = false
     
     var body: some View {
@@ -30,7 +29,7 @@ struct ExerciseDetailView: View {
             
             ZStack{
                 Button(""){}
-                NavigationLink(destination: ExerciseDescription(exercise: exercise, exerciseStatsModel: exerciseStatsModel)){
+                NavigationLink(destination: ExerciseDescription(exercise: exercise)){
                     HStack{
                         Image(systemName: "info.circle").foregroundColor(.accentColor)
                         Text("Oefening omschrijving")

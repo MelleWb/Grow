@@ -1,8 +1,8 @@
-import Firebase
-import FirebaseFirestore
-import FirebaseMessaging
+
 import UIKit
 import UserNotifications
+import FirebaseFirestore
+import FirebaseMessaging
 
 class PushNotificationManager: NSObject, MessagingDelegate, UNUserNotificationCenterDelegate {
     let userID: String
@@ -41,7 +41,7 @@ class PushNotificationManager: NSObject, MessagingDelegate, UNUserNotificationCe
 //        print(remoteMessage.appData)
 //    }
     
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         updateFirestorePushTokenIfNeeded()
     }
     

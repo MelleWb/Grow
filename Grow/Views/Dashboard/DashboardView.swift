@@ -6,8 +6,8 @@
 //
 
 import SwiftUI
-import Firebase
 import HealthKit
+import FirebaseAuth
 import GoogleMobileAds
 
 struct TabBarView: View {
@@ -57,7 +57,6 @@ struct Dashboard: View{
     @State var showMeasurementView: Bool = false
     @State var bodyWeight: Double = 0
     @State var fatPercentage: Double = 0
-    @State var bannerView = GADBannerView()
 
     private func loadAndDisplayMostRecentWeight() {
         guard let weightSampleType = HKSampleType.quantityType(forIdentifier: .bodyMass) else {
@@ -103,7 +102,7 @@ struct Dashboard: View{
     
     var body: some View {
         
-        NavigationView{
+        NavigationStack{
             VStack{
                 List{
                     Section(header: Text(Date(), style: .date)){
@@ -127,12 +126,13 @@ struct Dashboard: View{
                                         }
                             NavigationLink(destination:FoodView()){}.isDetailLink(false).opacity(0)
                         }
-                        //GoogleAddBanner()
                     }
                     if self.userModel.isNewMeasurementDay {
                         Section{
                             HStack{
-                                NavigationLink(destination: NewMeasurementView(showMeasurementView: $showMeasurementView), isActive:$showMeasurementView){
+                                Button {
+                                    showMeasurementView = true
+                                } label: {
                                         Image(systemName: "alarm").foregroundColor(.accentColor)
                                         Text("Tijd voor een nieuwe meting")
                                 }
@@ -143,21 +143,24 @@ struct Dashboard: View{
                     Section(header:Text("Trainingen deze week")){
                         HStack{
                                 TrainingCircle()
-                            if let percentage = (self.userModel.workoutDonePercentage * 100).rounded(){
-                                    let roundedPercentage = Int(round(percentage))
-                                    Text("\(roundedPercentage) %")
-                            }
+                            let percentage = (self.userModel.workoutDonePercentage * 100).rounded()
+                            let roundedPercentage = Int(round(percentage))
+                            Text("\(roundedPercentage) %")
                         }
                         if userModel.user.workoutOfTheDay != nil {
                             HStack{
-                                NavigationLink(destination: WorkoutOfTheDayView(showWOD: $isWorkOutPresented, routine: self.userModel.user.workoutOfTheDay!),isActive:$isWorkOutPresented) {
+                                Button {
+                                    if userModel.user.workoutOfTheDay != nil {
+                                        isWorkOutPresented = true
+                                    }
+                                } label: {
                                         HStack{
                                         Image(systemName: "bolt")
                                             .foregroundColor(.accentColor)
 
                                             Text("Start je training van vandaag").font(.subheadline).foregroundColor(Color.init("blackWhite"))
                                         }
-                                }.isDetailLink(false)
+                                }
                                 }.padding(.init(top: 10, leading: 0, bottom: 10, trailing: 20))
                             }
                         
@@ -193,6 +196,16 @@ struct Dashboard: View{
             .disabled(self.userModel.queryRunning)
             .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Dashboard"))
+            .navigationDestination(isPresented: $showMeasurementView) {
+                NewMeasurementView(showMeasurementView: $showMeasurementView)
+            }
+            .navigationDestination(isPresented: $isWorkOutPresented) {
+                if let routine = self.userModel.user.workoutOfTheDay {
+                    WorkoutOfTheDayView(showWOD: $isWorkOutPresented, routine: routine)
+                } else {
+                    EmptyView()
+                }
+            }
             .onAppear(perform:{
                 
                 //Compare dates, if different (after 12.00AM), load new day

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Firebase
 
 struct CompareMeasurements: View {
     @Binding var selectedMeasurements: [BodyMeasurement]?

@@ -10,10 +10,10 @@ import SwiftUI
 struct ManageProductDetailView: View {
     
     @EnvironmentObject var foodModel : FoodDataModel
+    @Environment(\.dismiss) private var dismiss
     @State var documentID: String
     @State var product: Product = Product()
     let unit = ["Grammen", "Milliliters"]
-    @Binding var showManageProductDetailView: Bool
 
     @State var portionName: String = ""
     @State var portionAmount: String = ""
@@ -168,7 +168,7 @@ struct ManageProductDetailView: View {
                     
                     calculateKcal()
                 } else {
-                    self.showManageProductDetailView.toggle()
+                    dismiss()
                 }
                 })
             })
@@ -179,7 +179,7 @@ struct ManageProductDetailView: View {
                 Button(action: {
                         let success = self.foodModel.createProduct(product: product)
                         if success {
-                        self.showManageProductDetailView = false
+                            dismiss()
                             
                         }
             }){

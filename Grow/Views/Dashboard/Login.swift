@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Firebase
+import FirebaseAuth
 
 struct Login: View {
     
@@ -19,7 +19,6 @@ struct Login: View {
     @State private var showActivityIndicator = false
     @State private var alertText = ""
     @State private var showAlert: Bool = false
-    @State var showRegister: Bool = false
     
     
     func login(){
@@ -43,17 +42,8 @@ struct Login: View {
         }
     }
     
-    func register(){
-        self.showRegister = true
-    }
-    
     var body: some View {
-        
-        if showRegister{
-            NavigationLink(destination:Register(),isActive:$showRegister){
-            }
-        }
-        NavigationView{
+        NavigationStack{
         VStack(alignment: .leading, spacing: 15){
             ScrollView(showsIndicators: false){
                 

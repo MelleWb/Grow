@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SaveAsMeal: View {
     @EnvironmentObject var foodModel:FoodDataModel
-    @Binding var showSaveAsMeal: Bool
+    @Environment(\.dismiss) private var dismiss
     @State var meal: Meal
     @State var mealName: String = ""
     
@@ -42,7 +42,7 @@ struct SaveAsMeal: View {
             Button("Opslaan"){
                 let success = self.foodModel.saveMeal(for:meal)
                 if success{
-                    self.showSaveAsMeal=false
+                    dismiss()
                 }
             })
     }

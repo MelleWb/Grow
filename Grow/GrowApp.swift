@@ -6,8 +6,8 @@
 //
 
 import SwiftUI
-import Firebase
 import UIKit.UIGestureRecognizerSubclass
+import FirebaseCore
 import GoogleMobileAds
 
 @main
@@ -20,7 +20,7 @@ struct GrowApp: App {
         FirebaseApp.configure()
         
         // Initialize the Google Mobile Ads SDK.
-        GADMobileAds.sharedInstance().start(completionHandler: nil)
+        MobileAds.shared.start(completionHandler: nil)
         
             HealthKitSetupAssistant.authorizeHealthKit { (authorized, error) in
                   

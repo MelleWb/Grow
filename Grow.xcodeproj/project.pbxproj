@@ -3,11 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		66DCCA41E695FC061C97932F /* Pods_Grow_GrowUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5138FA79BC7CEA39171F1B9 /* Pods_Grow_GrowUITests.framework */; };
 		85037C16268915D500EC344B /* UserVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85037C15268915D500EC344B /* UserVM.swift */; };
 		850B59292769297D008DA670 /* FoodCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 850B59282769297D008DA670 /* FoodCharts.swift */; };
 		850B592B27692BF1008DA670 /* MealCopyCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 850B592A27692BF1008DA670 /* MealCopyCalendar.swift */; };
@@ -63,7 +62,6 @@
 		85AEF013275EAEB500647E54 /* FormRowButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AEF012275EAEB500647E54 /* FormRowButtonStyle.swift */; };
 		85B4CA1E26DEB81500C97E99 /* SaveAsMeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85B4CA1D26DEB81500C97E99 /* SaveAsMeal.swift */; };
 		85B4CA2026DECB7200C97E99 /* SelectSavedMeal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85B4CA1F26DECB7200C97E99 /* SelectSavedMeal.swift */; };
-		85BA4E60268A6D5700D71521 /* Pods_Grow.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED30685E6FCB1070B6129F05 /* Pods_Grow.framework */; };
 		85BC5E9326B3255500DBC821 /* TrainingDaySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85BC5E9226B3255500DBC821 /* TrainingDaySelectionView.swift */; };
 		85C48AE326B0978100BFE48E /* FoodModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C48AE226B0978000BFE48E /* FoodModel.swift */; };
 		85C48AE526B1E32400BFE48E /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C48AE426B1E32400BFE48E /* ChatView.swift */; };
@@ -75,16 +73,17 @@
 		85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */; };
 		85E77740275A651F00D8996A /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E7773F275A651F00D8996A /* Profile.swift */; };
 		85E77744275AB8A100D8996A /* CalorieOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E77743275AB8A100D8996A /* CalorieOverview.swift */; };
-		85ED07A827C29EC000117112 /* muscleanimation.json in Resources */ = {isa = PBXBuildFile; fileRef = 85ED07A327C29EBD00117112 /* muscleanimation.json */; };
-		85ED07A927C29EC000117112 /* bodybuildboy.json in Resources */ = {isa = PBXBuildFile; fileRef = 85ED07A427C29EBD00117112 /* bodybuildboy.json */; };
-		85ED07AA27C29EC000117112 /* personaltrainer.json in Resources */ = {isa = PBXBuildFile; fileRef = 85ED07A527C29EBD00117112 /* personaltrainer.json */; };
-		85ED07AB27C29EC000117112 /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85ED07A627C29EBF00117112 /* LottieView.swift */; };
 		85ED07AC27C29EC000117112 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85ED07A727C29EC000117112 /* LoadingView.swift */; };
 		85F301F426E376A400E268A5 /* NewMeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F301F326E376A400E268A5 /* NewMeasurementView.swift */; };
 		85F6FDCC2693A3D70051B60E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 85F6FDCB2693A3D70051B60E /* GoogleService-Info.plist */; };
 		85F6FDCE2693A4E60051B60E /* PushNotificationSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */; };
 		85F92EEA2694AD9F00698585 /* Routines.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F92EE92694AD9E00698585 /* Routines.swift */; };
-		A6E001FFBE239836B521EE84 /* Pods_GrowTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A37F4C0892EF1E134FAE80A /* Pods_GrowTests.framework */; };
+		86A100012F70000100000001 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 86A100112F70000100000001 /* FirebaseAuth */; };
+		86A100022F70000100000001 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 86A100122F70000100000001 /* FirebaseCore */; };
+		86A100032F70000100000001 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 86A100132F70000100000001 /* FirebaseFirestore */; };
+		86A100052F70000100000001 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 86A100152F70000100000001 /* FirebaseMessaging */; };
+		86A100062F70000100000001 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 86A100162F70000100000001 /* FirebaseStorage */; };
+		86A100072F70000100000001 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 86A100172F70000100000001 /* GoogleMobileAds */; };
 		F041551726CE72660044FD22 /* AddProductView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F041551626CE72660044FD22 /* AddProductView.swift */; };
 		F041551926D178DA0044FD22 /* NewProductsNutritionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F041551826D178DA0044FD22 /* NewProductsNutritionView.swift */; };
 		F05CBB09277B6F0F00C7E06F /* ChangeExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05CBB08277B6F0F00C7E06F /* ChangeExercise.swift */; };
@@ -114,20 +113,16 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		8521A2952685BDFC00400657 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 10;
+			dstSubfolder = None;
 			files = (
 				8521A2942685BDFC00400657 /* (null) in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		74B64DB1C2B74BA9D0648D65 /* Pods-GrowTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GrowTests.release.xcconfig"; path = "Target Support Files/Pods-GrowTests/Pods-GrowTests.release.xcconfig"; sourceTree = "<group>"; };
-		7A37F4C0892EF1E134FAE80A /* Pods_GrowTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GrowTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		85037C15268915D500EC344B /* UserVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserVM.swift; sourceTree = "<group>"; };
 		850B59282769297D008DA670 /* FoodCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodCharts.swift; sourceTree = "<group>"; };
 		850B592A27692BF1008DA670 /* MealCopyCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealCopyCalendar.swift; sourceTree = "<group>"; };
@@ -200,22 +195,11 @@
 		85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDetailView.swift; sourceTree = "<group>"; };
 		85E7773F275A651F00D8996A /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		85E77743275AB8A100D8996A /* CalorieOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieOverview.swift; sourceTree = "<group>"; };
-		85ED07A327C29EBD00117112 /* muscleanimation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = muscleanimation.json; sourceTree = "<group>"; };
-		85ED07A427C29EBD00117112 /* bodybuildboy.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = bodybuildboy.json; sourceTree = "<group>"; };
-		85ED07A527C29EBD00117112 /* personaltrainer.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = personaltrainer.json; sourceTree = "<group>"; };
-		85ED07A627C29EBF00117112 /* LottieView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LottieView.swift; sourceTree = "<group>"; };
 		85ED07A727C29EC000117112 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		85F301F326E376A400E268A5 /* NewMeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewMeasurementView.swift; sourceTree = "<group>"; };
 		85F6FDCB2693A3D70051B60E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		85F6FDCD2693A4E60051B60E /* PushNotificationSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationSender.swift; sourceTree = "<group>"; };
 		85F92EE92694AD9E00698585 /* Routines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routines.swift; sourceTree = "<group>"; };
-		87EF29623603D4645BA37018 /* Pods-Grow.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow.release.xcconfig"; path = "Target Support Files/Pods-Grow/Pods-Grow.release.xcconfig"; sourceTree = "<group>"; };
-		C8DF0475DF192E1486887AF1 /* Pods-Grow-GrowUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow-GrowUITests.debug.xcconfig"; path = "Target Support Files/Pods-Grow-GrowUITests/Pods-Grow-GrowUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		CDB7AACCA6B2946A724EDEA0 /* Pods-Grow-GrowUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow-GrowUITests.release.xcconfig"; path = "Target Support Files/Pods-Grow-GrowUITests/Pods-Grow-GrowUITests.release.xcconfig"; sourceTree = "<group>"; };
-		CDEDA238F20F2F8013C33A52 /* Pods-GrowTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GrowTests.debug.xcconfig"; path = "Target Support Files/Pods-GrowTests/Pods-GrowTests.debug.xcconfig"; sourceTree = "<group>"; };
-		D2F1545A4D93566705ECD8C1 /* Pods-Grow.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grow.debug.xcconfig"; path = "Target Support Files/Pods-Grow/Pods-Grow.debug.xcconfig"; sourceTree = "<group>"; };
-		E5138FA79BC7CEA39171F1B9 /* Pods_Grow_GrowUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Grow_GrowUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		ED30685E6FCB1070B6129F05 /* Pods_Grow.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Grow.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F041551626CE72660044FD22 /* AddProductView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddProductView.swift; sourceTree = "<group>"; };
 		F041551826D178DA0044FD22 /* NewProductsNutritionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewProductsNutritionView.swift; sourceTree = "<group>"; };
 		F05CBB08277B6F0F00C7E06F /* ChangeExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeExercise.swift; sourceTree = "<group>"; };
@@ -228,29 +212,26 @@
 /* Begin PBXFrameworksBuildPhase section */
 		851AFF322673D6D70092DA9B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
+				86A100012F70000100000001 /* FirebaseAuth in Frameworks */,
+				86A100022F70000100000001 /* FirebaseCore in Frameworks */,
+				86A100032F70000100000001 /* FirebaseFirestore in Frameworks */,
+				86A100052F70000100000001 /* FirebaseMessaging in Frameworks */,
+				86A100062F70000100000001 /* FirebaseStorage in Frameworks */,
+				86A100072F70000100000001 /* GoogleMobileAds in Frameworks */,
 				850C966926FFA43400051772 /* HealthKit.framework in Frameworks */,
-				85BA4E60268A6D5700D71521 /* Pods_Grow.framework in Frameworks */,
 				850B592F276A8E2F008DA670 /* StoreKit.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		851AFF432673D6DC0092DA9B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
-				A6E001FFBE239836B521EE84 /* Pods_GrowTests.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		851AFF4E2673D6DC0092DA9B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
-				66DCCA41E695FC061C97932F /* Pods_Grow_GrowUITests.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -260,9 +241,6 @@
 			children = (
 				850B592E276A8E2E008DA670 /* StoreKit.framework */,
 				850C966826FFA43400051772 /* HealthKit.framework */,
-				ED30685E6FCB1070B6129F05 /* Pods_Grow.framework */,
-				E5138FA79BC7CEA39171F1B9 /* Pods_Grow_GrowUITests.framework */,
-				7A37F4C0892EF1E134FAE80A /* Pods_GrowTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -282,7 +260,6 @@
 				851AFF492673D6DC0092DA9B /* GrowTests */,
 				851AFF542673D6DC0092DA9B /* GrowUITests */,
 				851AFF362673D6D70092DA9B /* Products */,
-				E29AEFD6DB6DBB1C52CFFAB8 /* Pods */,
 				64979F16A846C94D61E978FE /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -412,9 +389,7 @@
 			isa = PBXGroup;
 			children = (
 				85ED07A727C29EC000117112 /* LoadingView.swift */,
-				85ED07A627C29EBF00117112 /* LottieView.swift */,
 				85827C1927EDB62300B34D9C /* SplashScreen.swift */,
-				85ED07A227C29EBD00117112 /* LottieFiles */,
 				854F1DD62755784C009E70B7 /* ButtonStyles */,
 				85F301F226E374DB00E268A5 /* Measurements */,
 				855C4C5D26CE5CBE00EAB0FC /* Food */,
@@ -501,16 +476,6 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
-		85ED07A227C29EBD00117112 /* LottieFiles */ = {
-			isa = PBXGroup;
-			children = (
-				85ED07A327C29EBD00117112 /* muscleanimation.json */,
-				85ED07A427C29EBD00117112 /* bodybuildboy.json */,
-				85ED07A527C29EBD00117112 /* personaltrainer.json */,
-			);
-			path = LottieFiles;
-			sourceTree = "<group>";
-		};
 		85F301F226E374DB00E268A5 /* Measurements */ = {
 			isa = PBXGroup;
 			children = (
@@ -521,19 +486,6 @@
 			path = Measurements;
 			sourceTree = "<group>";
 		};
-		E29AEFD6DB6DBB1C52CFFAB8 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				D2F1545A4D93566705ECD8C1 /* Pods-Grow.debug.xcconfig */,
-				87EF29623603D4645BA37018 /* Pods-Grow.release.xcconfig */,
-				C8DF0475DF192E1486887AF1 /* Pods-Grow-GrowUITests.debug.xcconfig */,
-				CDB7AACCA6B2946A724EDEA0 /* Pods-Grow-GrowUITests.release.xcconfig */,
-				CDEDA238F20F2F8013C33A52 /* Pods-GrowTests.debug.xcconfig */,
-				74B64DB1C2B74BA9D0648D65 /* Pods-GrowTests.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -541,19 +493,21 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 851AFF5A2673D6DC0092DA9B /* Build configuration list for PBXNativeTarget "Grow" */;
 			buildPhases = (
-				1E5BD71340B493AE202728FE /* [CP] Check Pods Manifest.lock */,
 				851AFF312673D6D70092DA9B /* Sources */,
 				851AFF322673D6D70092DA9B /* Frameworks */,
 				851AFF332673D6D70092DA9B /* Resources */,
 				8521A2952685BDFC00400657 /* Embed Frameworks */,
-				E7AD698BCD95E06B7DC529AA /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			name = Grow;
 			packageProductDependencies = (
+				86A100112F70000100000001 /* FirebaseAuth */,
+				86A100122F70000100000001 /* FirebaseCore */,
+				86A100132F70000100000001 /* FirebaseFirestore */,
+				86A100152F70000100000001 /* FirebaseMessaging */,
+				86A100162F70000100000001 /* FirebaseStorage */,
+				86A100172F70000100000001 /* GoogleMobileAds */,
 			);
 			productName = Grow;
 			productReference = 851AFF352673D6D70092DA9B /* Grow.app */;
@@ -563,7 +517,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 851AFF5D2673D6DC0092DA9B /* Build configuration list for PBXNativeTarget "GrowTests" */;
 			buildPhases = (
-				62C5426E5580A5B8E547D97A /* [CP] Check Pods Manifest.lock */,
 				851AFF422673D6DC0092DA9B /* Sources */,
 				851AFF432673D6DC0092DA9B /* Frameworks */,
 				851AFF442673D6DC0092DA9B /* Resources */,
@@ -582,11 +535,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 851AFF602673D6DC0092DA9B /* Build configuration list for PBXNativeTarget "GrowUITests" */;
 			buildPhases = (
-				0243FBED681AEE0AAB748787 /* [CP] Check Pods Manifest.lock */,
 				851AFF4D2673D6DC0092DA9B /* Sources */,
 				851AFF4E2673D6DC0092DA9B /* Frameworks */,
 				851AFF4F2673D6DC0092DA9B /* Resources */,
-				55D9E4503F824581452ECAEB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -604,8 +555,9 @@
 		851AFF2D2673D6D70092DA9B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					851AFF342673D6D70092DA9B = {
 						CreatedOnToolsVersion = 12.5;
@@ -621,7 +573,6 @@
 				};
 			};
 			buildConfigurationList = 851AFF302673D6D70092DA9B /* Build configuration list for PBXProject "Grow" */;
-			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -630,7 +581,10 @@
 			);
 			mainGroup = 851AFF2C2673D6D70092DA9B;
 			packageReferences = (
+				854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				86A100202F70000100000001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 851AFF362673D6D70092DA9B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -645,140 +599,27 @@
 /* Begin PBXResourcesBuildPhase section */
 		851AFF332673D6D70092DA9B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				851AFF402673D6DB0092DA9B /* Preview Assets.xcassets in Resources */,
-				85ED07AA27C29EC000117112 /* personaltrainer.json in Resources */,
-				85ED07A927C29EC000117112 /* bodybuildboy.json in Resources */,
-				85ED07A827C29EC000117112 /* muscleanimation.json in Resources */,
 				851AFF3D2673D6DB0092DA9B /* Assets.xcassets in Resources */,
 				85F6FDCC2693A3D70051B60E /* GoogleService-Info.plist in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		851AFF442673D6DC0092DA9B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		851AFF4F2673D6DC0092DA9B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		0243FBED681AEE0AAB748787 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Grow-GrowUITests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		1E5BD71340B493AE202728FE /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Grow-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		55D9E4503F824581452ECAEB /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Grow-GrowUITests/Pods-Grow-GrowUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Grow-GrowUITests/Pods-Grow-GrowUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Grow-GrowUITests/Pods-Grow-GrowUITests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		62C5426E5580A5B8E547D97A /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-GrowTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E7AD698BCD95E06B7DC529AA /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Grow/Pods-Grow-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Grow/Pods-Grow-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Grow/Pods-Grow-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		851AFF312673D6D70092DA9B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				85E77744275AB8A100D8996A /* CalorieOverview.swift in Sources */,
 				852DBDFF26E7F6D5000ABE3C /* MeasurementOverview.swift in Sources */,
@@ -836,7 +677,6 @@
 				85853F0C26E2639500907701 /* TrainingHistory.swift in Sources */,
 				8588C33C2681D0FA00535E68 /* SceneDelegate.swift in Sources */,
 				85AEF013275EAEB500647E54 /* FormRowButtonStyle.swift in Sources */,
-				85ED07AB27C29EC000117112 /* LottieView.swift in Sources */,
 				85F6FDCE2693A4E60051B60E /* PushNotificationSender.swift in Sources */,
 				85ED07AC27C29EC000117112 /* LoadingView.swift in Sources */,
 				850B592D27693DCD008DA670 /* GoogleAdsManager.swift in Sources */,
@@ -852,23 +692,18 @@
 				851AFF392673D6D70092DA9B /* GrowApp.swift in Sources */,
 				85F301F426E376A400E268A5 /* NewMeasurementView.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		851AFF422673D6DC0092DA9B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				851AFF4B2673D6DC0092DA9B /* GrowTests.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		851AFF4D2673D6DC0092DA9B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				851AFF562673D6DC0092DA9B /* GrowUITests.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -886,7 +721,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		851AFF582673D6DC0092DA9B /* Debug */ = {
+		851AFF582673D6DC0092DA9B /* Debug configuration for PBXProject "Grow" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -921,8 +756,10 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -942,12 +779,13 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		851AFF592673D6DC0092DA9B /* Release */ = {
+		851AFF592673D6DC0092DA9B /* Release configuration for PBXProject "Grow" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -982,8 +820,10 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -996,15 +836,15 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		851AFF5B2673D6DC0092DA9B /* Debug */ = {
+		851AFF5B2673D6DC0092DA9B /* Debug configuration for PBXNativeTarget "Grow" */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D2F1545A4D93566705ECD8C1 /* Pods-Grow.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1013,10 +853,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
-				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Grow/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1032,29 +871,7 @@
 					"-framework",
 					"\"CoreTelephony\"",
 					"-framework",
-					"\"FBLPromises\"",
-					"-framework",
-					"\"FirebaseAnalytics\"",
-					"-framework",
-					"\"FirebaseAuth\"",
-					"-framework",
-					"\"FirebaseCore\"",
-					"-framework",
-					"\"FirebaseCoreDiagnostics\"",
-					"-framework",
-					"\"FirebaseDatabase\"",
-					"-framework",
-					"\"FirebaseInstallations\"",
-					"-framework",
 					"\"Foundation\"",
-					"-framework",
-					"\"GTMSessionFetcher\"",
-					"-framework",
-					"\"GoogleAppMeasurement\"",
-					"-framework",
-					"\"GoogleDataTransport\"",
-					"-framework",
-					"\"GoogleUtilities\"",
 					"-framework",
 					"\"SafariServices\"",
 					"-framework",
@@ -1065,10 +882,6 @@
 					"\"SystemConfiguration\"",
 					"-framework",
 					"\"UIKit\"",
-					"-framework",
-					"\"leveldb\"",
-					"-framework",
-					"\"nanopb\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.grow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1078,9 +891,8 @@
 			};
 			name = Debug;
 		};
-		851AFF5C2673D6DC0092DA9B /* Release */ = {
+		851AFF5C2673D6DC0092DA9B /* Release configuration for PBXNativeTarget "Grow" */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 87EF29623603D4645BA37018 /* Pods-Grow.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1089,10 +901,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
-				DEVELOPMENT_TEAM = V8EUC3L37P;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Grow/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1108,29 +919,7 @@
 					"-framework",
 					"\"CoreTelephony\"",
 					"-framework",
-					"\"FBLPromises\"",
-					"-framework",
-					"\"FirebaseAnalytics\"",
-					"-framework",
-					"\"FirebaseAuth\"",
-					"-framework",
-					"\"FirebaseCore\"",
-					"-framework",
-					"\"FirebaseCoreDiagnostics\"",
-					"-framework",
-					"\"FirebaseDatabase\"",
-					"-framework",
-					"\"FirebaseInstallations\"",
-					"-framework",
 					"\"Foundation\"",
-					"-framework",
-					"\"GTMSessionFetcher\"",
-					"-framework",
-					"\"GoogleAppMeasurement\"",
-					"-framework",
-					"\"GoogleDataTransport\"",
-					"-framework",
-					"\"GoogleUtilities\"",
 					"-framework",
 					"\"SafariServices\"",
 					"-framework",
@@ -1141,10 +930,6 @@
 					"\"SystemConfiguration\"",
 					"-framework",
 					"\"UIKit\"",
-					"-framework",
-					"\"leveldb\"",
-					"-framework",
-					"\"nanopb\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.grow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1154,16 +939,13 @@
 			};
 			name = Release;
 		};
-		851AFF5E2673D6DC0092DA9B /* Debug */ = {
+		851AFF5E2673D6DC0092DA9B /* Debug configuration for PBXNativeTarget "GrowTests" */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CDEDA238F20F2F8013C33A52 /* Pods-GrowTests.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V8EUC3L37P;
 				INFOPLIST_FILE = GrowTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1181,16 +963,13 @@
 			};
 			name = Debug;
 		};
-		851AFF5F2673D6DC0092DA9B /* Release */ = {
+		851AFF5F2673D6DC0092DA9B /* Release configuration for PBXNativeTarget "GrowTests" */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 74B64DB1C2B74BA9D0648D65 /* Pods-GrowTests.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V8EUC3L37P;
 				INFOPLIST_FILE = GrowTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1208,14 +987,11 @@
 			};
 			name = Release;
 		};
-		851AFF612673D6DC0092DA9B /* Debug */ = {
+		851AFF612673D6DC0092DA9B /* Debug configuration for PBXNativeTarget "GrowUITests" */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C8DF0475DF192E1486887AF1 /* Pods-Grow-GrowUITests.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V8EUC3L37P;
 				INFOPLIST_FILE = GrowUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1230,14 +1006,11 @@
 			};
 			name = Debug;
 		};
-		851AFF622673D6DC0092DA9B /* Release */ = {
+		851AFF622673D6DC0092DA9B /* Release configuration for PBXNativeTarget "GrowUITests" */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CDB7AACCA6B2946A724EDEA0 /* Pods-Grow-GrowUITests.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V8EUC3L37P;
 				INFOPLIST_FILE = GrowUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1258,40 +1031,88 @@
 		851AFF302673D6D70092DA9B /* Build configuration list for PBXProject "Grow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				851AFF582673D6DC0092DA9B /* Debug */,
-				851AFF592673D6DC0092DA9B /* Release */,
+				851AFF582673D6DC0092DA9B /* Debug configuration for PBXProject "Grow" */,
+				851AFF592673D6DC0092DA9B /* Release configuration for PBXProject "Grow" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		851AFF5A2673D6DC0092DA9B /* Build configuration list for PBXNativeTarget "Grow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				851AFF5B2673D6DC0092DA9B /* Debug */,
-				851AFF5C2673D6DC0092DA9B /* Release */,
+				851AFF5B2673D6DC0092DA9B /* Debug configuration for PBXNativeTarget "Grow" */,
+				851AFF5C2673D6DC0092DA9B /* Release configuration for PBXNativeTarget "Grow" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		851AFF5D2673D6DC0092DA9B /* Build configuration list for PBXNativeTarget "GrowTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				851AFF5E2673D6DC0092DA9B /* Debug */,
-				851AFF5F2673D6DC0092DA9B /* Release */,
+				851AFF5E2673D6DC0092DA9B /* Debug configuration for PBXNativeTarget "GrowTests" */,
+				851AFF5F2673D6DC0092DA9B /* Release configuration for PBXNativeTarget "GrowTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		851AFF602673D6DC0092DA9B /* Build configuration list for PBXNativeTarget "GrowUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				851AFF612673D6DC0092DA9B /* Debug */,
-				851AFF622673D6DC0092DA9B /* Release */,
+				851AFF612673D6DC0092DA9B /* Debug configuration for PBXNativeTarget "GrowUITests" */,
+				851AFF622673D6DC0092DA9B /* Release configuration for PBXNativeTarget "GrowUITests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.10.0;
+			};
+		};
+		86A100202F70000100000001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		86A100112F70000100000001 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		86A100122F70000100000001 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		86A100132F70000100000001 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		86A100152F70000100000001 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		86A100162F70000100000001 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		86A100172F70000100000001 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 86A100202F70000100000001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 851AFF2D2673D6D70092DA9B /* Project object */;
 }

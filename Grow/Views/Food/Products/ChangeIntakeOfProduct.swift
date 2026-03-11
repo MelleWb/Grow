@@ -10,7 +10,7 @@ import SwiftUI
 struct ChangeIntakeOfProduct: View {
     
     @EnvironmentObject var foodModel: FoodDataModel
-    @Binding var showChangeIntake: Bool
+    @Environment(\.dismiss) private var dismiss
     @State var product:Product
     @State var meal: Meal
     @State var amount: String
@@ -111,7 +111,7 @@ struct ChangeIntakeOfProduct: View {
                 let success = self.foodModel.updateProductInMeal(for: meal, with: self.product, with: createdProduct)
                 
                 if success {
-                    self.showChangeIntake = false
+                    dismiss()
                 }
             }
             
@@ -127,7 +127,6 @@ struct ChangeIntakeOfProduct: View {
             //set the placeholder equal to amount
             self.amountPlaceHolder = amount
             
-            self.showChangeIntake = true
             if let value = NumberFormatter().number(from: amount) {
                 self.updateCalories(portion: value.intValue)
             }

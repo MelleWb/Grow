@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Firebase
 
 struct SlimProductOverview : View {
     
@@ -72,12 +71,11 @@ struct SlimProductOverview : View {
 
 struct ManageProductRow: View{
     @State var product: SlimProduct
-    @State var showManageProductDetailView: Bool = false
     
     var body: some View{
         ZStack{
             Button(""){}
-            NavigationLink(destination:ManageProductDetailView(documentID: product.documentID, showManageProductDetailView: $showManageProductDetailView),isActive:$showManageProductDetailView){
+            NavigationLink(destination: ManageProductDetailView(documentID: product.documentID)){
                 Text(product.name)
                     .foregroundColor(Color.init("blackWhite"))
             }

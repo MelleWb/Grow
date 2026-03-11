@@ -13,7 +13,9 @@ struct LoadingView: View {
     
     var body: some View {
         VStack{
-            LottieView(animation: "muscleanimation", loopMode:.playOnce).frame(width: 150, height: 150)
+            ProgressView()
+                .controlSize(.large)
+                .frame(width: 150, height: 150)
             Text(loadingText)
                 .padding(.bottom)
                 .font(.subheadline)

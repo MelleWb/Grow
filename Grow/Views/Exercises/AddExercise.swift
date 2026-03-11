@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Firebase
+import FirebaseFirestore
 
 struct AddExercise: View {
     
@@ -53,8 +53,6 @@ struct AddExercise: View {
                         // Say something
                     } else {
                         
-                        let settings = FirestoreSettings()
-                        settings.isPersistenceEnabled = true
                         let db = Firestore.firestore()
                         
                         db.collection("exercises").addDocument(data: [

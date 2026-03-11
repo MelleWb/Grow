@@ -6,18 +6,15 @@
 //
 
 import SwiftUI
-import Firebase
+import FirebaseAuth
 
 struct SceneDelegate : View{
 
     @State var ViewToDisplay: Views?
+    @State private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     
     enum Views{
         case dashboard, login
-    }
-    
-    func setViewToDisplay(view: Views){
-        self.ViewToDisplay = view
     }
     
     var body: some View{
@@ -28,16 +25,22 @@ struct SceneDelegate : View{
                     Login()
                 }
         }.onAppear(perform: {
-            Auth.auth().addStateDidChangeListener { auth, user in
-            if user != nil {
-                let pushManager = PushNotificationManager(userID: user?.uid ?? "test")
+            authStateListenerHandle = Auth.auth().addStateDidChangeListener { _, user in
+            if let user {
+                let pushManager = PushNotificationManager(userID: user.uid)
                     pushManager.registerForPushNotifications()
-                setViewToDisplay(view: .dashboard)
+                ViewToDisplay = .dashboard
             } else {
-                setViewToDisplay(view: .login)
+                ViewToDisplay = .login
                 }
             }
         })
+        .onDisappear {
+            if let authStateListenerHandle {
+                Auth.auth().removeStateDidChangeListener(authStateListenerHandle)
+                self.authStateListenerHandle = nil
+            }
+        }
         .environment(\.locale, Locale.init(identifier: "nl_NL"))
     }
 }

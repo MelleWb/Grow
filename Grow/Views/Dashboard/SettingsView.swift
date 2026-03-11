@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Firebase
 
 struct SettingsView: View {
     
@@ -15,7 +14,7 @@ struct SettingsView: View {
     @State var showProfileView: Bool = false
     
     //IAP
-    @ObservedObject var storeManager = StoreManager()
+    @StateObject private var storeManager = StoreManager()
     
     var body: some View {
         NavigationView{
@@ -51,9 +50,9 @@ struct SettingsView: View {
                     ForEach(self.storeManager.myProducts, id: \.self) { product in
                     HStack {
                            VStack(alignment: .leading) {
-                               Text(product.localizedTitle)
+                               Text(product.displayName)
                                    .font(.headline)
-                               Text(product.localizedDescription)
+                               Text(product.description)
                                    .font(.caption2)
                            }
                            Spacer()
@@ -62,9 +61,9 @@ struct SettingsView: View {
 //                                   .foregroundColor(.green)
 //                           } else {
                                Button(action: {
-                                   let _ = self.storeManager.purchaseProduct(product: product)
+                                   self.storeManager.purchaseProduct(product: product)
                                }) {
-                                   Text("€ \(product.price)")
+                                   Text(product.displayPrice)
                                }
                                    .foregroundColor(.blue)
 //                           }

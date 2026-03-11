@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Firebase
+import FirebaseFirestore
 
 struct TrainingDashboardView : View {
     
@@ -15,7 +15,7 @@ struct TrainingDashboardView : View {
     
     var body: some View {
         
-        NavigationView{
+        NavigationStack{
             VStack{
                 List{
                     Section(header:Text("Schemas, oefeningen en statistieken")){
@@ -61,22 +61,16 @@ struct TrainingDashboardView : View {
 
 struct TrainingOverview: View {
     
-    @State private var showAddSchema = false
-    @ObservedObject var schemas = TrainingDataModel()
-    @State private var action: Int? = 0
+    @State private var showCreateSchema = false
+    @EnvironmentObject var trainingModel: TrainingDataModel
     
     var body: some View {
-        
-        NavigationLink(destination: CreateSchema(), tag: 1, selection: $action) {
-              EmptyView()
-          }
-        
         VStack{
             List {
-                ForEach(Array(schemas.fetchedSchemas.enumerated()), id: \.1) { index, schema in
+                ForEach(Array(trainingModel.fetchedSchemas.enumerated()), id: \.1) { index, schema in
                     ZStack{
                         Button(""){}
-                        NavigationLink(destination: ReviewSchema(newSchema: schemas, schema: schema)){
+                        NavigationLink(destination: ReviewSchema(newSchema: trainingModel, schema: schema)){
                             Text(schema.name)
                         }
                     }
@@ -87,9 +81,12 @@ struct TrainingOverview: View {
         
         .listStyle(InsetGroupedListStyle())
         .navigationBarTitle(Text("Schemas"), displayMode: .inline)
+        .navigationDestination(isPresented: $showCreateSchema) {
+            CreateSchema()
+        }
         .navigationBarItems(trailing:
                Button(action: {
-                    self.action = 1
+                    self.showCreateSchema = true
                }) {
                    Image(systemName: "plus")
                }
@@ -98,17 +95,15 @@ struct TrainingOverview: View {
     func deleteSchema(at offsets: IndexSet){
         let index = offsets[offsets.startIndex]
         
-        let documentID = schemas.fetchedSchemas[index].docID ?? ""
+        let documentID = trainingModel.fetchedSchemas[index].docID ?? ""
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         db.collection("schemas").document(documentID).delete() { err in
             if let err = err {
                 print("Error removing document: \(err)")
             } else {
-                self.schemas.fetchedSchemas.remove(atOffsets: offsets)
+                self.trainingModel.fetchedSchemas.remove(atOffsets: offsets)
             }
         }
     }

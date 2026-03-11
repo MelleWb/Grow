@@ -11,7 +11,7 @@ struct SelectSavedMeal: View {
     @EnvironmentObject var foodModel: FoodDataModel
     @State var searchText = ""
     @State var searching = false
-    @Binding var navigationAction: Int?
+    @Binding var isPresented: Bool
     
     var body: some View {
         VStack{
@@ -24,7 +24,7 @@ struct SelectSavedMeal: View {
                         ZStack{
                             Button(""){
                                 self.foodModel.addSavedMeal(meal: meal)
-                                navigationAction = 0
+                                isPresented = false
                                 
                             }
                             VStack(alignment: .leading){

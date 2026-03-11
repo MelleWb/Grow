@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import Firebase
-import Introspect
 
 struct MeasurementOverview: View {
     @EnvironmentObject var userModel: UserDataModel
@@ -33,18 +31,8 @@ struct MeasurementOverview: View {
     }
 
     var body: some View{
-        NavigationView{
+        NavigationStack{
             VStack(alignment: .leading){
-                if showAddNewMeasurement{
-                    NavigationLink(destination: NewMeasurementView(showMeasurementView: $showAddNewMeasurement),isActive: self.$showAddNewMeasurement){
-                        NewMeasurementView(showMeasurementView: $showAddNewMeasurement)
-                    }.hidden()
-                }
-                if showCompareMeasurement{
-                    NavigationLink(destination: CompareMeasurements(selectedMeasurements:$selectedMeasurements, imageForViewer: $imageForViewer, showImageViewer: $showImageViewer),isActive: self.$showCompareMeasurement){
-                        CompareMeasurements(selectedMeasurements: $selectedMeasurements, imageForViewer: $imageForViewer, showImageViewer: $showImageViewer)
-                    }.hidden()
-                }
                 ScrollView{
                     ForEach(self.userModel.measurements, id: \.self) { measurement in
                         MeasurementRow(measurement: measurement, imageForViewer: $imageForViewer, showImageViewer: $showImageViewer, compare: $compare, selectedMeasurements: $selectedMeasurements)
@@ -55,6 +43,12 @@ struct MeasurementOverview: View {
                 self.userModel.getBodyMeasurements()
             })
             .navigationTitle(Text("Metingen"))
+            .navigationDestination(isPresented: $showAddNewMeasurement) {
+                NewMeasurementView(showMeasurementView: $showAddNewMeasurement)
+            }
+            .navigationDestination(isPresented: $showCompareMeasurement) {
+                CompareMeasurements(selectedMeasurements: $selectedMeasurements, imageForViewer: $imageForViewer, showImageViewer: $showImageViewer)
+            }
             .navigationBarItems(leading: (
                 Button(action: {
                     withAnimation {

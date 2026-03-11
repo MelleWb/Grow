@@ -7,7 +7,6 @@
 
 import SwiftUI
 import UIKit
-import Introspect
 
 @available(iOS 13.0, *)
 public struct ImageViewer: View {

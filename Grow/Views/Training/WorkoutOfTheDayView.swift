@@ -85,13 +85,6 @@ struct ExerciseRow:View{
     @State var superset: Superset
 
     var body: some View{
-        
-        if showExerciseChange{
-            NavigationLink(destination:ChangeExercise(exerciseToChange: exercise, showExerciseChange: $showExerciseChange, superset: superset),isActive:$showExerciseChange){
-                ChangeExercise(exerciseToChange: exercise, showExerciseChange: $showExerciseChange, superset: superset)
-            }.isDetailLink(false).hidden()
-        }
-        
         VStack(alignment: .leading){
                 Button(""){}
                 NavigationLink(destination:ExerciseDetailView(exercise: exercise)){
@@ -109,6 +102,9 @@ struct ExerciseRow:View{
                     }
                     .tint(.indigo)
                 }
+        .navigationDestination(isPresented: $showExerciseChange) {
+            ChangeExercise(exerciseToChange: exercise, showExerciseChange: $showExerciseChange, superset: superset)
+        }
 
         VStack(alignment: .center){
             HStack{

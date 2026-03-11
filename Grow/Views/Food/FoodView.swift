@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import Firebase
-import Introspect
 
 struct FoodView: View {
     
@@ -19,7 +17,8 @@ struct FoodView: View {
     @State private var text = ""
     @State var meal: Meal = Meal()
     @State var mealToCopy: Meal  = Meal()
-    @State private var navigationAction: Int? = 0
+    @State private var showAddProductToMeal = false
+    @State private var showSelectSavedMeal = false
     @FocusState var focusedField: UUID?
     
     let dayNameFormatter: DateFormatter = {
@@ -38,16 +37,6 @@ struct FoodView: View {
         self.foodModel.date = dateValue
         self.foodModel.dateHasChanged()
     }
-        
-        
-    NavigationLink(destination: AddProductToMealList(meal: meal, navigationAction: $navigationAction), tag: 1, selection: $navigationAction) {
-          EmptyView()
-      }
-    
-        NavigationLink(destination: SelectSavedMeal(navigationAction: $navigationAction), tag: 2, selection: $navigationAction) {
-          EmptyView()
-      }
-        
     ZStack{
         VStack{
             List{
@@ -148,7 +137,7 @@ struct FoodView: View {
                 Section{
                     HStack{
                         Button(action: {
-                            self.navigationAction = 2
+                            self.showSelectSavedMeal = true
                         }) {
                             HStack{
                                 Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
@@ -190,8 +179,8 @@ struct FoodView: View {
 
                                 
                                 Button(action:{
-                                    self.navigationAction = 1
                                     self.meal = meal
+                                    self.showAddProductToMeal = true
                                     
                                 },label:{
                                     HStack{
@@ -229,6 +218,12 @@ struct FoodView: View {
             }
             .listStyle(GroupedListStyle())
             .navigationTitle(Text("Voeding"))
+            .navigationDestination(isPresented: $showAddProductToMeal) {
+                AddProductToMealList(meal: meal, isPresented: $showAddProductToMeal)
+            }
+            .navigationDestination(isPresented: $showSelectSavedMeal) {
+                SelectSavedMeal(isPresented: $showSelectSavedMeal)
+            }
             .navigationBarHidden(enableSheet)
             .navigationBarBackButtonHidden(enableSheet)
             
@@ -271,11 +266,10 @@ struct ProductForMeal: View {
 struct ProductIntakeDetails:View {
     
     @State var meal: Meal
-    @State var showChangeIntake = false
     @State var product: Product
     
     var body: some View{
-        NavigationLink(destination:ChangeIntakeOfProduct(showChangeIntake: $showChangeIntake, product: product, meal: meal, amount: String(product.selectedProductDetails?.amount ?? 0)),isActive:$showChangeIntake){
+        NavigationLink(destination: ChangeIntakeOfProduct(product: product, meal: meal, amount: String(product.selectedProductDetails?.amount ?? 0))){
             HStack{
                 VStack(alignment:.leading){
                     Text(String(product.name)).padding(.init(top: 0, leading: 0, bottom: 5, trailing: 0))
@@ -284,7 +278,7 @@ struct ProductIntakeDetails:View {
                 Spacer()
                 Text(NumberHelper.roundedNumbersFromDouble(unit:product.selectedProductDetails?.kcal ?? 0))
             }.padding()
-        }.isDetailLink(false)
+        }
     }
 }
 
@@ -301,13 +295,6 @@ struct ShowMealHeader: View {
     
     
     var body: some View{
-        
-        if showSaveAsMeal{
-            NavigationLink(destination:SaveAsMeal(showSaveAsMeal: $showSaveAsMeal, meal: meal),isActive:$showSaveAsMeal){
-                SaveAsMeal(showSaveAsMeal: $showSaveAsMeal, meal: meal)
-            }.isDetailLink(false).hidden()
-        }
-            
         if foodModel.getMealIndex(for: meal) != nil {
             
             let mealIndex: Int = (foodModel.getMealIndex(for: meal) ?? 0) + 1
@@ -365,7 +352,9 @@ struct ShowMealHeader: View {
                     self.mealName = meal.name!
                 }
             }
+            .navigationDestination(isPresented: $showSaveAsMeal) {
+                SaveAsMeal(meal: meal)
+            }
         }
     }
 }
-

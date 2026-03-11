@@ -10,7 +10,7 @@ import SwiftUI
 struct AddProductToMealList: View {
     
     @State var meal: Meal
-    @Binding var navigationAction: Int?
+    @Binding var isPresented: Bool
     
     @State var searchText = ""
     @State var searching = false
@@ -40,7 +40,7 @@ struct AddProductToMealList: View {
                         SearchBar(searchText: customSearchText, searching: $searching)
                         if filteredProducts != nil {
                             ForEach(filteredProducts!, id: \.self) { product in
-                                AddProductRow(product: product, navigationAction: $navigationAction, meal: meal, documentID: product.documentID)
+                                AddProductRow(product: product, isPresented: $isPresented, meal: meal, documentID: product.documentID)
                                 }
                            }
                     }
@@ -61,15 +61,14 @@ struct AddProductToMealList: View {
 
 struct AddProductRow: View{
     @State var product: SlimProduct
-    @Binding var navigationAction: Int?
+    @Binding var isPresented: Bool
     @State var meal: Meal
     @State var documentID: String
-    @State var showProductDetailView: Bool = false
     
     var body: some View{
         ZStack{
             Button(""){}
-            NavigationLink(destination:ProductDetailView(meal: meal, documentID: documentID, navigationAction: $navigationAction)){
+            NavigationLink(destination: ProductDetailView(meal: meal, documentID: documentID, isPresented: $isPresented)){
                 Text(product.name)
                     .foregroundColor(Color.init("blackWhite"))
             }

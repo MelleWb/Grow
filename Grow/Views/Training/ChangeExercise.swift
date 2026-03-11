@@ -7,11 +7,11 @@
 
 import SwiftUI
 import UIKit
-import Firebase
+import FirebaseFirestore
 
 struct ChangeExercise: View {
     
-    @ObservedObject var exerciseModel = ExerciseDataModel()
+    @StateObject private var exerciseModel = ExerciseDataModel()
     @EnvironmentObject var trainingModel: TrainingDataModel
     @State var showAddExerciseSheetView = false
     @State var exerciseToChange: Exercise
@@ -25,8 +25,6 @@ struct ChangeExercise: View {
         let index = offsets[offsets.startIndex]
         let documentID = exerciseModel.exercises[index].documentID ?? ""
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         db.collection("exercises").document(documentID).delete() { err in

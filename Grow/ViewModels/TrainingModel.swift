@@ -6,8 +6,22 @@
 //
 
 import Foundation
-import Firebase
-import FirebaseFirestoreSwift
+import FirebaseAuth
+import FirebaseFirestore
+
+private extension KeyedDecodingContainer {
+    func decodeUUIDIfPresent(forKey key: Key) -> UUID? {
+        if let value = try? decodeIfPresent(UUID.self, forKey: key) {
+            return value
+        }
+
+        if let stringValue = try? decodeIfPresent(String.self, forKey: key) {
+            return UUID(uuidString: stringValue)
+        }
+
+        return nil
+    }
+}
 
 class TrainingDataModel: ObservableObject{
     
@@ -25,23 +39,21 @@ class TrainingDataModel: ObservableObject{
     
     func initiateTrainingModel(){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let docRef = db.collection("users").document(Auth.auth().currentUser!.uid)
 
-        docRef.getDocument(source: .cache) { (document, error) in
-          if let document = document {
+        docRef.getDocument { (document, error) in
+          if let document = document, document.exists {
             do{
-                self.user = try document.data(as: User.self)!
+                self.user = try document.data(as: User.self)
                 self.loadRoutineFromSchema()
             }
             catch {
               print(error)
             }
           } else {
-            print("Document does not exist in cache")
+            print("User document does not exist")
           }
         }
     }
@@ -51,9 +63,16 @@ class TrainingDataModel: ObservableObject{
         self.loadRoutineFromSchema()
     }
     
-    func getTodaysRoutine() -> UUID{
+    func getTodaysRoutine() -> UUID? {
         let dayOfWeek: Int = self.getDayForWeekPlan()
-        return self.user.weekPlan![dayOfWeek].routine!
+        guard
+            let weekPlan = self.user.weekPlan,
+            weekPlan.indices.contains(dayOfWeek)
+        else {
+            return nil
+        }
+
+        return weekPlan[dayOfWeek].routine
     }
     
     func getDayForWeekPlan() -> Int{
@@ -69,41 +88,35 @@ class TrainingDataModel: ObservableObject{
     
     
     func loadRoutineFromSchema(){
-        
-        if self.user.workoutOfTheDay != nil || self.user.workoutOfTheDay?.uuidString != "" && self.user.schema != nil{
-            
-            let settings = FirestoreSettings()
-            settings.isPersistenceEnabled = true
-            let db = Firestore.firestore()
-            
-            let docRef = db.collection("schemas").document(self.user.schema!)
-              
-            docRef.getDocument { document, error in
-              if (error as NSError?) != nil {
-                  print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
-              }
-              else {
-                if let document = document {
-                  do {
-                    self.schema = try document.data(as: Schema.self)!
-                      
-                      let todaysRoutine = self.getTodaysRoutine()
-                    
-                    if let index = self.schema.routines.firstIndex(where: { $0.id == todaysRoutine }) {
-                            self.routine = self.schema.routines[index]
-                        }
-                  }
-                  catch {
-                    print(error)
-                    }
-                  }
-                }
-              }
-        }
+        guard
+            let schemaID = self.user.schema,
+            let todaysRoutine = self.user.workoutOfTheDay ?? self.getTodaysRoutine()
         else {
-            if let index = self.schema.routines.firstIndex(where: { $0.id == self.user.workoutOfTheDay }) {
-                    self.routine = self.schema.routines[index]
+            self.routine = Routine()
+            return
+        }
+
+        let db = Firestore.firestore()
+        let docRef = db.collection("schemas").document(schemaID)
+
+        docRef.getDocument { document, error in
+            if (error as NSError?) != nil {
+                print("Error getting document: \(error?.localizedDescription ?? "Unknown error")")
+            } else if let document = document {
+                do {
+                    self.schema = try document.data(as: Schema.self)
+
+                    if let index = self.schema.routines.firstIndex(where: { $0.id == todaysRoutine }) {
+                        self.routine = self.schema.routines[index]
+                    } else {
+                        self.routine = Routine()
+                    }
                 }
+                catch {
+                    print(error)
+                    self.routine = Routine()
+                }
+            }
         }
     }
     
@@ -235,8 +248,6 @@ class TrainingDataModel: ObservableObject{
         
     func fetchData() {
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         db.collection("schemas").addSnapshotListener { (querySnapshot, error) in
@@ -252,12 +263,7 @@ class TrainingDataModel: ObservableObject{
                     }
                     switch result {
                     case .success(let schema):
-                        if let schema = schema {
-                            return Schema(id: schema.id, docID: schema.docID, type: schema.type, name: schema.name, routines: schema.routines)
-                        }
-                        else {
-                            print ("Document does not exists")
-                        }
+                        return Schema(id: schema.id, docID: schema.docID, type: schema.type, name: schema.name, routines: schema.routines)
                     case .failure(let error):
                         print("error decoding schema: \(error)")
                     }
@@ -269,8 +275,6 @@ class TrainingDataModel: ObservableObject{
     
     func getTrainingSchema(for schemaDocID: String){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let docRef = db.collection("schemas").document(schemaDocID)
@@ -282,7 +286,7 @@ class TrainingDataModel: ObservableObject{
           else {
             if let document = document {
               do {
-                self.schema = try document.data(as: Schema.self)!
+                self.schema = try document.data(as: Schema.self)
               }
               catch {
                 print(error)
@@ -318,8 +322,6 @@ class TrainingDataModel: ObservableObject{
             schema.name = schemaName
         }
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let newSchemaRef = db.collection("schemas").document()
@@ -360,8 +362,6 @@ class TrainingDataModel: ObservableObject{
             schema.name = schemaName
         }
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let saveSchema: Schema = schema
@@ -398,6 +398,23 @@ struct Schema: Codable, Hashable, Identifiable  {
         self.name = name
         self.routines = routines
     }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case name
+        case routines
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.id = container.decodeUUIDIfPresent(forKey: .id) ?? UUID()
+        self.docID = nil
+        self.type = try container.decodeIfPresent(String.self, forKey: .type) ?? ""
+        self.name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+        self.routines = try container.decodeIfPresent([Routine].self, forKey: .routines) ?? []
+    }
 }
 
 struct Routine: Codable, Hashable, Identifiable {
@@ -411,6 +428,20 @@ struct Routine: Codable, Hashable, Identifiable {
         self.type = type
         self.superset = superset
     }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case superset
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.id = container.decodeUUIDIfPresent(forKey: .id) ?? UUID()
+        self.type = try container.decodeIfPresent(String.self, forKey: .type) ?? "Unknown"
+        self.superset = try container.decodeIfPresent([Superset].self, forKey: .superset) ?? []
+    }
 }
 
 struct Superset: Codable, Hashable, Identifiable {
@@ -421,5 +452,19 @@ struct Superset: Codable, Hashable, Identifiable {
     init(sets: Int = 0,exercises: [Exercise] = [Exercise]()){
         self.sets = sets
         self.exercises = exercises
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case sets
+        case exercises
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.id = container.decodeUUIDIfPresent(forKey: .id) ?? UUID()
+        self.sets = try container.decodeIfPresent(Int.self, forKey: .sets) ?? 0
+        self.exercises = try container.decodeIfPresent([Exercise].self, forKey: .exercises) ?? []
     }
 }

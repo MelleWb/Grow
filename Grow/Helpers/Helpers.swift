@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
-import Firebase
 import Combine
+import FirebaseAuth
+import UIKit
 
 class NumberHelper{
     class func roundedNumbersFromDouble(unit: Double) -> String {
@@ -159,6 +160,16 @@ class FirebaseAuthentication: ObservableObject {
                 print("Geen authenticatie")
             }
         }
+    }
+}
+
+extension View {
+    func introspectTabBarController(_ customize: @escaping (UITabBarController) -> Void) -> some View {
+        self
+    }
+
+    func introspectNavigationController(_ customize: @escaping (UINavigationController) -> Void) -> some View {
+        self
     }
 }
 

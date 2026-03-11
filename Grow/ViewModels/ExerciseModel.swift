@@ -6,8 +6,21 @@
 //
 
 import Foundation
-import Firebase
-import FirebaseFirestoreSwift
+import FirebaseFirestore
+
+private extension KeyedDecodingContainer {
+    func decodeUUIDIfPresent(forKey key: Key) -> UUID? {
+        if let value = try? decodeIfPresent(UUID.self, forKey: key) {
+            return value
+        }
+
+        if let stringValue = try? decodeIfPresent(String.self, forKey: key) {
+            return UUID(uuidString: stringValue)
+        }
+
+        return nil
+    }
+}
 
 struct Exercise: Codable, Hashable, Identifiable {
     var id = UUID()
@@ -37,6 +50,30 @@ struct Exercise: Codable, Hashable, Identifiable {
         self.imageURL = imageURL ?? "Plaatje"
         self.description = description ?? "Omschrijving"
         self.statistics = statistics
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case documentID
+        case name
+        case reps
+        case category
+        case imageURL
+        case description
+        case statistics
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.id = container.decodeUUIDIfPresent(forKey: .id) ?? UUID()
+        self.documentID = nil
+        self.name = try container.decodeIfPresent(String.self, forKey: .name) ?? "Naam"
+        self.reps = try container.decodeIfPresent(Int.self, forKey: .reps) ?? 0
+        self.category = try container.decodeIfPresent(String.self, forKey: .category) ?? "Categorie"
+        self.imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
+        self.description = try container.decodeIfPresent(String.self, forKey: .description)
+        self.statistics = try container.decodeIfPresent([ExerciseStatistics].self, forKey: .statistics)
     }
 }
 

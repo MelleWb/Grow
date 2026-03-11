@@ -13,7 +13,9 @@ struct SplashScreen: View {
         VStack{
             withAnimation (
                 .linear(duration: 5)) {
-            LottieView(animation: "muscleanimation", loopMode:.repeat(1)).frame(width: 250, height: 300)
+                ProgressView()
+                    .controlSize(.large)
+                    .frame(width: 250, height: 300)
                 }
             
             Text(screenText)

@@ -33,8 +33,11 @@ struct CreateSchema: View{
             Section{
                 List{
                     ForEach($schema.routines) { $routine in
+                        Button {
+                            selectedRoutine = routine.id
+                        } label: {
                             Text(routine.type)
-                                .background(NavigationLink(destination: CreateRoutine(selectedRoutine: $selectedRoutine, routine: $routine), tag: $routine.id, selection: $selectedRoutine){EmptyView()}.isDetailLink(false).opacity(0))
+                        }
                     }.onDelete(perform: deleteRoutine)
                     
                     
@@ -50,6 +53,11 @@ struct CreateSchema: View{
             }
         }
         .navigationBarTitle(Text("Schema"), displayMode: .inline)
+        .navigationDestination(item: $selectedRoutine) { routineID in
+            if let index = schema.routines.firstIndex(where: { $0.id == routineID }) {
+                CreateRoutine(selectedRoutine: $selectedRoutine, routine: $schema.routines[index])
+            }
+        }
         .navigationBarItems(
             trailing:
             Button(action: {
@@ -93,26 +101,29 @@ struct CreateRoutine : View{
                     
                     ForEach($routine.superset){ $set in
                         Section(header: Text("Set")) {
-                            HStack{
-                                if set.sets != 0 {
-                                    Text("\(set.sets) sets")
-                                        .padding()
-                                }
-                                VStack(alignment:.leading){
-                                    if $set.exercises.isEmpty {
-                                        Text("Configureer de set")
-                                    } else {
-                                        ForEach($set.exercises) { $exercise in
-                                            HStack {
-                                                Text(exercise.name)
-                                                Spacer()
-                                                Text("\(exercise.reps) hh")
-                                            }.padding()
+                            Button {
+                                selectedSuperset = set.id
+                            } label: {
+                                HStack{
+                                    if set.sets != 0 {
+                                        Text("\(set.sets) sets")
+                                            .padding()
+                                    }
+                                    VStack(alignment:.leading){
+                                        if $set.exercises.isEmpty {
+                                            Text("Configureer de set")
+                                        } else {
+                                            ForEach($set.exercises) { $exercise in
+                                                HStack {
+                                                    Text(exercise.name)
+                                                    Spacer()
+                                                    Text("\(exercise.reps) hh")
+                                                }.padding()
+                                            }
                                         }
                                     }
                                 }
                             }
-                            .background(NavigationLink(destination: AddSuperSet(superSet: $set, selectedSuperset: $selectedSuperset), tag: $set.id, selection: $selectedSuperset){EmptyView()}.isDetailLink(false).opacity(0))
                         }
                     }.onDelete { indexSet in
                         self.routine.superset.remove(atOffsets: indexSet)
@@ -126,6 +137,11 @@ struct CreateRoutine : View{
                             Text("Voeg superset toe").foregroundColor(Color.init("textColor"))
                         }
                     }
+                }
+            }
+            .navigationDestination(item: $selectedSuperset) { supersetID in
+                if let index = routine.superset.firstIndex(where: { $0.id == supersetID }) {
+                    AddSuperSet(superSet: $routine.superset[index], selectedSuperset: $selectedSuperset)
                 }
             }
     }
@@ -167,7 +183,9 @@ struct AddSuperSet: View {
                     }
                 }
                 
-                NavigationLink(destination: AddExerciseToRoutine(showAddExercise: $showAddExercise, exercises: $superSet.exercises), isActive: $showAddExercise){
+                Button {
+                    showAddExercise = true
+                } label: {
                     HStack{
                         Image(systemName: "plus").foregroundColor(Color.init("textColor"))
                         Text("Oefeningen").foregroundColor(Color.init("textColor"))
@@ -178,6 +196,9 @@ struct AddSuperSet: View {
         }
         
         .navigationTitle("Superset")
+        .navigationDestination(isPresented: $showAddExercise) {
+            AddExerciseToRoutine(showAddExercise: $showAddExercise, exercises: $superSet.exercises)
+        }
         .blur(radius: isRepsSheetEnabled ? 1 : 0)
         .overlay(isRepsSheetEnabled ? Color.black.opacity(0.6) : nil)
     }
@@ -185,7 +206,7 @@ struct AddSuperSet: View {
 
 struct AddExerciseToRoutine: View {
     
-    @ObservedObject var exerciseModel = ExerciseDataModel()
+    @StateObject private var exerciseModel = ExerciseDataModel()
     @State var showAddExerciseSheetView = false
     @State var searchText = ""
     @State var searching = false

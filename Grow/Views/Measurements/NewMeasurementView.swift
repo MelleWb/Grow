@@ -6,8 +6,7 @@
 //
 
 import SwiftUI
-import Firebase
-import FirebaseFirestoreSwift
+import FirebaseStorage
 
 struct NewMeasurementView: View {
     

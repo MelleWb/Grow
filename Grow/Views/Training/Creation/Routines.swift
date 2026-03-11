@@ -5,7 +5,6 @@
 //  Created by Swen Rolink on 06/07/2021.
 //
 import SwiftUI
-import Firebase
 
 struct ReviewSchema: View{
     @Environment(\.presentationMode) private var presentationMode
@@ -36,8 +35,11 @@ struct ReviewSchema: View{
             Section{
                 List{
                     ForEach($schema.routines) { $routine in
+                        Button {
+                            selectedRoutine = routine.id
+                        } label: {
                             Text(routine.type)
-                                .background(NavigationLink(destination: CreateRoutine(selectedRoutine: $selectedRoutine, routine: $routine), tag: $routine.id, selection: $selectedRoutine){EmptyView()}.isDetailLink(false).opacity(0))
+                        }
                     }.onDelete(perform: deleteRoutine)
                     
                     
@@ -50,6 +52,11 @@ struct ReviewSchema: View{
                         }
                     }
                 }
+            }
+        }
+        .navigationDestination(item: $selectedRoutine) { routineID in
+            if let index = schema.routines.firstIndex(where: { $0.id == routineID }) {
+                CreateRoutine(selectedRoutine: $selectedRoutine, routine: $schema.routines[index])
             }
         }
         .navigationBarItems(

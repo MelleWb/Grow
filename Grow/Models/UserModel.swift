@@ -6,8 +6,22 @@
 //
 
 import Foundation
-import Firebase
-import FirebaseFirestoreSwift
+import UIKit
+import FirebaseFirestore
+
+private extension KeyedDecodingContainer {
+    func decodeUUIDIfPresent(forKey key: Key) -> UUID? {
+        if let value = try? decodeIfPresent(UUID.self, forKey: key) {
+            return value
+        }
+
+        if let stringValue = try? decodeIfPresent(String.self, forKey: key) {
+            return UUID(uuidString: stringValue)
+        }
+
+        return nil
+    }
+}
 
 struct User: Codable {
     @DocumentID var id: String?
@@ -56,6 +70,34 @@ struct DayPlan: Codable, Identifiable, Hashable {
     var trainingType: String?
     var routine: UUID?
     var isTrainingDay: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case trainingType
+        case routine
+        case isTrainingDay
+    }
+
+    init(
+        id: UUID = UUID(),
+        trainingType: String? = nil,
+        routine: UUID? = nil,
+        isTrainingDay: Bool? = nil
+    ) {
+        self.id = id
+        self.trainingType = trainingType
+        self.routine = routine
+        self.isTrainingDay = isTrainingDay
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.id = container.decodeUUIDIfPresent(forKey: .id) ?? UUID()
+        self.trainingType = try container.decodeIfPresent(String.self, forKey: .trainingType)
+        self.routine = container.decodeUUIDIfPresent(forKey: .routine)
+        self.isTrainingDay = try container.decodeIfPresent(Bool.self, forKey: .isTrainingDay)
+    }
 }
 
 struct BodyMeasurement: Codable, Identifiable, Hashable {

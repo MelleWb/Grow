@@ -6,9 +6,10 @@
 //
 
 import Foundation
-import Firebase
-import FirebaseFirestoreSwift
 import SwiftUI
+import FirebaseAuth
+import FirebaseFirestore
+import FirebaseStorage
 
 class UserDataModel: ObservableObject{
     
@@ -23,7 +24,7 @@ class UserDataModel: ObservableObject{
     @Published var currentDate: Date = Date()
     var measurementListener: ListenerRegistration? = nil
     
-    @ObservedObject var storeManager = StoreManager()
+    private let storeManager = StoreManager()
     
     private enum UserError: Error {
         case NoUserID
@@ -45,10 +46,8 @@ class UserDataModel: ObservableObject{
     }
 
     
-    func fetchUser(uid: String, finished: () -> Void){
+    func fetchUser(uid: String, finished: @escaping () -> Void){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
       let docRef = db.collection("users").document(uid)
@@ -56,11 +55,12 @@ class UserDataModel: ObservableObject{
       docRef.getDocument { document, error in
         if (error as NSError?) != nil {
             self.errorMessage = "Error getting document: \(error?.localizedDescription ?? "Unknown error")"
+            finished()
         }
         else {
-          if let document = document {
+          if let document = document, document.exists {
             do {
-                self.user = try document.data(as: User.self)!
+                self.user = try document.data(as: User.self)
                 
                 //Check membership
                 self.checkMemberShip()
@@ -80,11 +80,16 @@ class UserDataModel: ObservableObject{
                 
                 //Update query Running
                 self.queryRunning = false
+                finished()
                 
             }
             catch {
-              print(error)
+              self.errorMessage = "Error parsing user document: \(error.localizedDescription)"
+              finished()
             }
+          } else {
+              self.errorMessage = "User document does not exist"
+              finished()
           }
         }
       }
@@ -122,8 +127,6 @@ class UserDataModel: ObservableObject{
             if let schema = user.schema {
                 //If trainingSchema is not nil, get it and work with it
                 var trainingSchema: Schema = Schema()
-                let settings = FirestoreSettings()
-                settings.isPersistenceEnabled = true
                 let db = Firestore.firestore()
                 
                 let docRef = db.collection("schemas").document(schema)
@@ -135,7 +138,7 @@ class UserDataModel: ObservableObject{
                   else {
                     if let document = document {
                       do {
-                        trainingSchema = try document.data(as: Schema.self)!
+                        trainingSchema = try document.data(as: Schema.self)
                         let routineAmount:Int = trainingSchema.routines.count - 1
 
                         let weekDays: [String] = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"]
@@ -197,22 +200,21 @@ class UserDataModel: ObservableObject{
     
     func determineWorkoutOfTheDay() {
         let dayOfWeek: Int = self.getDayForWeekPlan()
-        
-        if self.user.weekPlan == nil {
-            // don't determine the workout of today
-            print("Weekplan is nil, don't determine the WoD")
+
+        guard
+            let weekPlan = self.user.weekPlan,
+            weekPlan.indices.contains(dayOfWeek)
+        else {
+            self.user.workoutOfTheDay = nil
+            print("Weekplan is nil or incomplete, don't determine the WoD")
+            return
+        }
+
+        let dayPlan = weekPlan[dayOfWeek]
+        if dayPlan.isTrainingDay == true, let routine = dayPlan.routine {
+            self.user.workoutOfTheDay = routine
         } else {
-            if self.user.weekPlan![dayOfWeek].isTrainingDay != nil{
-                if self.user.weekPlan![dayOfWeek].isTrainingDay! {
-                    self.user.workoutOfTheDay = self.user.weekPlan?[dayOfWeek].routine
-                }
-                else{
-                    self.user.workoutOfTheDay = nil
-                }
-            }
-            else{
-                self.user.workoutOfTheDay = nil
-            }
+            self.user.workoutOfTheDay = nil
         }
     }
     
@@ -223,8 +225,6 @@ class UserDataModel: ObservableObject{
     
     func getTrainingStatsForCurrentWeek(){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let dateArray: [Date] = DateHelper.calcWeekDates()
@@ -361,8 +361,6 @@ class UserDataModel: ObservableObject{
     
     func saveBodyMeasurement(){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let measureRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("bodyMeasurements").document()
@@ -377,8 +375,6 @@ class UserDataModel: ObservableObject{
     func getBodyMeasurements(){
         
         var docCount:Int = 0
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("bodyMeasurements").order(by: "date", descending: true)
@@ -397,23 +393,18 @@ class UserDataModel: ObservableObject{
                 }
                 switch result {
                 case .success(let measurement):
-                    if let measurement = measurement {
-                        if docCount == 0 {
-                            let calendar = Calendar.current
-                            let startOfNow = calendar.startOfDay(for: Date())
-                            let startOfTimeStamp = calendar.startOfDay(for: measurement.date)
-                                   let components = calendar.dateComponents([.weekOfMonth], from: startOfTimeStamp, to: startOfNow)
-                                   let week = components.weekOfMonth!
-                            if week >= 3 {
-                                self.isNewMeasurementDay = true
-                            }
+                    if docCount == 0 {
+                        let calendar = Calendar.current
+                        let startOfNow = calendar.startOfDay(for: Date())
+                        let startOfTimeStamp = calendar.startOfDay(for: measurement.date)
+                               let components = calendar.dateComponents([.weekOfMonth], from: startOfTimeStamp, to: startOfNow)
+                               let week = components.weekOfMonth!
+                        if week >= 3 {
+                            self.isNewMeasurementDay = true
                         }
-                        docCount += 1
-                        return measurement
                     }
-                    else {
-                        print ("Document does not exists")
-                    }
+                    docCount += 1
+                    return measurement
                 case .failure:
                     print("error decoding schema...")
                 }
@@ -450,8 +441,6 @@ class UserDataModel: ObservableObject{
     
     func updateUser() {
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
       if let id = user.id {
@@ -710,4 +699,3 @@ class UserDataModel: ObservableObject{
     }
 
 }
-

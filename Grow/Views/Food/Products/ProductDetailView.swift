@@ -10,12 +10,13 @@ import SwiftUI
 struct ProductDetailView: View {
     
     @EnvironmentObject var foodModel: FoodDataModel
+    @Environment(\.dismiss) private var dismiss
     
     @State var product:Product = Product()
     
     @State var meal: Meal
     @State var documentID:String
-    @Binding var navigationAction: Int?
+    @Binding var isPresented: Bool
     
     
     @State var amount: String = "100"
@@ -111,7 +112,8 @@ struct ProductDetailView: View {
                 let success = self.foodModel.addProductToMeal(for: meal, with: self.product, with: createdProduct)
                 
                 if success {
-                        self.navigationAction = 0
+                    isPresented = false
+                    dismiss()
                 }
             }
             
@@ -132,7 +134,8 @@ struct ProductDetailView: View {
                     }
                     
                 } else {
-                    self.navigationAction = 0
+                    isPresented = false
+                    dismiss()
                 }
                 })
             })

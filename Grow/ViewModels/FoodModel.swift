@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Firebase
-import FirebaseFirestoreSwift
+import FirebaseAuth
+import FirebaseFirestore
 
 
 class FoodDataModel: ObservableObject{
@@ -43,16 +43,14 @@ class FoodDataModel: ObservableObject{
     
     func initiateFoodModel(){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let docRef = db.collection("users").document(Auth.auth().currentUser!.uid)
 
-        docRef.getDocument(source: .cache) { (document, error) in
-          if let document = document {
+        docRef.getDocument { (document, error) in
+          if let document = document, document.exists {
             do{
-                self.user = try document.data(as: User.self)!
+                self.user = try document.data(as: User.self)
                 self.getFoodDiary()
                 self.fetchSlimProductList()
                 self.getMeals()
@@ -61,7 +59,7 @@ class FoodDataModel: ObservableObject{
               print(error)
             }
           } else {
-            print("Document does not exist in cache")
+            print("User document does not exist")
           }
         }
     }
@@ -108,8 +106,6 @@ class FoodDataModel: ObservableObject{
     
     func getFoodDiary(){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
@@ -137,14 +133,8 @@ class FoodDataModel: ObservableObject{
                 }
                 switch result {
                 case .success(let stats):
-                    if let stats = stats {
-                        
-                        self.foodDiary = stats
-                        return stats
-                    }
-                    else {
-                        print ("Document does not exists")
-                    }
+                    self.foodDiary = stats
+                    return stats
                 case .failure:
                     print("error decoding schema...")
                 }
@@ -161,8 +151,6 @@ class FoodDataModel: ObservableObject{
     
     func copyMeal(meal: Meal){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let docRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
@@ -183,7 +171,7 @@ class FoodDataModel: ObservableObject{
                     if querySnapshot!.documents.count > 0 {
                         for document in querySnapshot!.documents {
                             do{
-                                var diaryToCopyInto: FoodDiary = try document.data(as: FoodDiary.self)!
+                                var diaryToCopyInto: FoodDiary = try document.data(as: FoodDiary.self)
                                 if diaryToCopyInto.meals == nil {
                                     diaryToCopyInto.meals = [meal]
                                 } else {
@@ -219,8 +207,6 @@ class FoodDataModel: ObservableObject{
     
     func createProduct(product: Product) -> Bool{
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         let prodRef = db.collection("foodProducts")
         let slimProdRef = db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg")
@@ -260,8 +246,6 @@ class FoodDataModel: ObservableObject{
     
     func deleteProduct(documentID: String){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
 
         db.collection("foodProducts").document(documentID).delete() { err in
@@ -287,8 +271,6 @@ class FoodDataModel: ObservableObject{
     
     func getProductDetails(documentID: String, completion: @escaping(Product?, String) -> Void) {
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         var returnProduct: Product = Product()
         
@@ -301,7 +283,7 @@ class FoodDataModel: ObservableObject{
             }
             
             do {
-                returnProduct = try document.data(as: Product.self)!
+                returnProduct = try document.data(as: Product.self)
                 completion(returnProduct, "")
             } catch {
                 print("Error in parsing the product document")
@@ -315,8 +297,6 @@ class FoodDataModel: ObservableObject{
         //Make sure the date of the foodDiary is right
         self.foodDiary.date = self.date
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let diaryRef = db.collection("users").document(Auth.auth().currentUser!.uid).collection("foodDiary")
@@ -344,8 +324,6 @@ class FoodDataModel: ObservableObject{
     
     func getMeals(){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let docRef = db.collection("meals")
@@ -364,13 +342,7 @@ class FoodDataModel: ObservableObject{
                 }
                 switch result {
                 case .success(let stats):
-                    if let stats = stats {
-
-                        return stats
-                    }
-                    else {
-                        print ("Document does not exists")
-                    }
+                    return stats
                 case .failure:
                     print("error decoding schema...")
                 }
@@ -381,8 +353,6 @@ class FoodDataModel: ObservableObject{
     
     func saveMeal(for meal: Meal) -> Bool {
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let mealRef = db.collection("meals")
@@ -449,8 +419,6 @@ class FoodDataModel: ObservableObject{
     
     func fetchSlimProductList() {
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg").addSnapshotListener { documentSnapshot, error in
@@ -461,7 +429,7 @@ class FoodDataModel: ObservableObject{
             }
             
             do {
-                self.slimProductList = try document.data(as: SlimProductList.self)!
+                self.slimProductList = try document.data(as: SlimProductList.self)
             } catch {
                 
                 print("error in parsing slim document list")
@@ -473,8 +441,6 @@ class FoodDataModel: ObservableObject{
         
         //MARK: Only use this to completely overwrite the SlimProductList
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let prodRef = db.collection("foodOverview").document("dA3UCyGYWDHRumopuAAg")

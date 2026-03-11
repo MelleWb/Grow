@@ -6,8 +6,7 @@
 //
 
 import SwiftUI
-import Introspect
-import Firebase
+import FirebaseAuth
 
 struct Profile: View {
     

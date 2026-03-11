@@ -28,8 +28,8 @@ struct StaticWeekDaysView: View{
     
     var body: some View {
         List{
-            ForEach(0..<weekDays.count){ i in
-            Text(weekDays[i])
+            ForEach(Array(weekDays.enumerated()), id: \.offset) { _, day in
+                Text(day)
             }
         }.listStyle(PlainListStyle())
     }

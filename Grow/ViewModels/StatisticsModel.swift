@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Firebase
-import FirebaseFirestoreSwift
+import FirebaseAuth
+import FirebaseFirestore
 
 class StatisticsDataModel: ObservableObject {
     
@@ -28,16 +28,14 @@ class StatisticsDataModel: ObservableObject {
     
     func initiateStatistics(){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         let docRef = db.collection("users").document(Auth.auth().currentUser!.uid)
 
-        docRef.getDocument(source: .cache) { (document, error) in
-          if let document = document {
+        docRef.getDocument { (document, error) in
+          if let document = document, document.exists {
             do{
-                self.user = try document.data(as: User.self)!
+                self.user = try document.data(as: User.self)
                 self.getStatisticsForCurrentRoutine()
                 
                 if self.trainingStatsListener != nil {
@@ -49,7 +47,7 @@ class StatisticsDataModel: ObservableObject {
               print(error)
             }
           } else {
-            print("Document does not exist in cache")
+            print("User document does not exist")
           }
         }
     }
@@ -67,8 +65,6 @@ class StatisticsDataModel: ObservableObject {
     
     func calcEstimatedWeights(for exerciseName: String){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         db.collection("users").document(Auth.auth().currentUser!.uid).collection("exerciseStatistics")
@@ -86,12 +82,7 @@ class StatisticsDataModel: ObservableObject {
                     }
                     switch result {
                     case .success(let stats):
-                        if let stats = stats {
-                            return stats
-                        }
-                        else {
-                            print ("Document does not exists")
-                        }
+                        return stats
                     case .failure(let error):
                         print("error decoding schema: \(error)")
                     }
@@ -185,8 +176,6 @@ class StatisticsDataModel: ObservableObject {
     
     func fetchStatsForExercise(for exerciseName: String){
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         
@@ -205,12 +194,7 @@ class StatisticsDataModel: ObservableObject {
                     }
                     switch result {
                     case .success(let stats):
-                        if let stats = stats {
-                            return stats
-                        }
-                        else {
-                            print ("Document does not exists")
-                        }
+                        return stats
                     case .failure(let error):
                         print("error decoding schema: \(error)")
                     }
@@ -237,9 +221,16 @@ class StatisticsDataModel: ObservableObject {
         return value
     }
     
-    func getTodaysRoutine() -> UUID{
+    func getTodaysRoutine() -> UUID? {
         let dayOfWeek: Int = self.getDayForWeekPlan()
-        return self.user.weekPlan![dayOfWeek].routine!
+        guard
+            let weekPlan = self.user.weekPlan,
+            weekPlan.indices.contains(dayOfWeek)
+        else {
+            return nil
+        }
+
+        return weekPlan[dayOfWeek].routine
     }
     
     func getDayForWeekPlan() -> Int{
@@ -254,18 +245,18 @@ class StatisticsDataModel: ObservableObject {
     }
     
     func getStatisticsForCurrentRoutine(){
-        
-        if self.user.id != "" && self.user.workoutOfTheDay != nil && self.user.workoutOfTheDay?.uuidString != ""{
-        
-            let routine:String = self.getTodaysRoutine().uuidString
-                
-            let settings = FirestoreSettings()
-            settings.isPersistenceEnabled = true
-            let db = Firestore.firestore()
-        
-        
-            db.collection("users").document(self.user.id!).collection("trainingStatistics")
-                .whereField("routineID", isEqualTo: routine).order(by: "trainingDate", descending: true).limit(to: 1).getDocuments(completion: { (querySnapshot, error) in
+        guard
+            self.user.id != "",
+            let routineID = self.user.workoutOfTheDay ?? self.getTodaysRoutine()
+        else {
+            return
+        }
+
+        let routine = routineID.uuidString
+        let db = Firestore.firestore()
+
+        db.collection("users").document(self.user.id!).collection("trainingStatistics")
+            .whereField("routineID", isEqualTo: routine).order(by: "trainingDate", descending: true).limit(to: 1).getDocuments(completion: { (querySnapshot, error) in
 
                 guard let documents = querySnapshot?.documents else {
                         print("No documents")
@@ -279,20 +270,14 @@ class StatisticsDataModel: ObservableObject {
                     }
                     switch result {
                     case .success(let stats):
-                        if let stats = stats {
-                            self.trainingStatistics = stats
-                            return stats
-                        }
-                        else {
-                            print ("Document does not exists")
-                        }
+                        self.trainingStatistics = stats
+                        return stats
                     case .failure(let error):
                         print("error decoding schema: \(error)")
                     }
                     return TrainingStatistics()
                 }
             })
-        }
     }
     
     func getStatisticsForCurrentSchema(){
@@ -300,8 +285,6 @@ class StatisticsDataModel: ObservableObject {
         if self.schemaStatistics.routineStats == nil && self.user.schema != nil {
         var schema:Schema = Schema()
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
             let docRef = db.collection("schemas").document(self.user.schema!)
@@ -313,7 +296,7 @@ class StatisticsDataModel: ObservableObject {
           else {
             if let document = document {
               do {
-                schema = try document.data(as: Schema.self)!
+                schema = try document.data(as: Schema.self)
                 
                 //Get routines for current schema
                 for routine in schema.routines {
@@ -337,12 +320,7 @@ class StatisticsDataModel: ObservableObject {
                                 }
                                 switch result {
                                 case .success(let stats):
-                                    if let stats = stats {
-                                        return stats
-                                    }
-                                    else {
-                                        print ("Document does not exists")
-                                    }
+                                    return stats
                                 case .failure(let error):
                                     print("error decoding schema: \(error)")
                                 }
@@ -372,8 +350,6 @@ class StatisticsDataModel: ObservableObject {
         
         if self.user.id != nil {
         
-            let settings = FirestoreSettings()
-            settings.isPersistenceEnabled = true
             let db = Firestore.firestore()
             
             trainingHistoryListener = db.collection("users").document(self.user.id!).collection("trainingStatistics").order(by: "trainingDate", descending: true).limit(to: 10).addSnapshotListener { (querySnapshot, error) in
@@ -389,12 +365,7 @@ class StatisticsDataModel: ObservableObject {
                     }
                     switch result {
                     case .success(let history):
-                        if let history = history {
-                            return history
-                        }
-                        else {
-                            print ("Document does not exists")
-                        }
+                        return history
                     case .failure(let error):
                         print("error decoding schema: \(error)")
                     }
@@ -407,8 +378,6 @@ class StatisticsDataModel: ObservableObject {
     func removeTrainingHistory(for index: Int){
         let documentID = self.trainingHistory[index].documentID ?? ""
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         db.collection("users").document(Auth.auth().currentUser!.uid).collection("trainingStatistics").document(documentID).delete() { err in
@@ -482,8 +451,6 @@ class StatisticsDataModel: ObservableObject {
         
         let trainingStatisticsObject: TrainingStatistics = TrainingStatistics(routineID: routineID, trainingDate: date, trainingVolume: volume, exerciceStatistics: exerciseStatistics)
         
-        let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         
         
