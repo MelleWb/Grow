@@ -14,6 +14,7 @@ struct WorkoutOfTheDayView: View {
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     @State var routine:UUID
+    var loadsStatisticsOnAppear: Bool = true
     @State var amountOfSets: Int = 0
     @State var showAlert: Bool = false
     
@@ -39,6 +40,14 @@ struct WorkoutOfTheDayView: View {
                 }
             }
         .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: saveTraining) {
+                    Text("Opslaan")
+                        .foregroundColor(.accentColor)
+                }
+                .disabled(userModel.user.id == nil)
+            }
+
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
                 
@@ -51,28 +60,30 @@ struct WorkoutOfTheDayView: View {
             }
         }
         .onAppear(perform: {
-            self.statisticsModel.getStatisticsForCurrentRoutine()
+            if loadsStatisticsOnAppear {
+                self.statisticsModel.getStatisticsForCurrentRoutine()
+            }
         })
         .listStyle(InsetGroupedListStyle())
         .navigationTitle("Training van vandaag")
-        .navigationBarItems(trailing:
-                                Button(action:{
-                                    
-                                        let success: Bool = self.statisticsModel.saveTraining(for: userModel.user.id!, for: routine)
-                                        if success{
-                                            self.trainingModel.initiateTrainingModel()
-                                            self.statisticsModel.initiateStatistics()
-                                            self.showWOD = false
-                                        
-                                        } else {
-                                            self.showAlert.toggle()
-                                        }
-                                }){
-                                Text("Opslaan").foregroundColor(.accentColor)
-                                }
-        )
         .alert(isPresented: $showAlert, content: {
                 Alert(title: Text("Oops"), message: Text("Er ging iets fout in het opslaan van je training"), dismissButton: .default(Text("Oke")))})
+    }
+
+    private func saveTraining() {
+        guard let userID = userModel.user.id else {
+            showAlert = true
+            return
+        }
+
+        let success: Bool = self.statisticsModel.saveTraining(for: userID, for: routine)
+        if success {
+            self.trainingModel.initiateTrainingModel()
+            self.statisticsModel.initiateStatistics()
+            self.showWOD = false
+        } else {
+            self.showAlert.toggle()
+        }
     }
 }
 
@@ -110,12 +121,14 @@ struct ExerciseRow:View{
             HStack{
                 ForEach(0..<amountOfSets, id: \.self) { index in
                     WeightRow(set: index, exercise: exercise)
+                        .frame(maxWidth: .infinity)
                 }
             }
                 
             HStack{
                 ForEach(0..<amountOfSets, id: \.self) { index in
                     RepsRow(set: index, exercise: exercise)
+                        .frame(maxWidth: .infinity)
                 }
             }
         }.onTapGesture {
@@ -140,7 +153,7 @@ struct RepsRow:View{
                 }
             })
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 58, height: 40, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: 40)
                 .multilineTextAlignment(.center)
                 .keyboardType(.numberPad)
         }.onAppear(perform: {
@@ -187,7 +200,7 @@ struct WeightRow:View{
                       }
                   })
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 58, height: 40, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: 40)
                 .multilineTextAlignment(.center)
                 .keyboardType(.decimalPad)
         }
@@ -213,4 +226,68 @@ struct WeightRow:View{
 
         })
     }
+}
+
+private struct WorkoutOfTheDayPreviewHarness: View {
+    @State private var showWOD = true
+    @StateObject private var userModel: UserDataModel
+    @StateObject private var trainingModel: TrainingDataModel
+    @StateObject private var statisticsModel: StatisticsDataModel
+
+    init() {
+        let exerciseOne = Exercise(name: "Bench Press", reps: 8, category: "Chest")
+        let exerciseTwo = Exercise(name: "Incline Dumbbell Press", reps: 10, category: "Chest")
+        let exerciseThree = Exercise(name: "Cable Fly", reps: 12, category: "Chest")
+        let firstSuperset = Superset(sets: 3, exercises: [exerciseOne, exerciseTwo])
+        let secondSuperset = Superset(sets: 2, exercises: [exerciseThree])
+        let routine = Routine(type: "Push", superset: [firstSuperset, secondSuperset])
+
+        let userModel = UserDataModel(autostart: false, runStartupSideEffects: false)
+        userModel.user.id = "preview-user"
+
+        let trainingModel = TrainingDataModel(autostart: false, runStartupSideEffects: false)
+        trainingModel.routine = routine
+
+        let statisticsModel = StatisticsDataModel(autostart: false, runStartupSideEffects: false)
+        statisticsModel.trainingStatistics = TrainingStatistics(
+            routineID: routine.id,
+            exerciceStatistics: [
+                ExerciseStatistics(exerciseID: exerciseOne.id, exerciseName: exerciseOne.name, set: 0, reps: 8, weight: 80),
+                ExerciseStatistics(exerciseID: exerciseOne.id, exerciseName: exerciseOne.name, set: 1, reps: 8, weight: 82.5),
+                ExerciseStatistics(exerciseID: exerciseTwo.id, exerciseName: exerciseTwo.name, set: 0, reps: 10, weight: 28),
+                ExerciseStatistics(exerciseID: exerciseThree.id, exerciseName: exerciseThree.name, set: 0, reps: 12, weight: 18)
+            ]
+        )
+        statisticsModel.exerciseStatistics = [
+            ExerciseStatistics(exerciseID: exerciseOne.id, exerciseName: exerciseOne.name, date: Date(), set: 0, reps: 8, weight: 80),
+            ExerciseStatistics(exerciseID: exerciseOne.id, exerciseName: exerciseOne.name, date: Date(), set: 1, reps: 8, weight: 82.5),
+            ExerciseStatistics(exerciseID: exerciseOne.id, exerciseName: exerciseOne.name, date: Date(), set: 2, reps: 6, weight: 85),
+            ExerciseStatistics(exerciseID: exerciseTwo.id, exerciseName: exerciseTwo.name, date: Date(), set: 0, reps: 10, weight: 28),
+            ExerciseStatistics(exerciseID: exerciseTwo.id, exerciseName: exerciseTwo.name, date: Date(), set: 1, reps: 10, weight: 30),
+            ExerciseStatistics(exerciseID: exerciseTwo.id, exerciseName: exerciseTwo.name, date: Date(), set: 2, reps: 8, weight: 32),
+            ExerciseStatistics(exerciseID: exerciseThree.id, exerciseName: exerciseThree.name, date: Date(), set: 0, reps: 12, weight: 18),
+            ExerciseStatistics(exerciseID: exerciseThree.id, exerciseName: exerciseThree.name, date: Date(), set: 1, reps: 12, weight: 20)
+        ]
+
+        _userModel = StateObject(wrappedValue: userModel)
+        _trainingModel = StateObject(wrappedValue: trainingModel)
+        _statisticsModel = StateObject(wrappedValue: statisticsModel)
+    }
+
+    var body: some View {
+        NavigationStack {
+            WorkoutOfTheDayView(
+                showWOD: $showWOD,
+                routine: trainingModel.routine.id,
+                loadsStatisticsOnAppear: false
+            )
+            .environmentObject(userModel)
+            .environmentObject(trainingModel)
+            .environmentObject(statisticsModel)
+        }
+    }
+}
+
+#Preview {
+    WorkoutOfTheDayPreviewHarness()
 }

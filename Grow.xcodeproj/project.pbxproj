@@ -43,6 +43,18 @@
 		85667BE726ED29EC009E2C02 /* ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85667BE626ED29EC009E2C02 /* ImageViewer.swift */; };
 		856AB9FB276D2F8800A94125 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856AB9FA276D2F8800A94125 /* StoreManager.swift */; };
 		856D06F927C91B8A0008C842 /* PickerSearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D06F827C91B8A0008C842 /* PickerSearchBar.swift */; };
+		8578667F2F62A07500700148 /* DashboardPreviewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8578667E2F62A07500700148 /* DashboardPreviewContainer.swift */; };
+		857866812F62A07500700148 /* DashboardMeasurementSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857866802F62A07500700148 /* DashboardMeasurementSection.swift */; };
+		857866832F62A07500700148 /* DashboardTrainingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857866822F62A07500700148 /* DashboardTrainingSection.swift */; };
+		857866852F62A07600700148 /* DashboardBodyMetricsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857866842F62A07600700148 /* DashboardBodyMetricsSection.swift */; };
+		857866872F62A07600700148 /* DashboardRootPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857866862F62A07600700148 /* DashboardRootPreview.swift */; };
+		857866892F62A07600700148 /* DashboardNutritionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857866882F62A07600700148 /* DashboardNutritionSection.swift */; };
+		8578668B2F62ADD600700148 /* FoodPreviewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8578668A2F62ADD600700148 /* FoodPreviewContainer.swift */; };
+		8578668D2F62ADD600700148 /* FoodSummarySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8578668C2F62ADD600700148 /* FoodSummarySection.swift */; };
+		8578668F2F62ADD700700148 /* FoodSavedMealsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8578668E2F62ADD700700148 /* FoodSavedMealsSection.swift */; };
+		857866912F62ADD700700148 /* FoodMealSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857866902F62ADD700700148 /* FoodMealSection.swift */; };
+		857866932F62ADD700700148 /* FoodRootPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857866922F62ADD700700148 /* FoodRootPreview.swift */; };
+		857866952F62ADD700700148 /* FoodAddMealSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857866942F62ADD700700148 /* FoodAddMealSection.swift */; };
 		857E622A268472D600A3A9A4 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857E6229268472D600A3A9A4 /* Helpers.swift */; };
 		857E622E2684B80900A3A9A4 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857E622D2684B80900A3A9A4 /* ImagePicker.swift */; };
 		85821DAF275F6BF9002356DE /* MacrosActionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85821DAE275F6BF9002356DE /* MacrosActionSheet.swift */; };
@@ -167,6 +179,18 @@
 		85667BE626ED29EC009E2C02 /* ImageViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewer.swift; sourceTree = "<group>"; };
 		856AB9FA276D2F8800A94125 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		856D06F827C91B8A0008C842 /* PickerSearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerSearchBar.swift; sourceTree = "<group>"; };
+		8578667E2F62A07500700148 /* DashboardPreviewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPreviewContainer.swift; sourceTree = "<group>"; };
+		857866802F62A07500700148 /* DashboardMeasurementSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardMeasurementSection.swift; sourceTree = "<group>"; };
+		857866822F62A07500700148 /* DashboardTrainingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardTrainingSection.swift; sourceTree = "<group>"; };
+		857866842F62A07600700148 /* DashboardBodyMetricsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardBodyMetricsSection.swift; sourceTree = "<group>"; };
+		857866862F62A07600700148 /* DashboardRootPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardRootPreview.swift; sourceTree = "<group>"; };
+		857866882F62A07600700148 /* DashboardNutritionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardNutritionSection.swift; sourceTree = "<group>"; };
+		8578668A2F62ADD600700148 /* FoodPreviewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodPreviewContainer.swift; sourceTree = "<group>"; };
+		8578668C2F62ADD600700148 /* FoodSummarySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSummarySection.swift; sourceTree = "<group>"; };
+		8578668E2F62ADD700700148 /* FoodSavedMealsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSavedMealsSection.swift; sourceTree = "<group>"; };
+		857866902F62ADD700700148 /* FoodMealSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodMealSection.swift; sourceTree = "<group>"; };
+		857866922F62ADD700700148 /* FoodRootPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodRootPreview.swift; sourceTree = "<group>"; };
+		857866942F62ADD700700148 /* FoodAddMealSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodAddMealSection.swift; sourceTree = "<group>"; };
 		857E6229268472D600A3A9A4 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		857E622D2684B80900A3A9A4 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		85821DAE275F6BF9002356DE /* MacrosActionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacrosActionSheet.swift; sourceTree = "<group>"; };
@@ -370,6 +394,12 @@
 				850B59282769297D008DA670 /* FoodCharts.swift */,
 				85A80F4A27B6582C00248258 /* PreviewBars.swift */,
 				850B592A27692BF1008DA670 /* MealCopyCalendar.swift */,
+				8578668A2F62ADD600700148 /* FoodPreviewContainer.swift */,
+				8578668C2F62ADD600700148 /* FoodSummarySection.swift */,
+				8578668E2F62ADD700700148 /* FoodSavedMealsSection.swift */,
+				857866902F62ADD700700148 /* FoodMealSection.swift */,
+				857866922F62ADD700700148 /* FoodRootPreview.swift */,
+				857866942F62ADD700700148 /* FoodAddMealSection.swift */,
 			);
 			path = Food;
 			sourceTree = "<group>";
@@ -436,6 +466,12 @@
 				F05CBB0A277F452C00C7E06F /* Register.swift */,
 				F06E41F5279AFEDE0096D267 /* InitializeWeight.swift */,
 				F06E41F7279B0FDF0096D267 /* InitializeHeight.swift */,
+				8578667E2F62A07500700148 /* DashboardPreviewContainer.swift */,
+				857866802F62A07500700148 /* DashboardMeasurementSection.swift */,
+				857866822F62A07500700148 /* DashboardTrainingSection.swift */,
+				857866842F62A07600700148 /* DashboardBodyMetricsSection.swift */,
+				857866862F62A07600700148 /* DashboardRootPreview.swift */,
+				857866882F62A07600700148 /* DashboardNutritionSection.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -630,18 +666,23 @@
 		851AFF312673D6D70092DA9B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
+				857866892F62A07600700148 /* DashboardNutritionSection.swift in Sources */,
 				85E77744275AB8A100D8996A /* CalorieOverview.swift in Sources */,
 				852DBDFF26E7F6D5000ABE3C /* MeasurementOverview.swift in Sources */,
+				857866852F62A07600700148 /* DashboardBodyMetricsSection.swift in Sources */,
 				854F1DDB2756BC0D009E70B7 /* UserModel.swift in Sources */,
 				8514DFEF275CC85B00C9CE48 /* SecondaryButtonStyle.swift in Sources */,
 				85BC5E9326B3255500DBC821 /* TrainingDaySelectionView.swift in Sources */,
 				8539186826938D290045A1B5 /* TrainingModel.swift in Sources */,
+				857866872F62A07600700148 /* DashboardRootPreview.swift in Sources */,
 				8514DFED275CC5D600C9CE48 /* PrimaryButtonStyle.swift in Sources */,
 				85A9352F2763805F0053E693 /* Login.swift in Sources */,
 				85DF0607268C4CA400020559 /* AddExercise.swift in Sources */,
 				8554BCE426E0BF0800651C3F /* SettingsView.swift in Sources */,
 				8534D7C926D27F0300FB41EE /* TrainingVolumeView.swift in Sources */,
 				F06E41F8279B0FE00096D267 /* InitializeHeight.swift in Sources */,
+				857866832F62A07500700148 /* DashboardTrainingSection.swift in Sources */,
+				8578668D2F62ADD600700148 /* FoodSummarySection.swift in Sources */,
 				85A935312763F9DC0053E693 /* LinkButtonStyle.swift in Sources */,
 				856D06F927C91B8A0008C842 /* PickerSearchBar.swift in Sources */,
 				856AB9FB276D2F8800A94125 /* StoreManager.swift in Sources */,
@@ -650,6 +691,8 @@
 				85B4CA1E26DEB81500C97E99 /* SaveAsMeal.swift in Sources */,
 				8522F3FE27F1DD7D00F9D618 /* ManageProductDetailView.swift in Sources */,
 				85C48AE526B1E32400BFE48E /* ChatView.swift in Sources */,
+				857866912F62ADD700700148 /* FoodMealSection.swift in Sources */,
+				8578668B2F62ADD600700148 /* FoodPreviewContainer.swift in Sources */,
 				8522F40027F2535900F9D618 /* AddProductToMealList.swift in Sources */,
 				856677DE27A4878100CFEC31 /* CreateSchema.swift in Sources */,
 				F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */,
@@ -661,8 +704,10 @@
 				85F92EEA2694AD9F00698585 /* Routines.swift in Sources */,
 				85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */,
 				85821DB1275FB6BC002356DE /* MultiWheelPicker.swift in Sources */,
+				8578667F2F62A07500700148 /* DashboardPreviewContainer.swift in Sources */,
 				85143D7226CE603E0043FF1C /* FoodView.swift in Sources */,
 				F06E41F6279AFEDE0096D267 /* InitializeWeight.swift in Sources */,
+				8578668F2F62ADD700700148 /* FoodSavedMealsSection.swift in Sources */,
 				85CB7FA026C1C0A700025736 /* StatisticsModel.swift in Sources */,
 				85D21061268F8F32002BA11C /* SearchBar.swift in Sources */,
 				85B4CA2026DECB7200C97E99 /* SelectSavedMeal.swift in Sources */,
@@ -675,6 +720,8 @@
 				85037C16268915D500EC344B /* UserVM.swift in Sources */,
 				F05CBB09277B6F0F00C7E06F /* ChangeExercise.swift in Sources */,
 				85667BE726ED29EC009E2C02 /* ImageViewer.swift in Sources */,
+				857866952F62ADD700700148 /* FoodAddMealSection.swift in Sources */,
+				857866932F62ADD700700148 /* FoodRootPreview.swift in Sources */,
 				85476A31267FC04100BA68A2 /* KeyboardResponder.swift in Sources */,
 				854B05EC26820A8700A824CD /* UserDefaults.swift in Sources */,
 				8514DFF1275CCA2A00C9CE48 /* HeightActionSheet.swift in Sources */,
@@ -693,6 +740,7 @@
 				850C966526FF691500051772 /* LoadImage.swift in Sources */,
 				857E622E2684B80900A3A9A4 /* ImagePicker.swift in Sources */,
 				85597D7726A2C166005375F7 /* DisableAutoDismiss.swift in Sources */,
+				857866812F62A07500700148 /* DashboardMeasurementSection.swift in Sources */,
 				850B59292769297D008DA670 /* FoodCharts.swift in Sources */,
 				85A74D8A2F61A9F900D74F9E /* FirebaseDependencies.swift in Sources */,
 				85827C1A27EDB62300B34D9C /* SplashScreen.swift in Sources */,
@@ -867,6 +915,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Grow/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Grow;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -917,6 +966,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Grow/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Grow/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Grow;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (

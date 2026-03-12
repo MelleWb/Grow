@@ -96,7 +96,7 @@ class FoodDataModel: ObservableObject{
         if isToday{
             //set the foodDiary to todaysDiary
             //Remove listener first
-            self.foodDiaryListener!.remove()
+            self.foodDiaryListener?.remove()
             
             //Now fetch results
             self.foodDiary = FoodDiary()
@@ -105,7 +105,7 @@ class FoodDataModel: ObservableObject{
             self.foodDiary = self.todaysDiary
         } else {
             //Remove listener first
-            self.foodDiaryListener!.remove()
+            self.foodDiaryListener?.remove()
             
             //Now fetch results
             self.foodDiary = FoodDiary()
@@ -643,7 +643,7 @@ struct FoodDiary: Codable, Hashable, Identifiable {
     var usersCalorieLeftOver: Calories
     var usersCalorieUsedPercentage: CaloriesPercentages
     
-    init(id:String? = "",meals: [Meal]? = [Meal()], date: Date = Date(), usersCalorieBudget: Calories = Calories(), usersCalorieUsed: Calories = Calories(), usersCalorieLeftOver: Calories = Calories(), usersCalorieUsedPercentage: CaloriesPercentages = CaloriesPercentages()){
+    init(id:String? = nil,meals: [Meal]? = [Meal()], date: Date = Date(), usersCalorieBudget: Calories = Calories(), usersCalorieUsed: Calories = Calories(), usersCalorieLeftOver: Calories = Calories(), usersCalorieUsedPercentage: CaloriesPercentages = CaloriesPercentages()){
         self.id = id
         self.meals = meals
         self.date = date
@@ -691,7 +691,7 @@ struct Product: Codable, Hashable, Identifiable{
     var portions: [ProductPortion]
     var selectedProductDetails : SelectedProductDetails?
     
-    init(id:UUID = UUID(), documentID:String? = "", name:String = "", kcal:Double = 0, carbs:Double = 0, protein:Double = 0, fat:Double = 0, fiber:Double = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil){
+    init(id:UUID = UUID(), documentID:String? = nil, name:String = "", kcal:Double = 0, carbs:Double = 0, protein:Double = 0, fat:Double = 0, fiber:Double = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil){
         self.id = id
         self.documentID = documentID
         self.name = name

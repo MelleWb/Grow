@@ -58,6 +58,10 @@ struct Dashboard: View{
     @State var bodyWeight: Double = 0
     @State var fatPercentage: Double = 0
 
+    private var roundedWorkoutPercentage: Int {
+        Int((self.userModel.workoutDonePercentage * 100).rounded())
+    }
+
     private func loadAndDisplayMostRecentWeight() {
         guard let weightSampleType = HKSampleType.quantityType(forIdentifier: .bodyMass) else {
           print("Body Mass Sample Type is no longer available in HealthKit")
@@ -105,85 +109,21 @@ struct Dashboard: View{
         NavigationStack{
             VStack{
                 List{
-                    Section(header: Text(Date(), style: .date)){
-                        ZStack{
-                            HStack{
-                                CircleView()
-                                    .padding(.top, 20)
-                                    .padding(.bottom, 20)
-                                    VStack{
-                                        HStack{
-                                            ContentViewLinearKoolh()
-                                            ContentViewLinearEiwit()
-                                            }
-                                        HStack{
-                                                ContentViewLinearVet()
-                                                ContentViewLinearVezel()
-                                                }
-                                        
-                                            }.padding(.top, 10)
-                                             .padding(.bottom, 20)
-                                        }
-                            NavigationLink(destination:FoodView()){}.isDetailLink(false).opacity(0)
-                        }
-                    }
-                    if self.userModel.isNewMeasurementDay {
-                        Section{
-                            HStack{
-                                Button {
-                                    showMeasurementView = true
-                                } label: {
-                                    HStack{
-                                        Image(systemName: "alarm").foregroundColor(.accentColor)
-                                        Text("Tijd voor een nieuwe meting")
-                                            .font(.subheadline).foregroundColor(Color.init("blackWhite"))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    Section(header:Text("Trainingen deze week")){
-                        HStack{
-                                TrainingCircle()
-                            let percentage = (self.userModel.workoutDonePercentage * 100).rounded()
-                            let roundedPercentage = Int(round(percentage))
-                            Text("\(roundedPercentage) %")
-                        }
-                        if userModel.user.workoutOfTheDay != nil {
-                            HStack{
-                                Button {
-                                    if userModel.user.workoutOfTheDay != nil {
-                                        isWorkOutPresented = true
-                                    }
-                                } label: {
-                                        HStack{
-                                        Image(systemName: "bolt")
-                                            .foregroundColor(.accentColor)
+                    DashboardNutritionSection()
 
-                                            Text("Start je training van vandaag").font(.subheadline).foregroundColor(Color.init("blackWhite"))
-                                        }
-                                }
-                                }
-                            }
-                        
-                        }
-                    Section{
-                        if bodyWeight != 0 {
-                            HStack{
-                                Text("Gewicht")
-                                Spacer()
-                                Text("\(NumberHelper.roundNumbersMaxTwoDecimals(unit: self.bodyWeight)) kg").font(.headline)
-                            }
-                            if fatPercentage != 0 {
-                                HStack{
-                                    Text("Vet percentage")
-                                    Spacer()
-                                    Text("\(NumberHelper.roundNumbersMaxTwoDecimals(unit: self.fatPercentage)) %").font(.headline)
-                                }
-                            }
-                        }
+                    if self.userModel.isNewMeasurementDay {
+                        DashboardMeasurementSection(showMeasurementView: $showMeasurementView)
                     }
+
+                    DashboardTrainingSection(
+                        roundedWorkoutPercentage: roundedWorkoutPercentage,
+                        isWorkOutPresented: $isWorkOutPresented
+                    )
+
+                    DashboardBodyMetricsSection(
+                        bodyWeight: bodyWeight,
+                        fatPercentage: fatPercentage
+                    )
                 }
             }
             .overlay(
@@ -227,254 +167,6 @@ struct Dashboard: View{
                 self.loadAndDisplayMostRecentFatPercentage()
             })
         }
-    }
-}
-
-struct TrainingCircle: View {
-    @EnvironmentObject var userModel: UserDataModel
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(Color.accentColor.opacity(0.1))
-
-                Capsule()
-                    .fill(Color.accentColor)
-                    .frame(
-                        width: min(
-                            max(CGFloat(self.userModel.workoutDonePercentage), 0) * geometry.size.width,
-                            geometry.size.width
-                        )
-                    )
-                    .animation(Animation.linear(duration: 0.5), value: self.userModel.workoutDonePercentage)
-            }
-        }
-        .frame(maxWidth: .infinity, minHeight: 12, maxHeight: 12)
-    }
-}
-
-struct CircleView: View {
-    var body: some View {
-    
-        ZStack {
-            VStack {
-                ProgressBarCirle()
-                    .frame(width: 125.0, height: 125.0)
-                }
-        }
-    }
-}
-
-struct ProgressBarCirle: View {
-    @EnvironmentObject var foodModel: FoodDataModel
-        
-        var body: some View {
-            ZStack {
-                Circle()
-                    .stroke(lineWidth: 5.0)
-                    .opacity(0.3)
-                    .foregroundColor(Color.gray)
-                
-                if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal <= 0.9 {
-                    Circle()
-                        .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
-                        .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
-                        .foregroundColor(Color.red)
-                        .rotationEffect(Angle(degrees: 270.0))
-                        .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
-                }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal > 0.9 && self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal < 0.95{
-                Circle()
-                    .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
-                    .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
-                    .foregroundColor(Color.orange)
-                    .rotationEffect(Angle(degrees: 270.0))
-                    .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
-                }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal >= 0.95 && self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal < 1.05{
-                Circle()
-                    .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
-                    .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
-                    .foregroundColor(Color.green)
-                    .rotationEffect(Angle(degrees: 270.0))
-                    .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
-                }
-                else if self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal >= 1.05 && self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal < 1.1{
-                Circle()
-                    .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
-                    .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
-                    .foregroundColor(Color.orange)
-                    .rotationEffect(Angle(degrees: 270.0))
-                    .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
-                }
-                else {
-                    Circle()
-                        .trim(from: 0.0, to: CGFloat(min(self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal, 1.0)))
-                        .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
-                        .foregroundColor(Color.red)
-                        .rotationEffect(Angle(degrees: 270.0))
-                        .animation(Animation.linear(duration: 0.5), value: self.foodModel.todaysDiary.usersCalorieUsedPercentage.kcal)
-                    
-                }
-                VStack{
-                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.kcal))
-                    Text("Kcal over")
-                }
-            }
-        }
-    }
-
-struct ProgressBarLinearDashboard: View {
-    @Binding var value: Float
-    @EnvironmentObject var userModel: UserDataModel
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
-                    .opacity(0.3)
-                    .foregroundColor(Color(UIColor.gray))
-                
-                if value <= 0.90 {
-                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                    .foregroundColor(Color.red)
-                    .animation(Animation.linear(duration: 0.5), value: value)
-                }
-                else if value > 0.90 && value < 0.95 {
-                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                        .foregroundColor(Color.orange)
-                        .animation(Animation.linear(duration: 0.5), value: value)
-                }
-                else if value >= 0.95 && value < 1.05 {
-                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                        .foregroundColor(Color.green)
-                        .animation(Animation.linear(duration: 0.5), value: value)
-                }
-                else if value >= 1.05 && value < 1.1 {
-                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                        .foregroundColor(Color.orange)
-                        .animation(Animation.linear(duration: 0.5), value: value)
-                }
-                else {
-                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                        .foregroundColor(Color.red)
-                        .animation(Animation.linear(duration: 0.5), value: value)
-                }
-            }.cornerRadius(45.0)
-            .offset(y: geometry.size.height/3.5)
-        }
-    }
-}
-
-struct FiberProgressBarLinearDashboard: View {
-    @Binding var value: Float
-    @EnvironmentObject var userModel: UserDataModel
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle().frame(width: geometry.size.width , height: geometry.size.height)
-                    .opacity(0.3)
-                    .foregroundColor(Color(UIColor.gray))
-                
-                if value <= 0.90 {
-                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                    .foregroundColor(Color.red)
-                    .animation(Animation.linear(duration: 0.5), value: value)
-                }
-                else if value > 0.9 && value < 0.95 {
-                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                        .foregroundColor(Color.orange)
-                        .animation(Animation.linear(duration: 0.5), value: value)
-                }
-                else {
-                    Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width), height: geometry.size.height)
-                        .foregroundColor(Color.green)
-                        .animation(Animation.linear(duration: 0.5), value: value)
-                }
-            }.cornerRadius(45.0)
-            .offset(y: geometry.size.height/3.5)
-        }
-    }
-}
-
-struct ContentViewLinearKoolh: View {
-    @EnvironmentObject var foodModel: FoodDataModel
-
-    
-    var body: some View {
-        VStack {
-            VStack{
-                HStack{
-                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.carbs)).font(.subheadline).bold()
-                    Text("g").font(.subheadline).bold()
-                }
-                Text("Koolh. over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                }
-            ProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.carbs).frame(height: 7.5)
-
-        }
-    }
-}
-
-struct ContentViewLinearEiwit: View {
-    @EnvironmentObject var foodModel: FoodDataModel
-    
-    var body: some View {
-        VStack {
-            VStack{
-                HStack{
-                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.protein)).font(.subheadline).bold()
-                    Text("g").font(.subheadline).bold()
-                    }
-                Text("Eiwitten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                }
-            ProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.protein).frame(height: 7.5)
-        }
-    }
-}
-
-struct ContentViewLinearVet: View {
-    @EnvironmentObject var foodModel: FoodDataModel
-    
-    var body: some View {
-        VStack {
-            VStack{
-                HStack{
-                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.fat)).font(.subheadline).bold()
-                    Text("g").font(.subheadline).bold()
-                    }
-                Text("Vetten over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                }
-            ProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fat).frame(height: 7.5)
-        }
-    }
-}
-
-struct ContentViewLinearVezel: View {
-    @EnvironmentObject var foodModel: FoodDataModel
-    
-    var body: some View {
-        VStack {
-            VStack{
-                HStack{
-                    Text(NumberHelper.roundedNumbersFromDouble(unit:self.foodModel.todaysDiary.usersCalorieLeftOver.fiber)).font(.subheadline).bold()
-                    Text("g").font(.subheadline).bold()
-                    }
-                Text("Vezels over").font(.subheadline).foregroundColor(Color.gray).fixedSize(horizontal: true, vertical: false)
-                }
-            FiberProgressBarLinearDashboard(value: $foodModel.todaysDiary.usersCalorieUsedPercentage.fiber).frame(height: 7.5)
-            
-        }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        Dashboard()
-            .environmentObject(UserDataModel(autostart: false, runStartupSideEffects: false))
-            .environmentObject(TrainingDataModel(autostart: false, runStartupSideEffects: false))
-            .environmentObject(StatisticsDataModel(autostart: false, runStartupSideEffects: false))
-            .environmentObject(FoodDataModel(autostart: false, runStartupSideEffects: false))
     }
 }
 
