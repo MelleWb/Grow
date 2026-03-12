@@ -17,6 +17,7 @@ struct WorkoutOfTheDayView: View {
     var loadsStatisticsOnAppear: Bool = true
     @State var amountOfSets: Int = 0
     @State var showAlert: Bool = false
+    @State private var changeExerciseRoute: ChangeExerciseRoute?
     
     func setOrSuperset(set: Superset) -> String{
         //let setNumber: Int = self.$trainingModel.getSupersetIndex(for: self.trainingModel.routine, for: set) + 1
@@ -34,7 +35,17 @@ struct WorkoutOfTheDayView: View {
             ForEach(self.trainingModel.routine.superset, id: \.self){ set in
                 Section(header: Text(self.setOrSuperset(set: set))){
                     ForEach(set.exercises, id:\.self) {exercise in
-                        ExerciseRow(exercise: exercise, amountOfSets: set.sets, superset: set)
+                        ExerciseRow(
+                            exercise: exercise,
+                            amountOfSets: set.sets,
+                            superset: set,
+                            onChangeExercise: {
+                                changeExerciseRoute = ChangeExerciseRoute(
+                                    exerciseToChange: exercise,
+                                    superset: set
+                                )
+                            }
+                        )
                         }
                     }
                 }
@@ -66,6 +77,22 @@ struct WorkoutOfTheDayView: View {
         })
         .listStyle(InsetGroupedListStyle())
         .navigationTitle("Training van vandaag")
+        .navigationDestination(item: $changeExerciseRoute) { route in
+            let isPresented = Binding(
+                get: { changeExerciseRoute != nil },
+                set: { newValue in
+                    if !newValue {
+                        changeExerciseRoute = nil
+                    }
+                }
+            )
+            
+            ChangeExercise(
+                exerciseToChange: route.exerciseToChange,
+                showExerciseChange: isPresented,
+                superset: route.superset
+            )
+        }
         .alert(isPresented: $showAlert, content: {
                 Alert(title: Text("Oops"), message: Text("Er ging iets fout in het opslaan van je training"), dismissButton: .default(Text("Oke")))})
     }
@@ -87,13 +114,19 @@ struct WorkoutOfTheDayView: View {
     }
 }
 
+private struct ChangeExerciseRoute: Identifiable, Hashable {
+    let id = UUID()
+    let exerciseToChange: Exercise
+    let superset: Superset
+}
+
 struct ExerciseRow:View{
     
     @EnvironmentObject var statisticsModel: StatisticsDataModel
-    @State var showExerciseChange: Bool = false
     @State var exercise: Exercise
     @State var amountOfSets: Int
     @State var superset: Superset
+    let onChangeExercise: () -> Void
 
     var body: some View{
         VStack(alignment: .leading){
@@ -106,17 +139,12 @@ struct ExerciseRow:View{
                 }
                 }.swipeActions(edge: .leading, allowsFullSwipe: true) {
                     Button {
-                        // Copy function
-                        self.showExerciseChange = true
+                        onChangeExercise()
                     } label: {
                         Label("Verander", systemImage: "arrow.left.arrow.right")
                     }
                     .tint(.indigo)
                 }
-        .navigationDestination(isPresented: $showExerciseChange) {
-            ChangeExercise(exerciseToChange: exercise, showExerciseChange: $showExerciseChange, superset: superset)
-        }
-
         VStack(alignment: .center){
             HStack{
                 ForEach(0..<amountOfSets, id: \.self) { index in

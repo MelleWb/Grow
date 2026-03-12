@@ -109,7 +109,9 @@ struct FirestoreSchemaRepository: SchemaRepository {
             }
 
             do {
-                completion(.success(try document.data(as: Schema.self)))
+                var schema = try document.data(as: Schema.self)
+                schema.docID = document.documentID
+                completion(.success(schema))
             } catch {
                 completion(.failure(error))
             }
@@ -208,7 +210,11 @@ struct FirestoreTrainingDataLoader: TrainingDataLoading {
             }
 
             let schemas = documents.compactMap { document -> Schema? in
-                try? document.data(as: Schema.self)
+                guard var schema = try? document.data(as: Schema.self) else {
+                    return nil
+                }
+                schema.docID = document.documentID
+                return schema
             }
             handler(.success(schemas))
         }
@@ -399,7 +405,9 @@ struct FirestoreTrainingDataWriter: TrainingDataWriting {
             }
 
             do {
-                completion(.success(try document.data(as: Schema.self)))
+                var schema = try document.data(as: Schema.self)
+                schema.docID = document.documentID
+                completion(.success(schema))
             } catch {
                 completion(.failure(error))
             }

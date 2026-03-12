@@ -1,37 +1,48 @@
-//
-//  SplashScreen.swift
-//  Grow
-//
-//  Created by Swen Rolink on 25/03/2022.
-//
-
 import SwiftUI
 
 struct SplashScreen: View {
-    @State var screenText: String = ""
+    @State private var isVisible = false
+    
     var body: some View {
-        VStack{
-            withAnimation (
-                .linear(duration: 5)) {
-                ProgressView()
-                    .controlSize(.large)
-                    .frame(width: 250, height: 300)
-                }
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(.systemBackground),
+                    Color(.secondarySystemBackground)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
-            Text(screenText)
-                .font(.title)
+            VStack(spacing: 24) {
+                Image("menuImage")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 104, height: 104)
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .shadow(color: Color.black.opacity(0.08), radius: 16, y: 8)
                 
-        }.onAppear(perform: {
-            withAnimation (
-                .easeInOut(duration: 1)) {
-                    self.screenText = "Grow"
-                }
-        })
+                Text("Grow")
+                    .font(.system(size: 30, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.primary)
+                
+                ProgressView()
+                    .controlSize(.regular)
+                    .tint(.accentColor)
+            }
+            .padding(32)
+            .opacity(isVisible ? 1 : 0)
+            .scaleEffect(isVisible ? 1 : 0.96)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.45)) {
+                isVisible = true
+            }
+        }
     }
 }
 
-struct SplashScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        SplashScreen()
-    }
+#Preview {
+    SplashScreen()
 }

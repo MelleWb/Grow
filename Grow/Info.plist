@@ -22,6 +22,8 @@
 	<string>ca-app-pub-4164039570168283~3675935879</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
 	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
 	<string>We gebruiken je health records om te tonen in het dashboard</string>
 	<key>NSHealthShareUsageDescription</key>
@@ -35,15 +37,6 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UILaunchScreen</key>
-	<dict>
-		<key>UIColorName</key>
-		<string>launchScreenBackground</string>
-		<key>UIImageName</key>
-		<string>menuImage</string>
-		<key>UIImageRespectsSafeAreaInsets</key>
-		<true/>
-	</dict>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

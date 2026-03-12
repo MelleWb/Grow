@@ -88,15 +88,13 @@ class UserDataModel: ObservableObject{
 
                 self.checkMemberShip()
 
-                self.getWeekSchema(){
-                    //Just wait until it's done
+                self.getWeekSchema {
+                    self.determineWorkoutOfTheDay()
+                    self.getTrainingStatsForCurrentWeek()
+                    self.getBodyMeasurements()
+                    self.queryRunning = false
+                    finished()
                 }
-
-                self.determineWorkoutOfTheDay()
-                self.getTrainingStatsForCurrentWeek()
-                self.getBodyMeasurements()
-                self.queryRunning = false
-                finished()
             case .failure(let error):
                 self.errorMessage = "Error parsing user document: \(error.localizedDescription)"
                 self.queryRunning = false
@@ -130,46 +128,38 @@ class UserDataModel: ObservableObject{
         storeManager.stopObserving()
     }
     
-    func getWeekSchema(finished: () -> Void){
+    func getWeekSchema(finished: @escaping () -> Void) {
+        guard user.weekPlan == nil else {
+            finished()
+            return
+        }
         
-        if user.weekPlan == nil{
-            //If nil, create a weekplan
-            if let schema = user.schema {
-                //If trainingSchema is not nil, get it and work with it
-                var trainingSchema: Schema = Schema()
+        guard let schemaID = user.schema else {
+            finished()
+            return
+        }
+        
+        schemaRepository.fetchSchema(id: schemaID) { result in
+            switch result {
+            case .success(let schema):
+                let routineAmount = schema.routines.count - 1
+                let weekDays = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"]
                 
-                schemaRepository.fetchSchema(id: schema) { result in
-                    switch result {
-                    case .success(let schema):
-                        trainingSchema = schema
-                        let routineAmount:Int = trainingSchema.routines.count - 1
-
-                        let weekDays: [String] = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"]
-                        
-                        weekDays.enumerated().forEach( { (index,day) in
-                            var daySchema = DayPlan()
-                            if index > routineAmount{
-                                daySchema.isTrainingDay = false
-                            }
-                            else {
-                                daySchema.isTrainingDay = true
-                                daySchema.trainingType = trainingSchema.routines[index].type
-                                daySchema.routine = trainingSchema.routines[index].id
-                            }
-                            
-                            if self.user.weekPlan == nil{
-                                self.user.weekPlan = [daySchema]
-                            }
-                            else {
-                                self.user.weekPlan?.append(daySchema)
-                            }
-                        })
-                    case .failure(let error):
-                        print(error)
+                self.user.weekPlan = weekDays.enumerated().map { index, _ in
+                    var daySchema = DayPlan()
+                    if index > routineAmount {
+                        daySchema.isTrainingDay = false
+                    } else {
+                        daySchema.isTrainingDay = true
+                        daySchema.trainingType = schema.routines[index].type
+                        daySchema.routine = schema.routines[index].id
                     }
+                    return daySchema
                 }
-                finished()
+            case .failure(let error):
+                print(error)
             }
+            finished()
         }
     }
     
@@ -306,6 +296,24 @@ class UserDataModel: ObservableObject{
             catch {
                 throw error
             }
+        }
+    }
+    
+    func stageWorkoutSchemaChange(to schemaID: String) {
+        self.user.schema = schemaID
+        self.user.weekPlan = nil
+        self.user.workoutOfTheDay = nil
+    }
+    
+    private func prepareDerivedUserState(finished: @escaping () -> Void) {
+        if self.user.weekPlan == nil, self.user.schema != nil {
+            self.getWeekSchema {
+                self.determineWorkoutOfTheDay()
+                finished()
+            }
+        } else {
+            self.determineWorkoutOfTheDay()
+            finished()
         }
     }
     
@@ -453,23 +461,28 @@ class UserDataModel: ObservableObject{
         return newImage
     }
     
-    func updateUser() {
+    func updateUser(finished: @escaping () -> Void = {}) {
         
         let db = Firestore.firestore()
         
       if let id = user.id {
-        let docRef = db.collection("users").document(id)
-        do {
-          try docRef.setData(from: user, merge: true)
-            
-            //Immediately fetch new data
-            self.fetchUser(uid: user.id!){
-                //Just wait until it's done
+        self.prepareDerivedUserState {
+            let docRef = db.collection("users").document(id)
+            do {
+                try docRef.setData(from: self.user, merge: true)
+                
+                //Immediately fetch new data
+                self.fetchUser(uid: id){
+                    finished()
+                }
+            }
+            catch {
+                print(error)
+                finished()
             }
         }
-        catch {
-          print(error)
-        }
+      } else {
+        finished()
       }
     }
     
@@ -569,7 +582,7 @@ class UserDataModel: ObservableObject{
         if let proteinRatio = self.user.proteinRatio {
             return Int(Double(weight) * proteinRatio)
         } else {
-            return Int(weight * (30/100))
+            return Int((Double(weight) * 0.30).rounded())
         }
     }
     
@@ -613,8 +626,8 @@ class UserDataModel: ObservableObject{
     
     func determineCaloriesForMales(weight: Int, height: Int, plan: PlanType, ageNumber: Int, palValue: Double) -> Int{
         
-        let calc1 = 66 + (13.7 * Double(weight))
-        let kcal = calc1 + (5 * Double(height)) - (6.8 * Double(ageNumber))
+        let calc1 = 88.362 + (13.397 * Double(weight))
+        let kcal = calc1 + (4.799 * Double(height)) - (5.677 * Double(ageNumber))
         
         if plan == .Cut{
             return Int((kcal * palValue) * 0.82)
@@ -630,7 +643,7 @@ class UserDataModel: ObservableObject{
     func determineCaloriesForFemales(weight: Int, height: Int, plan: PlanType, ageNumber: Int, palValue: Double) -> Int{
         
         let calc1 = 447.593 + (9.247 * Double(weight))
-        let kcal = calc1 + (3.098 * Double(height)) - (4.33 * Double(ageNumber))
+        let kcal = calc1 + (3.098 * Double(height)) - (4.330 * Double(ageNumber))
         
         if plan == .Cut{
                 return Int((kcal * palValue) * 0.82)
