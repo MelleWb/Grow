@@ -11,6 +11,11 @@ struct ReviewSchema: View{
     @ObservedObject var newSchema: TrainingDataModel
     @State var schema: Schema
     @State var selectedRoutine: UUID? = nil
+    private let schemaTypes = ["Strength", "Hypertrofie", "Strength/Hypertrofie"]
+    
+    private var canSaveSchema: Bool {
+        !schema.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !schema.routines.isEmpty
+    }
     
     func deleteRoutine(indexSet: IndexSet) {
         self.schema.routines.remove(atOffsets: indexSet)
@@ -18,39 +23,39 @@ struct ReviewSchema: View{
     
     var body: some View {
         Form{
-            Section {
-
-                HStack{
-                    Picker(selection: $schema.type, label: Text("Kies trainingstype")) {
-                                        Text("Strength").tag("Strength")
-                                        Text("Hypertrofie").tag("Hypertrofie")
-                                        Text("Strength/Hypertrofie").tag("Strength/Hypertrofie")
-                                }
-                    .padding()
-                    .pickerStyle(SegmentedPickerStyle())
-
+            Section("Schema details") {
+                Picker("Doel", selection: $schema.type) {
+                    ForEach(schemaTypes, id: \.self) { type in
+                        Text(type).tag(type)
+                    }
                 }
+                .pickerStyle(.segmented)
+
                 TextField("Naam van het schema", text: $schema.name)
             }
-            Section{
-                List{
+            Section("Trainingen") {
+                if schema.routines.isEmpty {
+                    ContentUnavailableView(
+                        "Nog geen trainingen",
+                        systemImage: "list.bullet.clipboard",
+                        description: Text("Voeg eerst een training toe en werk daarna de sets en oefeningen uit.")
+                    )
+                } else {
                     ForEach($schema.routines) { $routine in
                         Button {
                             selectedRoutine = routine.id
                         } label: {
-                            Text(routine.type)
+                            RoutineSummaryRow(routine: routine)
                         }
-                    }.onDelete(perform: deleteRoutine)
-                    
-                    
-                    Button(action: {
-                        self.schema.routines.append(Routine())
-                    }) {
-                        HStack{
-                            Image(systemName: "plus").foregroundColor(Color.init("textColor"))
-                            Text("Voeg training toe").foregroundColor(Color.init("textColor"))
-                        }
+                        .buttonStyle(.plain)
                     }
+                    .onDelete(perform: deleteRoutine)
+                }
+                
+                Button(action: {
+                    self.schema.routines.append(Routine(type: "Upper 1", superset: [Superset(sets: 3)]))
+                }) {
+                    Label("Voeg training toe", systemImage: "plus.circle.fill")
                 }
             }
         }
@@ -59,14 +64,17 @@ struct ReviewSchema: View{
                 CreateRoutine(selectedRoutine: $selectedRoutine, routine: $schema.routines[index])
             }
         }
-        .navigationBarItems(
-            trailing:
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
                     self.newSchema.updateTraining(schema: schema)
                     presentationMode.wrappedValue.dismiss()
-                   }) {
-                      Text("Opslaan")
-                   })
+                }) {
+                    Text("Opslaan")
+                }
+                .disabled(!canSaveSchema)
+            }
+        }
     }
 }
 
@@ -190,6 +198,30 @@ struct SelectionCell: View {
                 }
             }
         }
+    }
+}
+
+private struct RoutineSummaryRow: View {
+    let routine: Routine
+    
+    private var exerciseCount: Int {
+        routine.superset.reduce(0) { $0 + $1.exercises.count }
+    }
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(routine.type)
+                    .font(.headline)
+                Text("\(routine.superset.count) blokken • \(exerciseCount) oefeningen")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.vertical, 4)
     }
 }
 
