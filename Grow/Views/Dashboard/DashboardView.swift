@@ -26,7 +26,7 @@ struct TabBarView: View {
 
             TrainingDashboardView()
                 .tabItem {
-                    Label("Training", systemImage: "bolt")
+                    Label("Training", systemImage: "figure.strengthtraining.traditional")
                 }
             
             MeasurementOverview()

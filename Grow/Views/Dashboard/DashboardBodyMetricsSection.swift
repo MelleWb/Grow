@@ -41,7 +41,7 @@ struct DashboardBodyMetricsSection: View {
                             .monospacedDigit()
                     }
                     
-                    StepGoalProgress(progress: stepProgress)
+                    //StepGoalProgress(progress: stepProgress)
                 }
             }
         }

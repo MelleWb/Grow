@@ -31,6 +31,8 @@
 		852DBDFF26E7F6D5000ABE3C /* MeasurementOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852DBDFE26E7F6D5000ABE3C /* MeasurementOverview.swift */; };
 		8534D7C926D27F0300FB41EE /* TrainingVolumeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8534D7C826D27F0300FB41EE /* TrainingVolumeView.swift */; };
 		8539186826938D290045A1B5 /* TrainingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8539186726938D290045A1B5 /* TrainingModel.swift */; };
+		853A8F832F633C74002834FD /* TrainingSchemaSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853A8F822F633C74002834FD /* TrainingSchemaSelectionView.swift */; };
+		853A8F872F636B04002834FD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 853A8F862F636B04002834FD /* LaunchScreen.storyboard */; };
 		8545E33226B542FC0083F69E /* WorkoutOfTheDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8545E33126B542FC0083F69E /* WorkoutOfTheDayView.swift */; };
 		85476A31267FC04100BA68A2 /* KeyboardResponder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85476A30267FC04100BA68A2 /* KeyboardResponder.swift */; };
 		854B05EC26820A8700A824CD /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 854B05EB26820A8700A824CD /* UserDefaults.swift */; };
@@ -167,6 +169,8 @@
 		852DBDFE26E7F6D5000ABE3C /* MeasurementOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementOverview.swift; sourceTree = "<group>"; };
 		8534D7C826D27F0300FB41EE /* TrainingVolumeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingVolumeView.swift; sourceTree = "<group>"; };
 		8539186726938D290045A1B5 /* TrainingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingModel.swift; sourceTree = "<group>"; };
+		853A8F822F633C74002834FD /* TrainingSchemaSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingSchemaSelectionView.swift; sourceTree = "<group>"; };
+		853A8F862F636B04002834FD /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8545E33126B542FC0083F69E /* WorkoutOfTheDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutOfTheDayView.swift; sourceTree = "<group>"; };
 		85476A30267FC04100BA68A2 /* KeyboardResponder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardResponder.swift; sourceTree = "<group>"; };
 		854B05EB26820A8700A824CD /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
@@ -286,6 +290,7 @@
 		851AFF2C2673D6D70092DA9B = {
 			isa = PBXGroup;
 			children = (
+				853A8F862F636B04002834FD /* LaunchScreen.storyboard */,
 				851AFF372673D6D70092DA9B /* Grow */,
 				851AFF492673D6DC0092DA9B /* GrowTests */,
 				851AFF542673D6DC0092DA9B /* GrowUITests */,
@@ -451,6 +456,7 @@
 				85AEF010275E5E1A00647E54 /* ExtraSportCaloriesActionSheet.swift */,
 				85821DAE275F6BF9002356DE /* MacrosActionSheet.swift */,
 				85821DB0275FB6BC002356DE /* MultiWheelPicker.swift */,
+				853A8F822F633C74002834FD /* TrainingSchemaSelectionView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -646,6 +652,7 @@
 			isa = PBXResourcesBuildPhase;
 			files = (
 				851AFF402673D6DB0092DA9B /* Preview Assets.xcassets in Resources */,
+				853A8F872F636B04002834FD /* LaunchScreen.storyboard in Resources */,
 				851AFF3D2673D6DB0092DA9B /* Assets.xcassets in Resources */,
 				85F6FDCC2693A3D70051B60E /* GoogleService-Info.plist in Resources */,
 			);
@@ -684,6 +691,7 @@
 				857866832F62A07500700148 /* DashboardTrainingSection.swift in Sources */,
 				8578668D2F62ADD600700148 /* FoodSummarySection.swift in Sources */,
 				85A935312763F9DC0053E693 /* LinkButtonStyle.swift in Sources */,
+				853A8F832F633C74002834FD /* TrainingSchemaSelectionView.swift in Sources */,
 				856D06F927C91B8A0008C842 /* PickerSearchBar.swift in Sources */,
 				856AB9FB276D2F8800A94125 /* StoreManager.swift in Sources */,
 				85E77740275A651F00D8996A /* Profile.swift in Sources */,

@@ -19,8 +19,6 @@ struct Profile: View {
     @State var enableHeightSheet: Bool = false
     @State var showAlert: Bool = false
     
-    @State private var searchTermTraining: String = ""
-    
     func isSheetEnabled() -> Bool {
         if enableWeightSheet || enableHeightSheet {
             return true
@@ -29,11 +27,24 @@ struct Profile: View {
         }
     }
     
-    var filteredSchemas: [Schema] {
-        self.trainingModel.fetchedSchemas.filter {
-            searchTermTraining.isEmpty ? true : $0.name.lowercased().contains(searchTermTraining.lowercased())
-            }
+    private var selectedSchemaName: String {
+        guard
+            let selectedSchemaID = userModel.user.schema,
+            let selectedSchema = trainingModel.fetchedSchemas.first(where: { $0.docID == selectedSchemaID })
+        else {
+            return "Geen schema geselecteerd"
         }
+        
+        return selectedSchema.name
+    }
+    
+    private func saveProfile() {
+        self.userModel.updateUser {
+            self.foodModel.resetUser(user: self.userModel.user)
+            self.trainingModel.resetUser(user: self.userModel.user)
+            self.statisticsModel.resetUser(user: self.userModel.user)
+        }
+    }
     
     var body: some View {
         ZStack{
@@ -194,38 +205,17 @@ struct Profile: View {
                         }
                     }
                     Section("Trainingschema") {
-                        
-                        let trainingSchemaBinding = Binding(
-                            get: { self.userModel.user.schema },
-                            set: {
-                                do {
-                                    try self.userModel.updateUserElements(for: .WorkoutSchema, to: $0!)
-                                    }
-                                    catch{
-                                        self.showAlert.toggle()
-                                    }
-                                }
-                        )
-                        
-                        Picker(selection: trainingSchemaBinding, label: Text("Trainingschema")) {
-                            PickerSearchBar(text: $searchTermTraining, placeholder: "Schema zoeken")
-                            ForEach(filteredSchemas, id:\.self) { schema in
-                                Text(schema.name).tag(schema.docID)
+                        NavigationLink {
+                            TrainingSchemaSelectionView()
+                        } label: {
+                            HStack {
+                                Text("Trainingschema")
+                                Spacer()
+                                Text(selectedSchemaName)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
                             }
                         }
-                    }
-                    HStack{
-                        Spacer()
-                        
-                        Button("Opslaan") {
-                            self.userModel.updateUser()
-                            self.foodModel.resetUser(user: self.userModel.user)
-                            self.trainingModel.resetUser(user: self.userModel.user)
-                            self.statisticsModel.resetUser(user: self.userModel.user)
-                        }.foregroundColor(.accentColor)
-                            .font(.headline)
-
-                        Spacer()
                     }
                 }
             }
@@ -240,17 +230,22 @@ struct Profile: View {
             
             .navigationBarHidden(isSheetEnabled())
             .navigationBarBackButtonHidden(isSheetEnabled())
-            
-            .navigationBarItems(trailing:
-                Button("Uitloggen"){
-                    do {
-                     try Auth.auth().signOut()
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button("Opslaan") {
+                        saveProfile()
                     }
+                    
+                    Button("Uitloggen") {
+                        do {
+                            try Auth.auth().signOut()
+                        }
                         catch let signOutError as NSError {
-                        print ("Error signing out: %@", signOutError)
-                   }
+                            print ("Error signing out: %@", signOutError)
+                        }
+                    }
                 }
-            )
+            }
             
             if enableWeightSheet {
                 WeightActionSheet(enableWeightSheet: $enableWeightSheet)

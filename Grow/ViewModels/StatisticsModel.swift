@@ -9,6 +9,20 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
+private extension KeyedDecodingContainer {
+    func decodeUUIDIfPresent(forKey key: Key) -> UUID? {
+        if let value = try? decodeIfPresent(UUID.self, forKey: key) {
+            return value
+        }
+        
+        if let stringValue = try? decodeIfPresent(String.self, forKey: key) {
+            return UUID(uuidString: stringValue)
+        }
+        
+        return nil
+    }
+}
+
 class StatisticsDataModel: ObservableObject {
     
     @Published var exerciseStatistics = [ExerciseStatistics]()
@@ -65,7 +79,8 @@ class StatisticsDataModel: ObservableObject {
                     return
                 }
 
-                self.getStatisticsForCurrentRoutine()
+                self.exerciseStatistics = []
+                self.trainingStatistics = TrainingStatistics()
                 
                 if self.trainingStatsListener != nil {
                     self.trainingStatsListener?.remove()
@@ -82,9 +97,11 @@ class StatisticsDataModel: ObservableObject {
         
         //Remove the listener
         trainingStatsListener?.remove()
+        trainingStatsListener = nil
+        self.exerciseStatistics = []
+        self.trainingStatistics = TrainingStatistics()
         
-        //Initiate the stats again
-        self.getStatisticsForCurrentRoutine()
+        //Initiate the schema stats again
         self.getStatisticsForCurrentSchema()
     }
     
@@ -529,6 +546,31 @@ struct ExerciseStatistics : Codable, Identifiable, Hashable {
         self.reps = reps
         self.weight = weight
         self.estimatedOneRepMax = estimatedOneRepMax
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case exerciseID
+        case exerciseName
+        case date
+        case set
+        case reps
+        case weight
+        case estimatedOneRepMax
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = container.decodeUUIDIfPresent(forKey: .id) ?? UUID()
+        self.documentID = nil
+        self.exerciseID = container.decodeUUIDIfPresent(forKey: .exerciseID) ?? UUID()
+        self.exerciseName = try container.decodeIfPresent(String.self, forKey: .exerciseName) ?? ""
+        self.date = try container.decodeIfPresent(Date.self, forKey: .date) ?? DateHelper.from(year: 1970, month: 1, day: 1)
+        self.set = try container.decodeIfPresent(Int.self, forKey: .set) ?? 0
+        self.reps = try container.decodeIfPresent(Int.self, forKey: .reps)
+        self.weight = try container.decodeIfPresent(Double.self, forKey: .weight)
+        self.estimatedOneRepMax = try container.decodeIfPresent(Double.self, forKey: .estimatedOneRepMax)
     }
 }
 
