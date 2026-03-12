@@ -11,7 +11,7 @@ struct ReviewSchema: View{
     @ObservedObject var newSchema: TrainingDataModel
     @State var schema: Schema
     @State var selectedRoutine: UUID? = nil
-    private let schemaTypes = ["Strength", "Hypertrofie", "Strength/Hypertrofie"]
+    private let schemaTypes = ["Strength", "Hypertrofie", "Strength/Hypertrofie", "Cardio", "Hyrox"]
     
     private var canSaveSchema: Bool {
         !schema.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !schema.routines.isEmpty

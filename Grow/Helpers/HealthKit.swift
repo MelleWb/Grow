@@ -26,7 +26,8 @@ class HealthKitSetupAssistant {
         
         //2. Prepare the data types that will interact with HealthKit
         guard   let bodyFatPercentage = HKObjectType.quantityType(forIdentifier: .bodyFatPercentage),
-                let bodyMass = HKObjectType.quantityType(forIdentifier: .bodyMass)
+                let bodyMass = HKObjectType.quantityType(forIdentifier: .bodyMass),
+                let stepCount = HKObjectType.quantityType(forIdentifier: .stepCount)
         else {
                 
                 completion(false, HealthkitSetupError.dataTypeNotAvailable)
@@ -35,7 +36,8 @@ class HealthKitSetupAssistant {
         
         //3
         let healthKitTypesToRead: Set<HKObjectType> = [bodyFatPercentage,
-                                                       bodyMass]
+                                                       bodyMass,
+                                                       stepCount]
         
         //4. Request Authorization
         HKHealthStore().requestAuthorization(toShare: nil, read: healthKitTypesToRead) { (success, error) in
@@ -79,5 +81,28 @@ class HealthKitDataStore {
       }
      
     HKHealthStore().execute(sampleQuery)
+    }
+    
+    class func getTodayStepCount(completion: @escaping (Double?, Error?) -> Void) {
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
+            completion(nil, nil)
+            return
+        }
+        
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date(), options: .strictStartDate)
+        
+        let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+            DispatchQueue.main.async {
+                guard let sum = result?.sumQuantity() else {
+                    completion(nil, error)
+                    return
+                }
+                
+                completion(sum.doubleValue(for: HKUnit.count()), nil)
+            }
+        }
+        
+        HKHealthStore().execute(query)
     }
 }

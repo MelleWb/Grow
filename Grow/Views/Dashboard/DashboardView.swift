@@ -57,6 +57,7 @@ struct Dashboard: View{
     @State var showMeasurementView: Bool = false
     @State var bodyWeight: Double = 0
     @State var fatPercentage: Double = 0
+    @State var stepsToday: Double?
 
     private var roundedWorkoutPercentage: Int {
         Int((self.userModel.workoutDonePercentage * 100).rounded())
@@ -104,6 +105,36 @@ struct Dashboard: View{
         }
     }
     
+    private func loadTodayStepCount() {
+        HealthKitDataStore.getTodayStepCount { steps, error in
+            guard let steps else {
+                if error != nil {
+                    print("An Error occured")
+                }
+                self.stepsToday = nil
+                return
+            }
+            
+            self.stepsToday = steps
+        }
+    }
+    
+    private func loadHealthKitMetrics() {
+        HealthKitSetupAssistant.authorizeHealthKit { success, error in
+            guard success else {
+                if let error {
+                    print(error.localizedDescription)
+                }
+                self.stepsToday = nil
+                return
+            }
+            
+            self.loadAndDisplayMostRecentWeight()
+            self.loadAndDisplayMostRecentFatPercentage()
+            self.loadTodayStepCount()
+        }
+    }
+    
     var body: some View {
         
         NavigationStack{
@@ -122,7 +153,8 @@ struct Dashboard: View{
 
                     DashboardBodyMetricsSection(
                         bodyWeight: bodyWeight,
-                        fatPercentage: fatPercentage
+                        fatPercentage: fatPercentage,
+                        stepsToday: stepsToday
                     )
                 }
             }
@@ -163,8 +195,7 @@ struct Dashboard: View{
                     }
                 }
                 
-                self.loadAndDisplayMostRecentWeight()
-                self.loadAndDisplayMostRecentFatPercentage()
+                self.loadHealthKitMetrics()
             })
         }
     }
