@@ -6,174 +6,176 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct Register: View {
-    
-    enum FocusFields {
-        case new_firstname, new_lastname, new_username, new_password, confirm_password
-    }
-    
-    @State var registerButtonTapped = false
-    @State var new_firstname: String = ""
-    @State var new_lastname: String = ""
-    @State var new_username: String = ""
-    @State var new_password: String = ""
-    @State var confirm_password: String = ""
-    @State var isEmailValid : Bool   = true
-    @State var birthDate = Date()
-    @State var weight: Int = 75
-    @State var height: Int = 170
-    @State var enableWeightSheet: Bool = false
-    @State var enableHeightSheet: Bool = false
-    @FocusState private var focusedField: FocusFields?
-    
-    func isSheetEnabled() -> Bool {
-        if enableWeightSheet || enableHeightSheet  {
-            return true
-        } else {
-            return  false
-        }
-    }
-    
-    func checkPassword() {
-        if new_password == confirm_password {
-                print("is hetzelfde")
-            } else {
-                print("is niet het zelfde")
-            }
-      }
-    
-    func textFieldValidatorEmail(_ string: String) -> Bool {
-        if string.count > 100 {
-            return false
-        }
-        let emailFormat = "(?:[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}~-]+(?:\\.[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}" + "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\" + "x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[\\p{L}0-9](?:[a-" + "z0-9-]*[\\p{L}0-9])?\\.)+[\\p{L}0-9](?:[\\p{L}0-9-]*[\\p{L}0-9])?|\\[(?:(?:25[0-5" + "]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-" + "9][0-9]?|[\\p{L}0-9-]*[\\p{L}0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21" + "-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
-        //let emailFormat = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailFormat)
-        return emailPredicate.evaluate(with: string)
-    }
-    
-    var body: some View {
-        
-        VStack(alignment: .leading, spacing: 15){
-            ScrollView(showsIndicators: false){
-                VStack{
-                
-                VStack{
-                Text("Maak een account!")
-                  .font(.largeTitle).foregroundColor(Color.black)
-                  .padding([.top, .bottom], 20)
-                }
-                
-                TextField("Voornaam", text: $new_firstname)
-                    .padding()
-                    .background(Color.init("textField"))
-                    .focused($focusedField, equals: .new_username)
-                    .cornerRadius(15.0)
-                    .padding([.leading, .trailing], 30)
-                
-                TextField("Achternaam", text: $new_lastname)
-                    .padding()
-                    .background(Color.init("textField"))
-                    .focused($focusedField, equals: .new_username)
-                    .cornerRadius(15.0)
-                    .padding([.leading, .trailing], 30)
-                
-            VStack{
-                TextField("email", text: $new_username, onEditingChanged: { (isChanged) in
-                    if !isChanged {
-                        if self.textFieldValidatorEmail(self.new_username) {
-                            self.isEmailValid = true
-                        } else {
-                            self.isEmailValid = false
-                            self.new_username = ""
-                        }
-                    }
-                }).padding()
-                .background(Color.init("textField"))
-                .focused($focusedField, equals: .new_password)
-                .cornerRadius(15.0)
-                .padding([.leading, .trailing], 30)
 
-            if !self.isEmailValid {
-                Text("Email is niet juist")
-                .font(.callout)
-                .foregroundColor(Color.red)
+    enum FocusFields {
+        case email, password, confirmPassword
+    }
+
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var focusedField: FocusFields?
+
+    @State private var email = ""
+    @State private var password = ""
+    @State private var confirmPassword = ""
+    @State private var isSubmitting = false
+    @State private var alertText = ""
+    @State private var showAlert = false
+
+    private var isEmailValid: Bool {
+        let email = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let emailFormat = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        return NSPredicate(format: "SELF MATCHES %@", emailFormat).evaluate(with: email)
+    }
+
+    private var passwordsMatch: Bool {
+        !confirmPassword.isEmpty && password == confirmPassword
+    }
+
+    private var canSubmit: Bool {
+        isEmailValid && password.count >= 6 && passwordsMatch
+    }
+
+    private func register() {
+        guard canSubmit else {
+            alertText = "Vul een geldig e-mailadres in en zorg dat de wachtwoorden overeenkomen."
+            showAlert = true
+            return
+        }
+
+        isSubmitting = true
+
+        Auth.auth().createUser(withEmail: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password) { authResult, error in
+            if let error {
+                isSubmitting = false
+                alertText = error.localizedDescription
+                showAlert = true
+                return
+            }
+
+            authResult?.user.sendEmailVerification { verificationError in
+                isSubmitting = false
+
+                if let verificationError {
+                    alertText = verificationError.localizedDescription
+                    showAlert = true
+                } else {
+                    dismiss()
                 }
             }
-                SecureField("Wachtwoord", text: $new_password)
+        }
+    }
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Maak een account")
+                    .font(.largeTitle.bold())
+                    .padding(.top, 20)
+
+                Text("Na registratie ontvang je een verificatiemail. Na bevestiging vragen we je profielgegevens aan.")
+                    .foregroundStyle(.secondary)
+
+                TextField("E-mail", text: $email)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .keyboardType(.emailAddress)
+                    .textContentType(.emailAddress)
                     .padding()
-                    .background(Color.init("textField"))
-                    .focused($focusedField, equals: .new_password)
-                    .cornerRadius(15.0)
-                    .padding([.leading, .trailing], 30)
-                
-                SecureField("bevestig Wachtwoord", text: $confirm_password)
+                    .background(Color("textField"))
+                    .cornerRadius(15)
+                    .focused($focusedField, equals: .email)
+
+                if email.isEmpty == false && isEmailValid == false {
+                    Text("Voer een geldig e-mailadres in.")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+
+                SecureField("Wachtwoord", text: $password)
+                    .textContentType(.newPassword)
                     .padding()
-                    .background(Color.init("textField"))
-                    .focused($focusedField, equals: .confirm_password)
-                    .cornerRadius(15.0)
-                    .padding([.leading, .trailing], 30)
-                
-                VStack {
-                    HStack{
-                        Text("Geboortedatum")
-                        DatePicker("", selection: $birthDate, displayedComponents: .date)
+                    .background(Color("textField"))
+                    .cornerRadius(15)
+                    .focused($focusedField, equals: .password)
+
+                if password.isEmpty == false && password.count < 6 {
+                    Text("Gebruik minimaal 6 tekens.")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+
+                SecureField("Bevestig wachtwoord", text: $confirmPassword)
+                    .textContentType(.newPassword)
+                    .padding()
+                    .background(Color("textField"))
+                    .cornerRadius(15)
+                    .focused($focusedField, equals: .confirmPassword)
+
+                if confirmPassword.isEmpty == false && passwordsMatch == false {
+                    Text("De wachtwoorden komen niet overeen.")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+
+                Button(action: register) {
+                    if isSubmitting {
+                        ProgressView()
+                            .tint(.white)
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        Text("Account aanmaken")
+                            .frame(maxWidth: .infinity)
                     }
-                }.padding([.leading, .trailing], 30)
-                
-                    HStack{
-                        Text("Gewicht")
-                        Spacer()
-                        Button("\(weight)"){
-                            self.enableWeightSheet.toggle()
-                        }
-                    }.padding([.leading, .trailing], 30)
-                        .padding([.top, .bottom], 2.5)
-                    
-                    HStack{
-                        Text("Lengte")
-                        Spacer()
-                        Button("\(height)"){
-                            self.enableHeightSheet.toggle()
-                        }
-                    }.padding([.leading, .trailing], 30)
-                        .padding([.top, .bottom], 2.5)
-        
-                    Button(action: {
-                        checkPassword()
-                    }, label: {
-                        Text("Aanmelden")
-                            .buttonStyle(PrimaryButtonStyle())
-                            .padding()
-                    })
                 }
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(isSubmitting || canSubmit == false)
+                .padding(.top, 8)
             }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .navigationTitle("Registreren")
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("Registratie", isPresented: $showAlert) {
+            Button("Ok", role: .cancel) { }
+        } message: {
+            Text(alertText)
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                
+
                 Button(action: {
                     focusedField = nil
-                },label: {
+                }, label: {
                     Image(systemName: "keyboard.chevron.compact.down")
                         .foregroundColor(.accentColor)
                 })
             }
         }
-        if enableWeightSheet {
-            InitializeWeight(enableWeightSheet: $enableWeightSheet, weight: $weight, height: $height)
-        }
-        
-        if enableHeightSheet {
-            InitializeHeight(enableHeightSheet: $enableHeightSheet, heigth: $height)
+        .onSubmit {
+            switch focusedField {
+            case .email:
+                focusedField = .password
+            case .password:
+                focusedField = .confirmPassword
+            case .confirmPassword:
+                focusedField = nil
+                register()
+            case .none:
+                break
+            }
         }
     }
 }
 
 struct Register_Previews: PreviewProvider {
     static var previews: some View {
-        Register()
+        NavigationStack {
+            Register()
+        }
     }
 }

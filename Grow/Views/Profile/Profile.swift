@@ -16,6 +16,8 @@ struct Profile: View {
     @EnvironmentObject var trainingModel: TrainingDataModel
     
     @State var showAlert: Bool = false
+    var showsLogout: Bool = true
+    var onProfileSaved: (() -> Void)? = nil
     
     private var selectedSchemaName: String {
         guard
@@ -33,6 +35,7 @@ struct Profile: View {
             self.foodModel.resetUser(user: self.userModel.user)
             self.trainingModel.resetUser(user: self.userModel.user)
             self.statisticsModel.resetUser(user: self.userModel.user)
+            self.onProfileSaved?()
         }
     }
     
@@ -245,16 +248,23 @@ struct Profile: View {
             }
             .navigationTitle(Text("Profiel"))
             .toolbar {
-                Button("Uitloggen") {
-                    do {
-                        try Auth.auth().signOut()
-                    }
-                    catch let signOutError as NSError {
-                        print ("Error signing out: %@", signOutError)
+                if showsLogout {
+                    Button("Uitloggen") {
+                        do {
+                            try Auth.auth().signOut()
+                        }
+                        catch let signOutError as NSError {
+                            print ("Error signing out: %@", signOutError)
+                        }
                     }
                 }
                 Button("Opslaan") {
                     saveProfile()
+                }
+            }
+            .onAppear {
+                if trainingModel.fetchedSchemas.isEmpty {
+                    trainingModel.fetchData()
                 }
             }
         }

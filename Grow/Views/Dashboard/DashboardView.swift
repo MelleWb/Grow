@@ -11,11 +11,10 @@ import FirebaseAuth
 import GoogleMobileAds
 
 struct TabBarView: View {
-    
-    @StateObject var userModel = UserDataModel()
-    @StateObject var trainingModel = TrainingDataModel()
-    @StateObject var statisticsModel = StatisticsDataModel()
-    @StateObject var foodModel = FoodDataModel()
+    @EnvironmentObject var userModel: UserDataModel
+    @EnvironmentObject var trainingModel: TrainingDataModel
+    @EnvironmentObject var statisticsModel: StatisticsDataModel
+    @EnvironmentObject var foodModel: FoodDataModel
     
     var body: some View {
         TabView {
@@ -39,10 +38,6 @@ struct TabBarView: View {
                     Label("Instellingen", systemImage: "gear")
                 }
         }
-        .environmentObject(userModel)
-        .environmentObject(trainingModel)
-        .environmentObject(statisticsModel)
-        .environmentObject(foodModel)
     }
 }
 

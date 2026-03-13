@@ -9,103 +9,122 @@ import SwiftUI
 import FirebaseAuth
 
 struct Login: View {
-    
+
     enum FocusFields {
         case username, password
     }
-    
+
     @ObservedObject var userSettings = UserSettings()
     @FocusState private var focusedField: FocusFields?
     @State private var showActivityIndicator = false
     @State private var alertText = ""
-    @State private var showAlert: Bool = false
-    
-    
-    func login(){
-        
-        self.showActivityIndicator = true
-        
-        Auth.auth().signIn(withEmail: userSettings.username, password: userSettings.password) {
-            authResult, error in
-            
-            self.showActivityIndicator.toggle()
-            
-            if (error?.localizedDescription != nil){
-                self.alertText = error?.localizedDescription ?? "Aanmelden mislukt"
-                self.showAlert.toggle()
-            }else if(authResult?.user != nil){
-                // success!
-            } else {
-                self.alertText = "Aanmelden mislukt"
-                self.showAlert.toggle()
+    @State private var showAlert = false
+
+    private func login() {
+        showActivityIndicator = true
+
+        Auth.auth().signIn(withEmail: userSettings.username.trimmingCharacters(in: .whitespacesAndNewlines), password: userSettings.password) { _, error in
+            showActivityIndicator = false
+
+            if let error {
+                alertText = error.localizedDescription
+                showAlert = true
             }
         }
     }
-    
+
     var body: some View {
-        NavigationStack{
-        VStack(alignment: .leading, spacing: 15){
-            ScrollView(showsIndicators: false){
-                
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 16) {
+                Spacer(minLength: 12)
+
                 Text("Welkom!")
-                  .font(.largeTitle).foregroundColor(Color.init("blackWhite"))
-                  .padding([.top, .bottom], 40)
-                            
+                    .font(.largeTitle)
+                    .foregroundColor(Color("blackWhite"))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.bottom, 16)
+
                 Image("menuImage")
-                  .resizable()
-                  .frame(width: 150, height: 150)
-                  .shadow(radius: 10)
-                  .padding(.bottom, 50)
-                
+                    .resizable()
+                    .frame(width: 150, height: 150)
+                    .shadow(radius: 10)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 24)
+
                 TextField("E-mail", text: $userSettings.username)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .textContentType(.username)
+                    .keyboardType(.emailAddress)
                     .padding()
-                    .background(Color.init("textField"))
+                    .background(Color("textField"))
                     .focused($focusedField, equals: .username)
-                    .cornerRadius(15.0)
-                
-                SecureField("Password", text: $userSettings.password)
+                    .cornerRadius(15)
+
+                SecureField("Wachtwoord", text: $userSettings.password)
+                    .textContentType(.password)
                     .padding()
-                    .background(Color.init("textField"))
+                    .background(Color("textField"))
                     .focused($focusedField, equals: .password)
-                    .cornerRadius(15.0)
-                
-                Button("Login", action: login)
-                    .buttonStyle(PrimaryButtonStyle())
-                    .padding()
-          
-                NavigationLink(destination:Register()){
-                    Text ("Registeren")
+                    .cornerRadius(15)
+
+                Button(action: login) {
+                    if showActivityIndicator {
+                        ProgressView()
+                            .tint(.white)
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        Text("Login")
+                            .frame(maxWidth: .infinity)
+                    }
                 }
-                
-            }
-        }
-        .alert(isPresented: self.$showAlert) {
-            Alert(title: Text("Error"), message: Text(self.alertText), dismissButton: .default(Text("Ok")))
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(showActivityIndicator || userSettings.username.isEmpty || userSettings.password.isEmpty)
+
+                NavigationLink(destination: Register()) {
+                    Text("Registeren")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .padding(.top, 4)
+
                 Spacer()
-                
-                Button(action: {
+            }
+            .padding(.horizontal, 27.5)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [Color("textField"), Color("LoginBackground")]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .edgesIgnoringSafeArea(.all)
+                .opacity(0.5)
+            )
+            .alert("Error", isPresented: $showAlert) {
+                Button("Ok", role: .cancel) { }
+            } message: {
+                Text(alertText)
+            }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+
+                    Button(action: {
+                        focusedField = nil
+                    }, label: {
+                        Image(systemName: "keyboard.chevron.compact.down")
+                            .foregroundColor(.accentColor)
+                    })
+                }
+            }
+            .onSubmit {
+                if focusedField == .username {
+                    focusedField = .password
+                } else {
                     focusedField = nil
-                },label: {
-                    Image(systemName: "keyboard.chevron.compact.down")
-                        .foregroundColor(.accentColor)
-                })
+                    login()
+                }
             }
         }
-        .padding([.leading, .trailing], 27.5)
-        .background(
-            LinearGradient(gradient: Gradient(colors: [Color.init("textField"), Color.init("LoginBackground")]), startPoint: .top, endPoint: .bottom)
-                    .edgesIgnoringSafeArea(.all).opacity(0.5))
-        .onSubmit {
-            if focusedField == .username {
-                focusedField = .password
-            } else {
-                focusedField = nil
-            }
-        }
-    }
     }
 }
 
