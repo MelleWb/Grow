@@ -58,9 +58,18 @@ struct Dashboard: View{
     @State var bodyWeight: Double = 0
     @State var fatPercentage: Double = 0
     @State var stepsToday: Double?
+    @State var activeEnergyBurnedToday: Double?
+    @State var activeEnergyGoalToday: Double?
 
     private var roundedWorkoutPercentage: Int {
         Int((self.userModel.workoutDonePercentage * 100).rounded())
+    }
+
+    private var todaysWorkoutID: UUID? {
+        UserDataModel.routineID(
+            for: userModel.user,
+            dayOfWeek: userModel.getDayForWeekPlan()
+        )
     }
 
     private func loadAndDisplayMostRecentWeight() {
@@ -118,6 +127,22 @@ struct Dashboard: View{
             self.stepsToday = steps
         }
     }
+
+    private func loadTodayActiveEnergySummary() {
+        HealthKitDataStore.getTodayActiveEnergySummary { burned, goal, error in
+            guard let burned, let goal else {
+                if error != nil {
+                    print("An Error occured")
+                }
+                self.activeEnergyBurnedToday = nil
+                self.activeEnergyGoalToday = nil
+                return
+            }
+
+            self.activeEnergyBurnedToday = burned
+            self.activeEnergyGoalToday = goal
+        }
+    }
     
     private func loadHealthKitMetrics() {
         HealthKitSetupAssistant.authorizeHealthKit { success, error in
@@ -126,12 +151,15 @@ struct Dashboard: View{
                     print(error.localizedDescription)
                 }
                 self.stepsToday = nil
+                self.activeEnergyBurnedToday = nil
+                self.activeEnergyGoalToday = nil
                 return
             }
             
             self.loadAndDisplayMostRecentWeight()
             self.loadAndDisplayMostRecentFatPercentage()
             self.loadTodayStepCount()
+            self.loadTodayActiveEnergySummary()
         }
     }
     
@@ -154,7 +182,9 @@ struct Dashboard: View{
                     DashboardBodyMetricsSection(
                         bodyWeight: bodyWeight,
                         fatPercentage: fatPercentage,
-                        stepsToday: stepsToday
+                        stepsToday: stepsToday,
+                        activeEnergyBurnedToday: activeEnergyBurnedToday,
+                        activeEnergyGoalToday: activeEnergyGoalToday
                     )
                 }
             }
@@ -175,7 +205,7 @@ struct Dashboard: View{
                 NewMeasurementView(showMeasurementView: $showMeasurementView)
             }
             .navigationDestination(isPresented: $isWorkOutPresented) {
-                if let routine = self.userModel.user.workoutOfTheDay {
+                if let routine = todaysWorkoutID {
                     WorkoutOfTheDayView(showWOD: $isWorkOutPresented, routine: routine)
                 } else {
                     EmptyView()

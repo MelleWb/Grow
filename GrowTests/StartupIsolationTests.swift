@@ -145,9 +145,9 @@ private final class FoodDataWriterSpy: FoodDataWriting {
         completion(.success(()))
     }
 
-    func saveMeal(_ meal: Meal, completion: @escaping (Result<Void, Error>) -> Void) {
+    func saveMeal(_ meal: Meal, completion: @escaping (Result<String, Error>) -> Void) {
         savedMeals.append(meal)
-        completion(.success(()))
+        completion(.success(meal.documentID ?? "saved-meal-\(savedMeals.count)"))
     }
 }
 

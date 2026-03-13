@@ -15,17 +15,7 @@ struct Profile: View {
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
     
-    @State var enableWeightSheet: Bool = false
-    @State var enableHeightSheet: Bool = false
     @State var showAlert: Bool = false
-    
-    func isSheetEnabled() -> Bool {
-        if enableWeightSheet || enableHeightSheet {
-            return true
-        } else {
-            return  false
-        }
-    }
     
     private var selectedSchemaName: String {
         guard
@@ -122,21 +112,55 @@ struct Profile: View {
                         
                         DatePicker("Geboortedatum", selection: dateOfBirthBinding, displayedComponents: .date)
                             .datePickerStyle(CompactDatePickerStyle())
-                            
+
+                        let heightBinding = Binding<String>(
+                            get: { String(self.userModel.user.height ?? 0) },
+                            set: {
+                                if let value = Int($0), value > 0 {
+                                    do {
+                                        try self.userModel.updateUserElements(for: .Height, to: value)
+                                    }
+                                    catch {
+                                        self.showAlert.toggle()
+                                    }
+                                } else if $0.isEmpty {
+                                    self.userModel.user.height = nil
+                                }
+                            }
+                        )
+
                         HStack{
                             Text("Lengte")
                             Spacer()
-                            Button("\(self.userModel.user.height ?? 1)"){
-                                self.enableHeightSheet.toggle()
-                            }
+                            TextField("cm", text: heightBinding)
+                                .multilineTextAlignment(.trailing)
+                                .keyboardType(.numberPad)
+                                .frame(maxWidth: 80)
                         }
-                        
+
+                        let weightBinding = Binding<String>(
+                            get: { String(self.userModel.user.weight ?? 0) },
+                            set: {
+                                if let value = Int($0), value > 0 {
+                                    do {
+                                        try self.userModel.updateUserElements(for: .Weight, to: value)
+                                    }
+                                    catch {
+                                        self.showAlert.toggle()
+                                    }
+                                } else if $0.isEmpty {
+                                    self.userModel.user.weight = nil
+                                }
+                            }
+                        )
+
                         HStack{
                             Text("Gewicht")
                             Spacer()
-                            Button("\(self.userModel.user.weight ?? 1)"){
-                                self.enableWeightSheet.toggle()
-                            }
+                            TextField("kg", text: weightBinding)
+                                .multilineTextAlignment(.trailing)
+                                .keyboardType(.numberPad)
+                                .frame(maxWidth: 80)
                         }
                     }
                     Section("Plan"){
@@ -219,43 +243,20 @@ struct Profile: View {
                     }
                 }
             }
-            .introspectTabBarController { (UITabBarController) in
-                if isSheetEnabled() {
-                    UITabBarController.tabBar.isHidden = true
-                } else {
-                    UITabBarController.tabBar.isHidden = false
-                }
-            }
             .navigationTitle(Text("Profiel"))
-            
-            .navigationBarHidden(isSheetEnabled())
-            .navigationBarBackButtonHidden(isSheetEnabled())
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button("Opslaan") {
-                        saveProfile()
+                Button("Uitloggen") {
+                    do {
+                        try Auth.auth().signOut()
                     }
-                    
-                    Button("Uitloggen") {
-                        do {
-                            try Auth.auth().signOut()
-                        }
-                        catch let signOutError as NSError {
-                            print ("Error signing out: %@", signOutError)
-                        }
+                    catch let signOutError as NSError {
+                        print ("Error signing out: %@", signOutError)
                     }
                 }
+                Button("Opslaan") {
+                    saveProfile()
+                }
             }
-            
-            if enableWeightSheet {
-                WeightActionSheet(enableWeightSheet: $enableWeightSheet)
-            }
-            
-            if enableHeightSheet {
-                HeightActionSheet(enableHeightSheet: $enableHeightSheet)
-            }
-            
         }
-        
     }
 }

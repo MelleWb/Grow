@@ -33,6 +33,8 @@ struct AddExercise: View {
                     Section{
                         
                         Picker(selection: $category, label: Text("Categorie")) {
+                            Text("Hyrox").tag("Hyrox")
+                            Text("Cardio").tag("Cardio")
                             Text("Rug").tag("Rug")
                             Text("Borst").tag("Borst")
                             Text("Biceps").tag("Biceps")

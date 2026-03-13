@@ -9,63 +9,59 @@ import SwiftUI
 
 struct SlimProductOverview : View {
     
-    @State var searchText = ""
-    @State var searching = false
+    @State private var searchText = ""
     @EnvironmentObject var foodModel : FoodDataModel
-    @State var showAddProduct: Bool = false
-    @State var filteredProducts : [SlimProduct]?
+    @State private var showAddProduct: Bool = false
     
     func delete(at offsets: IndexSet) {
 
         let index = offsets[offsets.startIndex]
-        let documentID:String = filteredProducts![index].documentID
+        let documentID:String = filteredProducts[index].documentID
         
         //Remove
         self.foodModel.deleteProduct(documentID: documentID)
-        
-        //Filter the array again
-        self.filterProducts()
-        
-        //Remove it now
-        self.filteredProducts?.remove(at: index)
     }
     
-    func filterProducts(){
-        self.filteredProducts = self.foodModel.slimProductList.products.filter { product in
-          return product.name.range(of: searchText, options: .caseInsensitive) != nil || searchText == ""
+    private var filteredProducts: [SlimProduct] {
+        let products = self.foodModel.slimProductList.products.filter { product in
+            product.name.localizedCaseInsensitiveContains(searchText) || searchText.isEmpty
         }
-        
-        self.filteredProducts = self.filteredProducts?.sorted { $0.name < $1.name }
+
+        return products.sorted { $0.name < $1.name }
     }
     
     var body: some View {
-            VStack{
-                List {
-                    let customSearchText = Binding<String> {
-                        self.searchText
-                    } set: { text in
-                        self.searchText = text
-                        filterProducts()
-                    }
+        List {
+            Section {
+                PickerSearchBar(text: $searchText, placeholder: "Product zoeken")
+                    .listRowInsets(EdgeInsets())
+            }
 
-                    SearchBar(searchText: customSearchText, searching: $searching)
-                    if filteredProducts != nil {
-                        ForEach(filteredProducts!, id: \.self) { product in
-                                ManageProductRow(product: product)
-                            }.onDelete(perform: delete)
-                       }
+            Section("Beschikbare producten") {
+                if filteredProducts.isEmpty {
+                    ContentUnavailableView(
+                        "Geen producten gevonden",
+                        systemImage: "magnifyingglass",
+                        description: Text("Pas je zoekterm aan of voeg een nieuw product toe.")
+                    )
+                } else {
+                    ForEach(filteredProducts, id: \.self) { product in
+                        ManageProductRow(product: product)
+                    }
+                    .onDelete(perform: delete)
                 }
             }
-            .onAppear(perform: {
-                filterProducts()
-            })
-            .listStyle(InsetGroupedListStyle())
-            .sheet(isPresented: $showAddProduct, content: {AddProductView(showAddProduct: $showAddProduct)})
-                .toolbar(content: {Button(action: {
-                    self.showAddProduct.toggle()
-                }) {
-                    Text("Nieuw").foregroundColor(Color.accentColor)
-                }})
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Producten")
+        .sheet(isPresented: $showAddProduct, content: { AddProductView(showAddProduct: $showAddProduct) })
+        .toolbar(content: {
+            Button(action: {
+                self.showAddProduct.toggle()
+            }) {
+                Text("Nieuw").foregroundColor(Color.accentColor)
+            }
+        })
     }
 }
 

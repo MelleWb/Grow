@@ -60,31 +60,28 @@ struct MacrosActionSheet: View {
     }
     
     var body: some View{
-        ZStack{
-            GeometryReader { gr in
-                VStack {
+        GeometryReader { geometry in
+            VStack {
+                Spacer()
+                
+                VStack(spacing: 16) {
                     VStack {
-                        HStack{
-                            Spacer()
-                            Button("Annuleer", role: .cancel){
-                                self.enableMacroSheet.toggle()
-                            }
-                        }.padding()
                         Text("Verander je macros")
                             .font(.headline)
                             .foregroundColor(.gray)
                             .padding(.top, 10)
                         
-                            VStack{
-                                Text("Calorieën")
+                        VStack{
+                            Text("Calorieën")
+                                .font(.headline)
+                            HStack{
+                                Text("\(calorieTotal)")
+                                Text(" / ")
+                                Text("\(calorieSum ?? 1)")
                                     .font(.headline)
-                                HStack{
-                                    Text("\(calorieTotal)")
-                                    Text(" / ")
-                                    Text("\(calorieSum ?? 1)")
-                                        .font(.headline)
-                                }
-                        }.padding()
+                            }
+                        }
+                        .padding()
                         
                         HStack{
                             VStack{
@@ -110,44 +107,50 @@ struct MacrosActionSheet: View {
                                     get: { self.macroSelection },
                                     set: {
                                         self.macroSelection = $0
-                                            setMacroStates()
-                                        }
+                                        setMacroStates()
+                                    }
                                 )
                                 MultiWheelPicker(selections: macroSelectionBinding, data: macroData)
                             }
                         }
                     }
-                    .background(RoundedRectangle(cornerRadius: 10)
-                    .foregroundColor(Color.init("textField")).shadow(radius: 1))
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .foregroundColor(Color.init("textField"))
+                            .shadow(radius: 1)
+                    )
                     
-                    VStack {
-                        Button(action: {
-                            if typeOfCalories == .RestCalories {
-                                self.userModel.user.restCalories!.kcal = self.calorieSum ?? 0
-                                self.userModel.user.restCalories!.carbs = self.carbs ?? 0
-                                self.userModel.user.restCalories!.protein = self.proteins ?? 0
-                                self.userModel.user.restCalories!.fat = self.fats ?? 0
-                                self.userModel.user.restCalories!.fiber = Int(Double(self.calorieSum ?? 0) * 0.014)
-                            } else if typeOfCalories == .SportCalories {
-                                self.userModel.user.sportCalories!.kcal = self.calorieSum ?? 0
-                                self.userModel.user.sportCalories!.carbs = self.carbs ?? 0
-                                self.userModel.user.sportCalories!.protein = self.proteins ?? 0
-                                self.userModel.user.sportCalories!.fat = self.fats ?? 0
-                                self.userModel.user.sportCalories!.fiber = Int(Double(self.calorieSum ?? 0) * 0.014)
-                            }
-                                
-                            self.enableMacroSheet.toggle()
-                        }) {
-                            Text("Klaar").fontWeight(Font.Weight.bold)
+                    Button(action: {
+                        if typeOfCalories == .RestCalories {
+                            self.userModel.user.restCalories!.kcal = self.calorieSum ?? 0
+                            self.userModel.user.restCalories!.carbs = self.carbs ?? 0
+                            self.userModel.user.restCalories!.protein = self.proteins ?? 0
+                            self.userModel.user.restCalories!.fat = self.fats ?? 0
+                            self.userModel.user.restCalories!.fiber = Int(Double(self.calorieSum ?? 0) * 0.014)
+                        } else if typeOfCalories == .SportCalories {
+                            self.userModel.user.sportCalories!.kcal = self.calorieSum ?? 0
+                            self.userModel.user.sportCalories!.carbs = self.carbs ?? 0
+                            self.userModel.user.sportCalories!.protein = self.proteins ?? 0
+                            self.userModel.user.sportCalories!.fat = self.fats ?? 0
+                            self.userModel.user.sportCalories!.fiber = Int(Double(self.calorieSum ?? 0) * 0.014)
                         }
-                        .padding()
-                        .buttonStyle(SecondaryButtonStyle())
+                        
+                        self.enableMacroSheet.toggle()
+                    }) {
+                        Text("Klaar").fontWeight(Font.Weight.bold)
                     }
-                }.position(x: gr.size.width / 2 ,y: gr.size.height - 300)
-                    .onAppear {
-                        setMacroStates()
-                    }
-            }.edgesIgnoringSafeArea(.all)
-        }.background(Color.black.opacity(0.6))
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(SecondaryButtonStyle())
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, max(geometry.safeAreaInsets.bottom, 8))
+                .onAppear {
+                    setMacroStates()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.opacity(0.6).ignoresSafeArea())
+        }
     }
 }

@@ -13,7 +13,7 @@ struct CreateSchema: View{
     @State var schema = Schema()
     @State var selectedRoutine: UUID? = nil
     
-    private let schemaTypes = ["Strength", "Hypertrofie", "Strength/Hypertrofie"]
+    private let schemaTypes = ["Strength", "Hypertrofie", "Cardio", "Hyrox"]
     
     private var canSaveSchema: Bool {
         !schema.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !schema.routines.isEmpty
@@ -93,7 +93,7 @@ struct CreateRoutine : View{
     @Binding var routine: Routine
     @State var selectedSuperset: UUID? = nil
     
-    let routineArray = ["Upper 1","Upper 2","Upper 3","Lower 1","Lower 2","Lower 3","Full Body 1","Full Body 2","Full Body 3","Push 1","Push 2","Push 3","Pull 1","Pull 2","Pull 3"]
+    let routineArray = ["Upper 1","Upper 2","Upper 3","Lower 1","Lower 2","Lower 3","Full Body 1","Full Body 2","Full Body 3","Push 1","Push 2","Push 3","Pull 1","Pull 2","Pull 3", "Hyrox", "Cardio"]
     
     var body: some View{
         Form{

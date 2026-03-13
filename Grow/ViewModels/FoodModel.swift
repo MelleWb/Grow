@@ -276,7 +276,10 @@ class FoodDataModel: ObservableObject{
     func saveMeal(for meal: Meal) -> Bool {
         var success = true
         foodDataWriter.saveMeal(meal) { result in
-            if case .failure(let error) = result {
+            switch result {
+            case .success(let documentID):
+                self.assignSavedMealDocumentID(documentID, to: meal)
+            case .failure(let error):
                 print(error)
                 success = false
             }
@@ -492,6 +495,26 @@ class FoodDataModel: ObservableObject{
             }
         else {
             return nil
+        }
+    }
+
+    func currentMeal(for meal: Meal) -> Meal? {
+        guard let mealIndex = getMealIndex(for: meal) else {
+            return nil
+        }
+
+        return foodDiary.meals?[mealIndex]
+    }
+
+    private func assignSavedMealDocumentID(_ documentID: String, to meal: Meal) {
+        if let mealIndex = getMealIndex(for: meal) {
+            foodDiary.meals?[mealIndex].documentID = documentID
+        }
+
+        if let savedMealIndex = savedMeals.firstIndex(where: { candidate in
+            candidate.documentID == documentID || candidate.id == meal.id
+        }) {
+            savedMeals[savedMealIndex].documentID = documentID
         }
     }
     

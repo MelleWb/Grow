@@ -7,8 +7,15 @@ struct DashboardTrainingSection: View {
     @Binding var isWorkOutPresented: Bool
     var showsWorkoutButton: Bool? = nil
 
+    private var todaysWorkoutID: UUID? {
+        UserDataModel.routineID(
+            for: userModel.user,
+            dayOfWeek: userModel.getDayForWeekPlan()
+        )
+    }
+
     private var shouldShowWorkoutButton: Bool {
-        showsWorkoutButton ?? (userModel.user.workoutOfTheDay != nil)
+        showsWorkoutButton ?? (todaysWorkoutID != nil)
     }
 
     var body: some View {
@@ -22,7 +29,7 @@ struct DashboardTrainingSection: View {
             if shouldShowWorkoutButton {
                 HStack {
                     Button {
-                        if userModel.user.workoutOfTheDay != nil {
+                        if todaysWorkoutID != nil {
                             isWorkOutPresented = true
                         }
                     } label: {
@@ -44,19 +51,25 @@ struct DashboardTrainingSection: View {
 struct TrainingCircle: View {
     @EnvironmentObject private var userModel: UserDataModel
 
-    var body: some View {
-        ZStack(alignment: .leading) {
-            Capsule()
-                .fill(Color.accentColor.opacity(0.1))
+    private var progress: CGFloat {
+        CGFloat(min(max(userModel.workoutDonePercentage, 0), 1))
+    }
 
-            Capsule()
-                .fill(Color.accentColor)
-                .scaleEffect(
-                    x: CGFloat(min(max(userModel.workoutDonePercentage, 0), 1)),
-                    y: 1,
-                    anchor: .leading
-                )
-                .animation(Animation.linear(duration: 0.5), value: userModel.workoutDonePercentage)
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color.accentColor.opacity(0.1))
+
+                if progress > 0 {
+                    Capsule()
+                        .fill(Color.accentColor)
+                        .frame(
+                            width: max(geometry.size.height, geometry.size.width * progress)
+                        )
+                }
+            }
+            .animation(.linear(duration: 0.5), value: userModel.workoutDonePercentage)
         }
         .frame(maxWidth: .infinity, minHeight: 12, maxHeight: 12)
     }
@@ -66,7 +79,7 @@ struct TrainingCircle: View {
     DashboardPreviewContainer {
         List {
             DashboardTrainingSection(
-                roundedWorkoutPercentage: 65,
+                roundedWorkoutPercentage: 10,
                 isWorkOutPresented: .constant(true),
                 showsWorkoutButton: true
             )

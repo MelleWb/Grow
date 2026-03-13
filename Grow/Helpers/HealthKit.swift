@@ -33,11 +33,14 @@ class HealthKitSetupAssistant {
                 completion(false, HealthkitSetupError.dataTypeNotAvailable)
                 return
         }
+
+        let activitySummaryType = HKObjectType.activitySummaryType()
         
         //3
         let healthKitTypesToRead: Set<HKObjectType> = [bodyFatPercentage,
                                                        bodyMass,
-                                                       stepCount]
+                                                       stepCount,
+                                                       activitySummaryType]
         
         //4. Request Authorization
         HKHealthStore().requestAuthorization(toShare: nil, read: healthKitTypesToRead) { (success, error) in
@@ -103,6 +106,33 @@ class HealthKitDataStore {
             }
         }
         
+        HKHealthStore().execute(query)
+    }
+
+    class func getTodayActiveEnergySummary(completion: @escaping (Double?, Double?, Error?) -> Void) {
+        let calendar = Calendar.current
+        var todayComponents = calendar.dateComponents([.calendar, .year, .month, .day], from: Date())
+        let tomorrowDate = calendar.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        var tomorrowComponents = calendar.dateComponents([.calendar, .year, .month, .day], from: tomorrowDate)
+        todayComponents.calendar = calendar
+        tomorrowComponents.calendar = calendar
+
+        let predicate = HKQuery.predicate(forActivitySummariesBetweenStart: todayComponents, end: tomorrowComponents)
+
+        let query = HKActivitySummaryQuery(predicate: predicate) { _, summaries, error in
+            DispatchQueue.main.async {
+                guard let summary = summaries?.first else {
+                    completion(nil, nil, error)
+                    return
+                }
+
+                let unit = HKUnit.kilocalorie()
+                let burned = summary.activeEnergyBurned.doubleValue(for: unit)
+                let goal = summary.activeEnergyBurnedGoal.doubleValue(for: unit)
+                completion(burned, goal, nil)
+            }
+        }
+
         HKHealthStore().execute(query)
     }
 }

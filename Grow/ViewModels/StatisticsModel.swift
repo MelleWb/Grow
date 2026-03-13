@@ -34,6 +34,7 @@ class StatisticsDataModel: ObservableObject {
     
     var trainingHistoryListener: ListenerRegistration? = nil
     var trainingStatsListener: ListenerRegistration? = nil
+    var exerciseDetailsListener: ListenerRegistration? = nil
     var user = User()
     private let sessionProvider: SessionProviding
     private let userRepository: UserRepository
@@ -106,56 +107,7 @@ class StatisticsDataModel: ObservableObject {
     }
     
     func calcEstimatedWeights(for exerciseName: String){
-        
-        let db = Firestore.firestore()
-        
-        db.collection("users").document(Auth.auth().currentUser!.uid).collection("exerciseStatistics")
-        .whereField("exerciseName", isEqualTo: exerciseName).order(by: "weight", descending: true).limit(to: 1).addSnapshotListener { (queryDocumentSnapshot, error) in
-
-                guard let documents = queryDocumentSnapshot?.documents else {
-                        print("No documents")
-                    return
-                }
-                
-            let exerciseStats: [ExerciseStatistics] = documents.map { (queryDocumentSnapshot) -> ExerciseStatistics in
-
-                    let result = Result {
-                        try queryDocumentSnapshot.data(as: ExerciseStatistics.self)
-                    }
-                    switch result {
-                    case .success(let stats):
-                        return stats
-                    case .failure(let error):
-                        print("error decoding schema: \(error)")
-                    }
-                    return ExerciseStatistics(id: UUID(), documentID: nil, exerciseID: UUID(), exerciseName: "", date: DateHelper.from(year: 1970, month: 1, day: 1), set: 0, reps: 0, weight: 0)
-                }
-            if exerciseStats.count > 0 {
-                
-            self.maxWeight = exerciseStats[0]
-            
-            let oneRepMax:Double = self.getEstimatedOneRepMax(given: self.maxWeight.reps ?? 1, weight: Double(self.maxWeight.weight ?? 1))
-            
-            for i in 1...15 {
-                let weight: Double = self.getEstimatedWeightForReps(oneRepMax: oneRepMax, reps: i)
-                var repString = ""
-                
-                if i == 1 {
-                    repString = "1 rep"
-                }
-                else {
-                    repString = "\(i) reps"
-                }
-                
-                if self.estimatedWeights[0].repsString == "" {
-                    self.estimatedWeights = [EstimatedWeights(reps: i, repsString: repString, weight: weight)]
-                } else {
-                    self.estimatedWeights.append(EstimatedWeights(reps: i, repsString: repString, weight: weight))
-                }
-            
-                }
-            }
-        }
+        self.fetchStatsForExercise(for: exerciseName)
     }
     
     func getEstimatedOneRepMax(given reps: Int, weight: Double) -> Double {
@@ -217,32 +169,90 @@ class StatisticsDataModel: ObservableObject {
 
     
     func fetchStatsForExercise(for exerciseName: String){
-        
-        let db = Firestore.firestore()
-        
-        
-    db.collection("users").document(Auth.auth().currentUser!.uid).collection("exerciseStatistics")
-        .whereField("exerciseName", isEqualTo: exerciseName).order(by: "estimatedOneRepMax", descending: true).limit(to: 1).addSnapshotListener { (querySnapshot, error) in
+        guard let userID = sessionProvider.currentUserID else {
+            self.exerciseStatistics = []
+            self.maxWeight = ExerciseStatistics()
+            self.estimatedWeights = []
+            return
+        }
 
+        exerciseDetailsListener?.remove()
+
+        let db = Firestore.firestore()
+
+        exerciseDetailsListener = db.collection("users").document(userID).collection("exerciseStatistics")
+            .whereField("exerciseName", isEqualTo: exerciseName)
+            .addSnapshotListener { querySnapshot, error in
                 guard let documents = querySnapshot?.documents else {
-                        print("No documents")
+                    if let error = error {
+                        print("No exercise statistics: \(error)")
+                    }
+                    self.exerciseStatistics = []
+                    self.maxWeight = ExerciseStatistics()
+                    self.estimatedWeights = []
                     return
                 }
-                
-                self.exerciseStatistics = documents.map { (queryDocumentSnapshot) -> ExerciseStatistics in
-                    
+
+                self.exerciseStatistics = documents.compactMap { queryDocumentSnapshot in
                     let result = Result {
                         try queryDocumentSnapshot.data(as: ExerciseStatistics.self)
                     }
+
                     switch result {
                     case .success(let stats):
                         return stats
                     case .failure(let error):
-                        print("error decoding schema: \(error)")
+                        print("error decoding exercise statistics: \(error)")
+                        return nil
                     }
-                    return ExerciseStatistics(id: UUID(), documentID: nil, exerciseID: UUID(), exerciseName: "", date: DateHelper.from(year: 1970, month: 1, day: 1), set: 0, reps: 0, weight: 0)
                 }
+                .sorted { lhs, rhs in
+                    if lhs.date == rhs.date {
+                        return lhs.set < rhs.set
+                    }
+                    return lhs.date < rhs.date
+                }
+
+                self.updateExerciseInsights()
             }
+    }
+
+    private func updateExerciseInsights() {
+        estimatedWeights = []
+        maxWeight = ExerciseStatistics()
+
+        let completedSets = exerciseStatistics.filter {
+            ($0.reps ?? 0) > 0 && ($0.weight ?? 0) > 0
+        }
+
+        guard let bestSet = completedSets.max(by: { lhs, rhs in
+            let lhsOneRepMax = lhs.estimatedOneRepMax ?? self.getEstimatedOneRepMax(given: lhs.reps ?? 1, weight: lhs.weight ?? 1)
+            let rhsOneRepMax = rhs.estimatedOneRepMax ?? self.getEstimatedOneRepMax(given: rhs.reps ?? 1, weight: rhs.weight ?? 1)
+
+            if lhsOneRepMax == rhsOneRepMax {
+                return (lhs.weight ?? 0) < (rhs.weight ?? 0)
+            }
+
+            return lhsOneRepMax < rhsOneRepMax
+        }) else {
+            return
+        }
+
+        maxWeight = bestSet
+
+        let oneRepMax = bestSet.estimatedOneRepMax ?? self.getEstimatedOneRepMax(
+            given: bestSet.reps ?? 1,
+            weight: bestSet.weight ?? 1
+        )
+
+        estimatedWeights = (1...15).map { reps in
+            let repsString = reps == 1 ? "1 rep" : "\(reps) reps"
+            return EstimatedWeights(
+                reps: reps,
+                repsString: repsString,
+                weight: self.getEstimatedWeightForReps(oneRepMax: oneRepMax, reps: reps)
+            )
+        }
     }
     
     func getRepsPlaceholder(for exercise: Exercise, for set:Int) -> Int{

@@ -9,6 +9,7 @@ struct FoodMealSection: View {
     @Binding var mealToSave: Meal?
     @Binding var showSaveAsMeal: Bool
     @FocusState var focusedField: UUID?
+    let onOpenMealDetail: () -> Void
     let onCopyMealForwardOneDay: () -> Void
     let onDeleteMeal: () -> Void
 
@@ -23,7 +24,7 @@ struct FoodMealSection: View {
                         mealToSave = meal
                         showSaveAsMeal = true
                     },
-                    focusedField: _focusedField
+                    onOpenMealDetail: onOpenMealDetail
                 )
                 Spacer()
                 Text("\(NumberHelper.roundedNumbersFromDouble(unit: meal.kcal)) Kcal")
@@ -99,57 +100,49 @@ struct FoodMealHeader: View {
     @Binding var mealToCopy: Meal
     let meal: Meal
     let onSaveAsMeal: () -> Void
-    @State private var mealName: String = ""
-    @FocusState var focusedField: UUID?
-    @State private var mealNameUUID: UUID = UUID()
+    let onOpenMealDetail: () -> Void
 
     var body: some View {
         if let mealIndex = foodModel.getMealIndex(for: meal) {
-            HStack {
-                TextField(meal.name ?? "Maaltijd \(mealIndex + 1)", text: $mealName, onEditingChanged: { isBegin in
-                    if !isBegin {
-                        self.foodModel.updateMealName(for: meal, name: mealName)
-                    }
-                })
-                .focused($focusedField, equals: mealNameUUID)
-                .contextMenu(menuItems: {
-                    VStack {
-                        Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].kcal)) Calorieën")
-                        Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].carbs)) Koolhydraten")
-                        Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].protein)) Eiwitten")
-                        Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].fat)) Vetten")
-                        Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].fiber)) Vezels")
-                    }
-                    Button(action: onSaveAsMeal) {
-                        Text("Sla maaltijd op")
-                        Image(systemName: "square.and.arrow.down")
-                            .resizable()
-                            .frame(width: 17, height: 20, alignment: .trailing)
-                    }
-                    Button(action: {
-                        self.mealToCopy = meal
-                        self.enableSheet = true
-                    }) {
-                        Text("Kopieren")
-                        Image(systemName: "doc.on.doc")
-                            .resizable()
-                            .frame(width: 17, height: 20, alignment: .trailing)
-                    }
-                    Button(action: {
-                        foodModel.removeMeal(for: meal)
-                    }) {
-                        Text("Verwijder")
-                        Image(systemName: "trash")
-                            .resizable()
-                            .frame(width: 17, height: 20, alignment: .trailing)
-                    }
-                })
+            Button {
+                onOpenMealDetail()
+            } label: {
+                Text(meal.name?.isEmpty == false ? meal.name! : "Maaltijd \(mealIndex + 1)")
+                    .foregroundColor(.primary)
             }
-            .onAppear {
-                if let mealName = meal.name {
-                    self.mealName = mealName
+            .buttonStyle(.plain)
+            .contextMenu(menuItems: {
+                VStack {
+                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].kcal)) Calorieën")
+                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].carbs)) Koolhydraten")
+                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].protein)) Eiwitten")
+                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].fat)) Vetten")
+                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: self.foodModel.foodDiary.meals![mealIndex].fiber)) Vezels")
                 }
-            }
+                Button(action: onSaveAsMeal) {
+                    Text("Sla maaltijd op")
+                    Image(systemName: "square.and.arrow.down")
+                        .resizable()
+                        .frame(width: 17, height: 20, alignment: .trailing)
+                }
+                Button(action: {
+                    self.mealToCopy = meal
+                    self.enableSheet = true
+                }) {
+                    Text("Kopieren")
+                    Image(systemName: "doc.on.doc")
+                        .resizable()
+                        .frame(width: 17, height: 20, alignment: .trailing)
+                }
+                Button(action: {
+                    foodModel.removeMeal(for: meal)
+                }) {
+                    Text("Verwijder")
+                    Image(systemName: "trash")
+                        .resizable()
+                        .frame(width: 17, height: 20, alignment: .trailing)
+                }
+            })
         }
     }
 }
@@ -202,6 +195,7 @@ private struct FoodMealSectionPreviewHarness: View {
             mealToSave: $mealToSave,
             showSaveAsMeal: $showSaveAsMeal,
             focusedField: _focusedField,
+            onOpenMealDetail: {},
             onCopyMealForwardOneDay: {},
             onDeleteMeal: {}
         )

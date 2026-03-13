@@ -53,7 +53,7 @@ protocol FoodDataWriting {
     func saveProduct(_ product: Product, slimProductList: SlimProductList, completion: @escaping (Result<Void, Error>) -> Void)
     func deleteProduct(documentID: String, slimProductList: SlimProductList, completion: @escaping (Result<Void, Error>) -> Void)
     func saveDiary(userID: String, diary: FoodDiary, completion: @escaping (Result<Void, Error>) -> Void)
-    func saveMeal(_ meal: Meal, completion: @escaping (Result<Void, Error>) -> Void)
+    func saveMeal(_ meal: Meal, completion: @escaping (Result<String, Error>) -> Void)
 }
 
 protocol TrainingDataWriting {
@@ -378,13 +378,13 @@ struct FirestoreFoodDataWriter: FoodDataWriting {
         }
     }
 
-    func saveMeal(_ meal: Meal, completion: @escaping (Result<Void, Error>) -> Void) {
+    func saveMeal(_ meal: Meal, completion: @escaping (Result<String, Error>) -> Void) {
         let mealRef = Firestore.firestore().collection("meals")
         let documentRef = meal.documentID.flatMap { !$0.isEmpty ? mealRef.document($0) : nil } ?? mealRef.document()
 
         do {
             try documentRef.setData(from: meal, merge: true)
-            completion(.success(()))
+            completion(.success(documentRef.documentID))
         } catch {
             completion(.failure(error))
         }

@@ -18,6 +18,7 @@ struct FoodView: View {
     @State var meal: Meal = Meal()
     @State var mealToCopy: Meal  = Meal()
     @State private var mealToSave: Meal?
+    @State private var mealToDetail: Meal?
     @State private var showAddProductToMeal = false
     @State private var showSelectSavedMeal = false
     @State private var showSaveAsMeal = false
@@ -66,6 +67,9 @@ struct FoodView: View {
                         mealToSave: $mealToSave,
                         showSaveAsMeal: $showSaveAsMeal,
                         focusedField: _focusedField,
+                        onOpenMealDetail: {
+                            self.mealToDetail = meal
+                        },
                         onCopyMealForwardOneDay: {
                             self.date.addTimeInterval(86400)
                             self.foodModel.date = self.date
@@ -103,6 +107,9 @@ struct FoodView: View {
                 if let mealToSave {
                     SaveAsMeal(meal: mealToSave)
                 }
+            }
+            .navigationDestination(item: $mealToDetail) { meal in
+                MealDetailView(meal: meal)
             }
             .navigationBarHidden(enableSheet)
             .navigationBarBackButtonHidden(enableSheet)

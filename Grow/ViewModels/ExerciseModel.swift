@@ -95,15 +95,17 @@ class ExerciseDataModel: ObservableObject{
                 }
                 
                 self.exercises = documents.map { (queryDocumentSnapshot) -> Exercise in
-                    let data = queryDocumentSnapshot.data()
-                    
-                    let name = data["name"] as? String ?? ""
-                    let category = data["category"] as? String ?? ""
-                    let imageURL = data["category"] as? String ?? ""
-                    let description = data["description"] as? String ?? ""
-                    let documentID = queryDocumentSnapshot.documentID
-                    
-                    return Exercise(documentID: documentID, name: name, category: category, imageURL: imageURL, description: description)
+                    let result = Result {
+                        try queryDocumentSnapshot.data(as: Exercise.self)
+                    }
+
+                    switch result {
+                    case .success(let exercise):
+                        return exercise
+                    case .failure:
+                        print("error decoding exercise...")
+                        return Exercise()
+                    }
                 }
             }
         }

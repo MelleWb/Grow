@@ -20,8 +20,9 @@ struct ProductDetailView: View {
     
     
     @State var amount: String = "100"
-    @State var amountInput: String = ""
-    @State var portionAmount: Int = 1
+    @State private var amountInput: String = ""
+    @State private var selectedPortionIndex = 0
+    @State private var portionCountText: String = ""
     
     @State var calories: Double = 0
     @State var carbs: Double = 0
@@ -42,33 +43,71 @@ struct ProductDetailView: View {
         self.fat = calculation(unit: product.fat, portion: portion)
         self.fiber = calculation(unit: product.fiber, portion: portion)
     }
-    
-    var body: some View {
-        
-        let amountProxy = Binding<String>(
+
+    private var selectedPortion: ProductPortion? {
+        guard product.portions.indices.contains(selectedPortionIndex) else {
+            return nil
+        }
+
+        return product.portions[selectedPortionIndex]
+    }
+
+    private var portionCount: Int {
+        if let value = NumberFormatter().number(from: portionCountText) {
+            return max(value.intValue, 1)
+        }
+
+        return 1
+    }
+
+    private func applySelectedPortion() {
+        guard let selectedPortion else {
+            return
+        }
+
+        let totalAmount = selectedPortion.amount * portionCount
+        amountInput = ""
+        amount = String(totalAmount)
+        updateCalories(portion: totalAmount)
+    }
+
+    private var amountBinding: Binding<String> {
+        Binding(
             get: { amountInput },
-            set: {
-                amount = $0
-                amountInput = $0
-                if let value = NumberFormatter().number(from: $0) {
-                    self.updateCalories(portion: value.intValue)
+            set: { newValue in
+                amountInput = newValue
+
+                if let value = NumberFormatter().number(from: newValue) {
+                    amount = String(value.intValue)
+                    updateCalories(portion: value.intValue)
+                } else if newValue.isEmpty {
+                    applySelectedPortion()
                 }
             }
         )
-        
+    }
+    
+    var body: some View {
         Form{
             Section{
                 HStack{
-                    Picker(selection: amountProxy, label: Text("Portie")) {
-                        ForEach(self.product.portions, id:\.self){ portion in
-                            Text(portion.name).tag(String(portion.amount))
+                    Picker("Portie", selection: $selectedPortionIndex) {
+                        ForEach(Array(product.portions.enumerated()), id: \.offset) { index, portion in
+                            Text("\(portion.name) (\(portion.amount) g)").tag(index)
                         }
                     }
                 }
                 HStack{
-                    Text("Aantal grammen")
+                    Text("Aantal porties")
                     Spacer()
-                    TextField(amount, text: amountProxy)
+                    TextField("", text: $portionCountText, prompt: Text("1"))
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                }
+                HStack{
+                    Text("Portiegrootte (g)")
+                    Spacer()
+                    TextField("", text: amountBinding, prompt: Text(amount))
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                 }
@@ -121,17 +160,12 @@ struct ProductDetailView: View {
         }})
         .onAppear(perform:{
             
-        })
-        .onAppear(perform:{
-            
             //First get the product details
             self.foodModel.getProductDetails(documentID: documentID, completion: { product, error in
                 if let product = product {
                     self.product = product
-                    
-                    if let value = NumberFormatter().number(from: amount) {
-                        self.updateCalories(portion: value.intValue)
-                    }
+                    self.selectedPortionIndex = product.portions.isEmpty ? 0 : min(self.selectedPortionIndex, product.portions.count - 1)
+                    self.applySelectedPortion()
                     
                 } else {
                     isPresented = false
@@ -139,5 +173,11 @@ struct ProductDetailView: View {
                 }
                 })
             })
+        .onChange(of: selectedPortionIndex) { _, _ in
+            applySelectedPortion()
+        }
+        .onChange(of: portionCountText) { _, newValue in
+            applySelectedPortion()
+        }
     }
 }
