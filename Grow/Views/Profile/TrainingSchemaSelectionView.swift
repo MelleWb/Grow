@@ -43,6 +43,11 @@ struct TrainingSchemaSelectionView: View {
             }
         }
         .navigationTitle("Trainingschema")
+        .onAppear {
+            if trainingModel.fetchedSchemas.isEmpty {
+                trainingModel.fetchData()
+            }
+        }
     }
     
     private func selectSchema(_ schema: Schema) {

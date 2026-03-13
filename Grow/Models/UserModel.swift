@@ -50,6 +50,20 @@ struct User: Codable {
     var membership: MemberShip?
 }
 
+extension User {
+    var hasRequiredProfileData: Bool {
+        let hasFirstName = firstName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+        let hasLastName = lastName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+        let hasWeight = weight != nil
+        let hasHeight = height != nil
+        let hasPlan = plan != nil
+        let hasPal = pal != nil
+        let hasSchema = schema?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+
+        return hasFirstName && hasLastName && hasWeight && hasHeight && hasPlan && hasPal && hasSchema
+    }
+}
+
 struct MemberShip: Codable, Identifiable, Hashable {
     var id = UUID()
     var product: String?
