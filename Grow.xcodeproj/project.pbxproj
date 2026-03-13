@@ -29,6 +29,7 @@
 		8522F3FE27F1DD7D00F9D618 /* ManageProductDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8522F3FD27F1DD7D00F9D618 /* ManageProductDetailView.swift */; };
 		8522F40027F2535900F9D618 /* AddProductToMealList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8522F3FF27F2535900F9D618 /* AddProductToMealList.swift */; };
 		852DBDFF26E7F6D5000ABE3C /* MeasurementOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852DBDFE26E7F6D5000ABE3C /* MeasurementOverview.swift */; };
+		8533959A2F645A900056B654 /* MealDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853395992F645A900056B654 /* MealDetailView.swift */; };
 		8534D7C926D27F0300FB41EE /* TrainingVolumeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8534D7C826D27F0300FB41EE /* TrainingVolumeView.swift */; };
 		8539186826938D290045A1B5 /* TrainingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8539186726938D290045A1B5 /* TrainingModel.swift */; };
 		853A8F832F633C74002834FD /* TrainingSchemaSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853A8F822F633C74002834FD /* TrainingSchemaSelectionView.swift */; };
@@ -167,6 +168,7 @@
 		8522F3FD27F1DD7D00F9D618 /* ManageProductDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageProductDetailView.swift; sourceTree = "<group>"; };
 		8522F3FF27F2535900F9D618 /* AddProductToMealList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddProductToMealList.swift; sourceTree = "<group>"; };
 		852DBDFE26E7F6D5000ABE3C /* MeasurementOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementOverview.swift; sourceTree = "<group>"; };
+		853395992F645A900056B654 /* MealDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealDetailView.swift; sourceTree = "<group>"; };
 		8534D7C826D27F0300FB41EE /* TrainingVolumeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingVolumeView.swift; sourceTree = "<group>"; };
 		8539186726938D290045A1B5 /* TrainingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingModel.swift; sourceTree = "<group>"; };
 		853A8F822F633C74002834FD /* TrainingSchemaSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingSchemaSelectionView.swift; sourceTree = "<group>"; };
@@ -405,6 +407,7 @@
 				857866902F62ADD700700148 /* FoodMealSection.swift */,
 				857866922F62ADD700700148 /* FoodRootPreview.swift */,
 				857866942F62ADD700700148 /* FoodAddMealSection.swift */,
+				853395992F645A900056B654 /* MealDetailView.swift */,
 			);
 			path = Food;
 			sourceTree = "<group>";
@@ -701,6 +704,7 @@
 				85C48AE526B1E32400BFE48E /* ChatView.swift in Sources */,
 				857866912F62ADD700700148 /* FoodMealSection.swift in Sources */,
 				8578668B2F62ADD600700148 /* FoodPreviewContainer.swift in Sources */,
+				8533959A2F645A900056B654 /* MealDetailView.swift in Sources */,
 				8522F40027F2535900F9D618 /* AddProductToMealList.swift in Sources */,
 				856677DE27A4878100CFEC31 /* CreateSchema.swift in Sources */,
 				F08043EF26B0942F002D5C65 /* DashboardView.swift in Sources */,
@@ -916,6 +920,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Grow/Grow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -967,6 +972,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Grow/Grow.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;

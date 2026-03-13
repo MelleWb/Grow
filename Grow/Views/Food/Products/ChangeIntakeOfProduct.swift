@@ -14,8 +14,9 @@ struct ChangeIntakeOfProduct: View {
     @State var product:Product
     @State var meal: Meal
     @State var amount: String
-    @State var amountInput: String = ""
-    @State var amountPlaceHolder : String = ""
+    @State private var amountInput: String = ""
+    @State private var selectedPortionIndex = 0
+    @State private var portionCountText: String = ""
     
     @State var calories: Double = 0
     @State var carbs: Double = 0
@@ -36,38 +37,97 @@ struct ChangeIntakeOfProduct: View {
         self.fat = calculation(unit: product.fat, portion: portion)
         self.fiber = calculation(unit: product.fiber, portion: portion)
     }
-    
-    var body: some View {
-        
-        let amountProxy = Binding<String>(
-            get: {
-                if amountPlaceHolder == amount {
-                 return ""
-                } else {
-                    return amount
-                }
-            },
-            set: {
-                amount = $0
-                if let value = NumberFormatter().number(from: $0) {
-                    self.updateCalories(portion: value.intValue)
+
+    private var selectedPortion: ProductPortion? {
+        guard product.portions.indices.contains(selectedPortionIndex) else {
+            return nil
+        }
+
+        return product.portions[selectedPortionIndex]
+    }
+
+    private var portionCount: Int {
+        if let value = NumberFormatter().number(from: portionCountText) {
+            return max(value.intValue, 1)
+        }
+
+        return 1
+    }
+
+    private func applySelectedPortion() {
+        guard let selectedPortion else {
+            return
+        }
+
+        let totalAmount = selectedPortion.amount * portionCount
+        amountInput = ""
+        amount = String(totalAmount)
+        updateCalories(portion: totalAmount)
+    }
+
+    private var amountBinding: Binding<String> {
+        Binding(
+            get: { amountInput },
+            set: { newValue in
+                amountInput = newValue
+
+                if let value = NumberFormatter().number(from: newValue) {
+                    amount = String(value.intValue)
+                    updateCalories(portion: value.intValue)
+                } else if newValue.isEmpty {
+                    applySelectedPortion()
                 }
             }
         )
-        
+    }
+
+    private func configureSelectionFromExistingAmount() {
+        guard let currentAmount = NumberFormatter().number(from: amount)?.intValue else {
+            applySelectedPortion()
+            return
+        }
+
+        let exactMatch = product.portions.enumerated()
+            .filter { _, portion in
+                portion.amount > 0 && currentAmount % portion.amount == 0
+            }
+            .max { lhs, rhs in
+                lhs.element.amount < rhs.element.amount
+            }
+
+        if let exactMatch {
+            selectedPortionIndex = exactMatch.offset
+            let count = max(currentAmount / exactMatch.element.amount, 1)
+            portionCountText = count == 1 ? "" : String(count)
+            applySelectedPortion()
+        } else {
+            selectedPortionIndex = 0
+            portionCountText = ""
+            updateCalories(portion: currentAmount)
+        }
+    }
+    
+    var body: some View {
         Form{
             Section{
                 HStack{
-                    Picker(selection: amountProxy, label: Text("Maatvoering")) {
-                        ForEach(self.product.portions, id:\.self){ portion in
-                            Text(portion.name).tag(String(portion.amount))
+                    Picker("Portie", selection: $selectedPortionIndex) {
+                        ForEach(Array(product.portions.enumerated()), id: \.offset) { index, portion in
+                            Text("\(portion.name) (\(portion.amount) g)").tag(index)
                         }
                     }
                 }
                 HStack{
+                    Text("Aantal porties")
+                    Spacer()
+                    TextField("", text: $portionCountText, prompt: Text("1"))
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                }
+                HStack{
                     Text("Portiegrootte (g)")
                     Spacer()
-                    TextField(amount, text: amountProxy)
+                    TextField("", text: amountBinding, prompt: Text(amount))
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                 }
@@ -118,18 +178,13 @@ struct ChangeIntakeOfProduct: View {
 
         }})
         .onAppear(perform:{
-            
-            //Test
-            print(NumberHelper.roundNumbersMaxTwoDecimals(unit: 10.1234))
-            print(NumberHelper.roundNumbersMaxTwoDecimals(unit: 10.00))
-            print(NumberHelper.roundNumbersMaxTwoDecimals(unit: 10.01))
-            print(NumberHelper.roundNumbersMaxTwoDecimals(unit: 10.1))
-            //set the placeholder equal to amount
-            self.amountPlaceHolder = amount
-            
-            if let value = NumberFormatter().number(from: amount) {
-                self.updateCalories(portion: value.intValue)
-            }
+            self.configureSelectionFromExistingAmount()
         })
+        .onChange(of: selectedPortionIndex) { _, _ in
+            applySelectedPortion()
+        }
+        .onChange(of: portionCountText) { _, _ in
+            applySelectedPortion()
+        }
     }
 }

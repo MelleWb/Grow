@@ -12,51 +12,51 @@ struct AddProductToMealList: View {
     @State var meal: Meal
     @Binding var isPresented: Bool
     
-    @State var searchText = ""
-    @State var searching = false
+    @State private var searchText = ""
     @EnvironmentObject var foodModel : FoodDataModel
-    @State var filteredProducts : [SlimProduct]?
-    @State var showAddProduct: Bool = false
+    @State private var showAddProduct: Bool = false
     
-    
-    func filterProducts(){
-        self.filteredProducts = self.foodModel.slimProductList.products.filter { product in
-          return product.name.range(of: searchText, options: .caseInsensitive) != nil || searchText == ""
+    private var filteredProducts: [SlimProduct] {
+        let products = foodModel.slimProductList.products.filter { product in
+            product.name.localizedCaseInsensitiveContains(searchText) || searchText.isEmpty
         }
-        
-        self.filteredProducts = self.filteredProducts?.sorted { $0.name < $1.name }
+
+        return products.sorted { $0.name < $1.name }
     }
         
-        var body: some View {
-                VStack{
-                    List {
-                        let customSearchText = Binding<String> {
-                            self.searchText
-                        } set: { text in
-                            self.searchText = text
-                            filterProducts()
-                        }
+    var body: some View {
+        List {
+            Section {
+                PickerSearchBar(text: $searchText, placeholder: "Product zoeken")
+                    .listRowInsets(EdgeInsets())
+            }
 
-                        SearchBar(searchText: customSearchText, searching: $searching)
-                        if filteredProducts != nil {
-                            ForEach(filteredProducts!, id: \.self) { product in
-                                AddProductRow(product: product, isPresented: $isPresented, meal: meal, documentID: product.documentID)
-                                }
-                           }
+            Section("Beschikbare producten") {
+                if filteredProducts.isEmpty {
+                    ContentUnavailableView(
+                        "Geen producten gevonden",
+                        systemImage: "magnifyingglass",
+                        description: Text("Pas je zoekterm aan of voeg een nieuw product toe.")
+                    )
+                } else {
+                    ForEach(filteredProducts, id: \.self) { product in
+                        AddProductRow(product: product, isPresented: $isPresented, meal: meal, documentID: product.documentID)
                     }
                 }
-                .onAppear(perform: {
-                    filterProducts()
-                })
-                .listStyle(InsetGroupedListStyle())
-                .sheet(isPresented: $showAddProduct, content: {AddProductView(showAddProduct: $showAddProduct)})
-                    .toolbar(content: {Button(action: {
-                        self.showAddProduct.toggle()
-                    }) {
-                        Text("Nieuw").foregroundColor(Color.accentColor)
-                    }})
+            }
         }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Product kiezen")
+        .sheet(isPresented: $showAddProduct, content: { AddProductView(showAddProduct: $showAddProduct) })
+        .toolbar(content: {
+            Button(action: {
+                self.showAddProduct.toggle()
+            }) {
+                Text("Nieuw").foregroundColor(Color.accentColor)
+            }
+        })
     }
+}
 
 
 struct AddProductRow: View{

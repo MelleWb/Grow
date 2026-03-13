@@ -13,14 +13,22 @@ struct ExerciseOverview: View {
     
     @StateObject private var exerciseModel = ExerciseDataModel()
     
-    @State var showAddExerciseSheetView = false
-    @State var searchText = ""
-    @State var searching = false
+    @State private var showAddExerciseSheetView = false
+    @State private var searchText = ""
+
+    private var filteredExercises: [Exercise] {
+        exerciseModel.exercises
+            .filter { exercise in
+                exercise.name.localizedCaseInsensitiveContains(searchText) || searchText.isEmpty
+            }
+            .sorted { $0.name < $1.name }
+    }
     
     func delete(at offsets: IndexSet) {
         
         let index = offsets[offsets.startIndex]
-        let documentID = exerciseModel.exercises[index].documentID ?? ""
+        let exerciseToDelete = filteredExercises[index]
+        let documentID = exerciseToDelete.documentID ?? ""
         
         let db = Firestore.firestore()
         
@@ -28,33 +36,42 @@ struct ExerciseOverview: View {
             if let err = err {
                 print("Error removing document: \(err)")
             } else {
-                exerciseModel.exercises.remove(atOffsets: offsets)
+                exerciseModel.exercises.removeAll { $0.id == exerciseToDelete.id }
             }
         }
     }
     
     var body: some View{
-            VStack(alignment: .leading){
-                List {
-                    SearchBar(searchText: $searchText, searching: $searching)
-                    ForEach(exerciseModel.exercises.filter({ (exercise: Exercise) -> Bool in
-                        return exercise.name.range(of: searchText, options: .caseInsensitive) != nil || searchText == ""
-                    }), id: \.self) { exercise in
+            List {
+                Section {
+                    PickerSearchBar(text: $searchText, placeholder: "Oefening zoeken")
+                        .listRowInsets(EdgeInsets())
+                }
+
+                Section("Beschikbare oefeningen") {
+                    if filteredExercises.isEmpty {
+                        ContentUnavailableView(
+                            "Geen oefeningen gevonden",
+                            systemImage: "magnifyingglass",
+                            description: Text("Pas je zoekterm aan of voeg een nieuwe oefening toe.")
+                        )
+                    } else {
+                        ForEach(filteredExercises, id: \.self) { exercise in
                         NavigationLink( destination: ExerciseDetailView(exercise: exercise)) {
                                     VStack(alignment: .leading) {
                                         Text(exercise.name).font(.headline)
                                         Text(exercise.category).font(.subheadline)
                                     }
                         }
-                   }
-                    
-                   .onDelete(perform: delete)
-                }
             }
+                        .onDelete(perform: delete)
+                    }
+                }
+        }
             .onAppear(perform: {
                 self.exerciseModel.fetchData()
             })
-            .listStyle(InsetGroupedListStyle())
+            .listStyle(.insetGrouped)
             .navigationTitle("Oefeningen")
             .navigationBarItems(trailing: (
                             Button(action: {

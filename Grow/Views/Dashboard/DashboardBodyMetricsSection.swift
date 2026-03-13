@@ -4,6 +4,8 @@ struct DashboardBodyMetricsSection: View {
     let bodyWeight: Double
     let fatPercentage: Double
     let stepsToday: Double?
+    let activeEnergyBurnedToday: Double?
+    let activeEnergyGoalToday: Double?
     
     private let stepGoal: Double = 10_000
     
@@ -44,6 +46,16 @@ struct DashboardBodyMetricsSection: View {
                     //StepGoalProgress(progress: stepProgress)
                 }
             }
+
+            if let activeEnergyBurnedToday, let activeEnergyGoalToday {
+                HStack {
+                    Text("Verbrande kcal")
+                    Spacer()
+                    Text("\(NumberHelper.roundedNumbersFromDouble(unit: activeEnergyBurnedToday)) / \(NumberHelper.roundedNumbersFromDouble(unit: activeEnergyGoalToday))")
+                        .font(.headline)
+                        .monospacedDigit()
+                }
+            }
         }
     }
 }
@@ -67,7 +79,13 @@ private struct StepGoalProgress: View {
 #Preview {
     DashboardPreviewContainer {
         List {
-            DashboardBodyMetricsSection(bodyWeight: 82.4, fatPercentage: 14.2, stepsToday: 7342)
+            DashboardBodyMetricsSection(
+                bodyWeight: 82.4,
+                fatPercentage: 14.2,
+                stepsToday: 7342,
+                activeEnergyBurnedToday: 540,
+                activeEnergyGoalToday: 700
+            )
         }
         .listStyle(.insetGrouped)
     }

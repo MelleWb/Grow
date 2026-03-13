@@ -13,9 +13,11 @@ struct ExtraSportCaloriesActionSheet: View {
     @Binding var enableExtraCalorieSheet: Bool
     
     var body: some View {
-        ZStack{
-            GeometryReader { gr in
-                VStack {
+        GeometryReader { geometry in
+            VStack {
+                Spacer()
+                
+                VStack(spacing: 16) {
                     VStack {
                         Text("Percentage extra calorieën op een sportdag")
                             .font(.headline)
@@ -27,32 +29,40 @@ struct ExtraSportCaloriesActionSheet: View {
                             set: {
                                 do {
                                     try self.userModel.updateUserElements(for: .ExtraTrainingCalories, to: $0)
-                                    }
-                                    catch{
-                                        print("Oops")
-                                    }
                                 }
+                                catch {
+                                    print("Oops")
+                                }
+                            }
                         )
                         
                         Picker("Extra percentage calorieën", selection: calorieBinding) {
                             ForEach(0..<100) {
                                 Text("+ \($0)%").tag($0)
                             }
-                        }.pickerStyle(WheelPickerStyle())
-                        
-                    }.background(RoundedRectangle(cornerRadius: 10)
-                        .foregroundColor(Color.init("textField")).shadow(radius: 1))
-                    VStack {
-                        Button(action: {
-                            self.enableExtraCalorieSheet.toggle()
-                        }) {
-                            Text("Klaar").fontWeight(Font.Weight.bold)
-                        }.padding()
-                            .buttonStyle(SecondaryButtonStyle())
-
+                        }
+                        .pickerStyle(WheelPickerStyle())
                     }
-                }.position(x: gr.size.width / 2 ,y: gr.size.height - 200)
-            }.edgesIgnoringSafeArea(.all)
-        }.background(Color.black.opacity(0.6))
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .foregroundColor(Color.init("textField"))
+                            .shadow(radius: 1)
+                    )
+                    
+                    Button(action: {
+                        self.enableExtraCalorieSheet.toggle()
+                    }) {
+                        Text("Klaar").fontWeight(Font.Weight.bold)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(SecondaryButtonStyle())
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, max(geometry.safeAreaInsets.bottom, 8))
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.opacity(0.6).ignoresSafeArea())
+        }
     }
 }

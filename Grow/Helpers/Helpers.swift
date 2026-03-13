@@ -181,3 +181,4 @@ struct AddButton<Destination : View>: View {
         NavigationLink(destination: self.destination) { Image(systemName: "plus") }
     }
 }
+

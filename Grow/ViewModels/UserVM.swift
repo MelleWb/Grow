@@ -212,7 +212,7 @@ class UserDataModel: ObservableObject{
     }
 
     static func routineID(for user: User, dayOfWeek: Int) -> UUID? {
-        user.workoutOfTheDay ?? workoutOfTheDay(for: user.weekPlan, dayOfWeek: dayOfWeek)
+        workoutOfTheDay(for: user.weekPlan, dayOfWeek: dayOfWeek) ?? user.workoutOfTheDay
     }
 
     static func trainingDayCount(for weekPlan: [DayPlan]?) -> Int {
