@@ -44,6 +44,8 @@
 		85647EA526D6C4A300835CC8 /* ProductDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85647EA426D6C4A300835CC8 /* ProductDetailView.swift */; };
 		856677DE27A4878100CFEC31 /* CreateSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856677DD27A4878100CFEC31 /* CreateSchema.swift */; };
 		85667BE726ED29EC009E2C02 /* ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85667BE626ED29EC009E2C02 /* ImageViewer.swift */; };
+		85689C702F6584C4003D15E9 /* ManageExercisesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85689C6F2F6584C4003D15E9 /* ManageExercisesView.swift */; };
+		85689C952F65C1A0003D15E9 /* Watch me Grow Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 85689C752F65C19F003D15E9 /* Watch me Grow Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		856AB9FB276D2F8800A94125 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856AB9FA276D2F8800A94125 /* StoreManager.swift */; };
 		856D06F927C91B8A0008C842 /* PickerSearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856D06F827C91B8A0008C842 /* PickerSearchBar.swift */; };
 		8578667F2F62A07500700148 /* DashboardPreviewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8578667E2F62A07500700148 /* DashboardPreviewContainer.swift */; };
@@ -69,6 +71,7 @@
 		8588C33C2681D0FA00535E68 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8588C33B2681D0F900535E68 /* SceneDelegate.swift */; };
 		859B9452268B9A1B003F58F2 /* ExerciseOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 859B9451268B9A1B003F58F2 /* ExerciseOverview.swift */; };
 		859B9454268B9A37003F58F2 /* ExerciseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 859B9453268B9A37003F58F2 /* ExerciseModel.swift */; };
+		85A659A52F68A4C900E44589 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A659A42F68A4C900E44589 /* PaywallView.swift */; };
 		85A68CA5275B702300C1A5AA /* WeightActionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A68CA4275B702300C1A5AA /* WeightActionSheet.swift */; };
 		85A74D882F61A3D900D74F9E /* ModelDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A74D872F61A3D900D74F9E /* ModelDecodingTests.swift */; };
 		85A74D8A2F61A9F900D74F9E /* FirebaseDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A74D892F61A9F900D74F9E /* FirebaseDependencies.swift */; };
@@ -86,6 +89,7 @@
 		85CB7FA026C1C0A700025736 /* StatisticsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CB7F9F26C1C0A700025736 /* StatisticsModel.swift */; };
 		85D21061268F8F32002BA11C /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D21060268F8F32002BA11C /* SearchBar.swift */; };
 		85D210682691EEA0002BA11C /* TrainingDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D210672691EEA0002BA11C /* TrainingDashboard.swift */; };
+		85D4EF0E2F75D01F00A21FA8 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 85D4EF0D2F75D01F00A21FA8 /* FirebaseFunctions */; };
 		85DBDB8F26DC276B00512FF1 /* ChangeIntakeOfProduct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DBDB8E26DC276B00512FF1 /* ChangeIntakeOfProduct.swift */; };
 		85DF0607268C4CA400020559 /* AddExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DF0606268C4CA400020559 /* AddExercise.swift */; };
 		85DF0609268C5ABB00020559 /* ExerciseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */; };
@@ -126,6 +130,27 @@
 			remoteGlobalIDString = 851AFF342673D6D70092DA9B;
 			remoteInfo = Grow;
 		};
+		85689C822F65C1A0003D15E9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 851AFF2D2673D6D70092DA9B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 85689C742F65C19F003D15E9;
+			remoteInfo = "Watch me Grow Watch App";
+		};
+		85689C8C2F65C1A0003D15E9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 851AFF2D2673D6D70092DA9B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 85689C742F65C19F003D15E9;
+			remoteInfo = "Watch me Grow Watch App";
+		};
+		85689C932F65C1A0003D15E9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 851AFF2D2673D6D70092DA9B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 85689C742F65C19F003D15E9;
+			remoteInfo = "Watch me Grow Watch App";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -137,6 +162,15 @@
 				8521A2942685BDFC00400657 /* (null) in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
+		};
+		85689C992F65C1A0003D15E9 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolder = Product;
+			files = (
+				85689C952F65C1A0003D15E9 /* Watch me Grow Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -183,6 +217,10 @@
 		85647EA426D6C4A300835CC8 /* ProductDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailView.swift; sourceTree = "<group>"; };
 		856677DD27A4878100CFEC31 /* CreateSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateSchema.swift; sourceTree = "<group>"; };
 		85667BE626ED29EC009E2C02 /* ImageViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewer.swift; sourceTree = "<group>"; };
+		85689C6F2F6584C4003D15E9 /* ManageExercisesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageExercisesView.swift; sourceTree = "<group>"; };
+		85689C752F65C19F003D15E9 /* Watch me Grow Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch me Grow Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		85689C812F65C1A0003D15E9 /* Watch me Grow Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Watch me Grow Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		85689C8B2F65C1A0003D15E9 /* Watch me Grow Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Watch me Grow Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		856AB9FA276D2F8800A94125 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		856D06F827C91B8A0008C842 /* PickerSearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerSearchBar.swift; sourceTree = "<group>"; };
 		8578667E2F62A07500700148 /* DashboardPreviewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPreviewContainer.swift; sourceTree = "<group>"; };
@@ -209,6 +247,7 @@
 		8588C33B2681D0F900535E68 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		859B9451268B9A1B003F58F2 /* ExerciseOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseOverview.swift; sourceTree = "<group>"; };
 		859B9453268B9A37003F58F2 /* ExerciseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseModel.swift; sourceTree = "<group>"; };
+		85A659A42F68A4C900E44589 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		85A68CA4275B702300C1A5AA /* WeightActionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightActionSheet.swift; sourceTree = "<group>"; };
 		85A74D872F61A3D900D74F9E /* ModelDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDecodingTests.swift; sourceTree = "<group>"; };
 		85A74D892F61A9F900D74F9E /* FirebaseDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseDependencies.swift; sourceTree = "<group>"; };
@@ -245,6 +284,24 @@
 		F08043EE26B0942F002D5C65 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		85689C762F65C19F003D15E9 /* Watch me Grow Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Watch me Grow Watch App";
+			sourceTree = "<group>";
+		};
+		85689C842F65C1A0003D15E9 /* Watch me Grow Watch AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Watch me Grow Watch AppTests";
+			sourceTree = "<group>";
+		};
+		85689C8E2F65C1A0003D15E9 /* Watch me Grow Watch AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Watch me Grow Watch AppUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		851AFF322673D6D70092DA9B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -252,6 +309,7 @@
 				86A100012F70000100000001 /* FirebaseAuth in Frameworks */,
 				86A100022F70000100000001 /* FirebaseCore in Frameworks */,
 				86A100032F70000100000001 /* FirebaseFirestore in Frameworks */,
+				85D4EF0E2F75D01F00A21FA8 /* FirebaseFunctions in Frameworks */,
 				86A100052F70000100000001 /* FirebaseMessaging in Frameworks */,
 				86A100062F70000100000001 /* FirebaseStorage in Frameworks */,
 				86A100072F70000100000001 /* GoogleMobileAds in Frameworks */,
@@ -265,6 +323,21 @@
 			);
 		};
 		851AFF4E2673D6DC0092DA9B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		85689C722F65C19F003D15E9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		85689C7E2F65C1A0003D15E9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		85689C882F65C1A0003D15E9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
 			);
@@ -296,6 +369,9 @@
 				851AFF372673D6D70092DA9B /* Grow */,
 				851AFF492673D6DC0092DA9B /* GrowTests */,
 				851AFF542673D6DC0092DA9B /* GrowUITests */,
+				85689C762F65C19F003D15E9 /* Watch me Grow Watch App */,
+				85689C842F65C1A0003D15E9 /* Watch me Grow Watch AppTests */,
+				85689C8E2F65C1A0003D15E9 /* Watch me Grow Watch AppUITests */,
 				851AFF362673D6D70092DA9B /* Products */,
 				64979F16A846C94D61E978FE /* Frameworks */,
 			);
@@ -307,6 +383,9 @@
 				851AFF352673D6D70092DA9B /* Grow.app */,
 				851AFF462673D6DC0092DA9B /* GrowTests.xctest */,
 				851AFF512673D6DC0092DA9B /* GrowUITests.xctest */,
+				85689C752F65C19F003D15E9 /* Watch me Grow Watch App.app */,
+				85689C812F65C1A0003D15E9 /* Watch me Grow Watch AppTests.xctest */,
+				85689C8B2F65C1A0003D15E9 /* Watch me Grow Watch AppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -481,6 +560,7 @@
 				857866842F62A07600700148 /* DashboardBodyMetricsSection.swift */,
 				857866862F62A07600700148 /* DashboardRootPreview.swift */,
 				857866882F62A07600700148 /* DashboardNutritionSection.swift */,
+				85A659A42F68A4C900E44589 /* PaywallView.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -491,6 +571,7 @@
 				859B9451268B9A1B003F58F2 /* ExerciseOverview.swift */,
 				85DF0608268C5ABB00020559 /* ExerciseDetailView.swift */,
 				85DF0606268C4CA400020559 /* AddExercise.swift */,
+				85689C6F2F6584C4003D15E9 /* ManageExercisesView.swift */,
 			);
 			path = Exercises;
 			sourceTree = "<group>";
@@ -551,8 +632,12 @@
 				851AFF322673D6D70092DA9B /* Frameworks */,
 				851AFF332673D6D70092DA9B /* Resources */,
 				8521A2952685BDFC00400657 /* Embed Frameworks */,
+				85689C992F65C1A0003D15E9 /* Embed Watch Content */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				85689C942F65C1A0003D15E9 /* PBXTargetDependency */,
 			);
 			name = Grow;
 			packageProductDependencies = (
@@ -562,6 +647,7 @@
 				86A100152F70000100000001 /* FirebaseMessaging */,
 				86A100162F70000100000001 /* FirebaseStorage */,
 				86A100172F70000100000001 /* GoogleMobileAds */,
+				85D4EF0D2F75D01F00A21FA8 /* FirebaseFunctions */,
 			);
 			productName = Grow;
 			productReference = 851AFF352673D6D70092DA9B /* Grow.app */;
@@ -603,6 +689,66 @@
 			productReference = 851AFF512673D6DC0092DA9B /* GrowUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		85689C742F65C19F003D15E9 /* Watch me Grow Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85689C962F65C1A0003D15E9 /* Build configuration list for PBXNativeTarget "Watch me Grow Watch App" */;
+			buildPhases = (
+				85689C712F65C19F003D15E9 /* Sources */,
+				85689C722F65C19F003D15E9 /* Frameworks */,
+				85689C732F65C19F003D15E9 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				85689C762F65C19F003D15E9 /* Watch me Grow Watch App */,
+			);
+			name = "Watch me Grow Watch App";
+			productName = "Watch me Grow Watch App";
+			productReference = 85689C752F65C19F003D15E9 /* Watch me Grow Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		85689C802F65C1A0003D15E9 /* Watch me Grow Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85689C9A2F65C1A0003D15E9 /* Build configuration list for PBXNativeTarget "Watch me Grow Watch AppTests" */;
+			buildPhases = (
+				85689C7D2F65C1A0003D15E9 /* Sources */,
+				85689C7E2F65C1A0003D15E9 /* Frameworks */,
+				85689C7F2F65C1A0003D15E9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				85689C832F65C1A0003D15E9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				85689C842F65C1A0003D15E9 /* Watch me Grow Watch AppTests */,
+			);
+			name = "Watch me Grow Watch AppTests";
+			productName = "Watch me Grow Watch AppTests";
+			productReference = 85689C812F65C1A0003D15E9 /* Watch me Grow Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		85689C8A2F65C1A0003D15E9 /* Watch me Grow Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85689C9D2F65C1A0003D15E9 /* Build configuration list for PBXNativeTarget "Watch me Grow Watch AppUITests" */;
+			buildPhases = (
+				85689C872F65C1A0003D15E9 /* Sources */,
+				85689C882F65C1A0003D15E9 /* Frameworks */,
+				85689C892F65C1A0003D15E9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				85689C8D2F65C1A0003D15E9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				85689C8E2F65C1A0003D15E9 /* Watch me Grow Watch AppUITests */,
+			);
+			name = "Watch me Grow Watch AppUITests";
+			productName = "Watch me Grow Watch AppUITests";
+			productReference = 85689C8B2F65C1A0003D15E9 /* Watch me Grow Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -610,8 +756,8 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 2630;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					851AFF342673D6D70092DA9B = {
 						CreatedOnToolsVersion = 12.5;
@@ -623,6 +769,17 @@
 					851AFF502673D6DC0092DA9B = {
 						CreatedOnToolsVersion = 12.5;
 						TestTargetID = 851AFF342673D6D70092DA9B;
+					};
+					85689C742F65C19F003D15E9 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					85689C802F65C1A0003D15E9 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 85689C742F65C19F003D15E9;
+					};
+					85689C8A2F65C1A0003D15E9 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 85689C742F65C19F003D15E9;
 					};
 				};
 			};
@@ -646,6 +803,9 @@
 				851AFF342673D6D70092DA9B /* Grow */,
 				851AFF452673D6DC0092DA9B /* GrowTests */,
 				851AFF502673D6DC0092DA9B /* GrowUITests */,
+				85689C742F65C19F003D15E9 /* Watch me Grow Watch App */,
+				85689C802F65C1A0003D15E9 /* Watch me Grow Watch AppTests */,
+				85689C8A2F65C1A0003D15E9 /* Watch me Grow Watch AppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -666,6 +826,21 @@
 			);
 		};
 		851AFF4F2673D6DC0092DA9B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		85689C732F65C19F003D15E9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		85689C7F2F65C1A0003D15E9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		85689C892F65C1A0003D15E9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -728,6 +903,7 @@
 				85A68CA5275B702300C1A5AA /* WeightActionSheet.swift in Sources */,
 				85C48AE326B0978100BFE48E /* FoodModel.swift in Sources */,
 				85A80F4B27B6582C00248258 /* PreviewBars.swift in Sources */,
+				85A659A52F68A4C900E44589 /* PaywallView.swift in Sources */,
 				859B9454268B9A37003F58F2 /* ExerciseModel.swift in Sources */,
 				85037C16268915D500EC344B /* UserVM.swift in Sources */,
 				F05CBB09277B6F0F00C7E06F /* ChangeExercise.swift in Sources */,
@@ -747,6 +923,7 @@
 				85AEF013275EAEB500647E54 /* FormRowButtonStyle.swift in Sources */,
 				85F6FDCE2693A4E60051B60E /* PushNotificationSender.swift in Sources */,
 				85ED07AC27C29EC000117112 /* LoadingView.swift in Sources */,
+				85689C702F6584C4003D15E9 /* ManageExercisesView.swift in Sources */,
 				850B592D27693DCD008DA670 /* GoogleAdsManager.swift in Sources */,
 				F041551726CE72660044FD22 /* AddProductView.swift in Sources */,
 				850C966526FF691500051772 /* LoadImage.swift in Sources */,
@@ -777,6 +954,21 @@
 				851AFF562673D6DC0092DA9B /* GrowUITests.swift in Sources */,
 			);
 		};
+		85689C712F65C19F003D15E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		85689C7D2F65C1A0003D15E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		85689C872F65C1A0003D15E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -790,6 +982,21 @@
 			target = 851AFF342673D6D70092DA9B /* Grow */;
 			targetProxy = 851AFF522673D6DC0092DA9B /* PBXContainerItemProxy */;
 		};
+		85689C832F65C1A0003D15E9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 85689C742F65C19F003D15E9 /* Watch me Grow Watch App */;
+			targetProxy = 85689C822F65C1A0003D15E9 /* PBXContainerItemProxy */;
+		};
+		85689C8D2F65C1A0003D15E9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 85689C742F65C19F003D15E9 /* Watch me Grow Watch App */;
+			targetProxy = 85689C8C2F65C1A0003D15E9 /* PBXContainerItemProxy */;
+		};
+		85689C942F65C1A0003D15E9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 85689C742F65C19F003D15E9 /* Watch me Grow Watch App */;
+			targetProxy = 85689C932F65C1A0003D15E9 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -797,6 +1004,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -861,6 +1069,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -1107,6 +1316,197 @@
 			};
 			name = Release;
 		};
+		85689C972F65C1A0003D15E9 /* Debug configuration for PBXNativeTarget "Watch me Grow Watch App" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
+				ENABLE_PREVIEWS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Watch me Grow";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.muscle.grow;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.grow.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.6;
+			};
+			name = Debug;
+		};
+		85689C982F65C1A0003D15E9 /* Release configuration for PBXNativeTarget "Watch me Grow Watch App" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
+				ENABLE_PREVIEWS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Watch me Grow";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.muscle.grow;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.muscle.grow.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.6;
+			};
+			name = Release;
+		};
+		85689C9B2F65C1A0003D15E9 /* Debug configuration for PBXNativeTarget "Watch me Grow Watch AppTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.muscle.Watch-me-Grow-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Watch me Grow Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Watch me Grow Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.6;
+			};
+			name = Debug;
+		};
+		85689C9C2F65C1A0003D15E9 /* Release configuration for PBXNativeTarget "Watch me Grow Watch AppTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.muscle.Watch-me-Grow-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Watch me Grow Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Watch me Grow Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.6;
+			};
+			name = Release;
+		};
+		85689C9E2F65C1A0003D15E9 /* Debug configuration for PBXNativeTarget "Watch me Grow Watch AppUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.muscle.Watch-me-Grow-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "Watch me Grow Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.6;
+			};
+			name = Debug;
+		};
+		85689C9F2F65C1A0003D15E9 /* Release configuration for PBXNativeTarget "Watch me Grow Watch AppUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V8EUC3L37P;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.muscle.Watch-me-Grow-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "Watch me Grow Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.6;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1142,6 +1542,30 @@
 			);
 			defaultConfigurationName = Release;
 		};
+		85689C962F65C1A0003D15E9 /* Build configuration list for PBXNativeTarget "Watch me Grow Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85689C972F65C1A0003D15E9 /* Debug configuration for PBXNativeTarget "Watch me Grow Watch App" */,
+				85689C982F65C1A0003D15E9 /* Release configuration for PBXNativeTarget "Watch me Grow Watch App" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		85689C9A2F65C1A0003D15E9 /* Build configuration list for PBXNativeTarget "Watch me Grow Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85689C9B2F65C1A0003D15E9 /* Debug configuration for PBXNativeTarget "Watch me Grow Watch AppTests" */,
+				85689C9C2F65C1A0003D15E9 /* Release configuration for PBXNativeTarget "Watch me Grow Watch AppTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		85689C9D2F65C1A0003D15E9 /* Build configuration list for PBXNativeTarget "Watch me Grow Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85689C9E2F65C1A0003D15E9 /* Debug configuration for PBXNativeTarget "Watch me Grow Watch AppUITests" */,
+				85689C9F2F65C1A0003D15E9 /* Release configuration for PBXNativeTarget "Watch me Grow Watch AppUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -1164,6 +1588,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		85D4EF0D2F75D01F00A21FA8 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
 		86A100112F70000100000001 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 854D3BFD2F60C42C00959A35 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

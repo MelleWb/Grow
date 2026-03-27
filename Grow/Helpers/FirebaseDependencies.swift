@@ -1,6 +1,7 @@
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseFunctions
 import FirebaseStorage
 
 enum StartupDependencyError: Error, Equatable {
@@ -13,6 +14,19 @@ protocol SessionProviding {
 
 protocol UserRepository {
     func fetchUser(uid: String, completion: @escaping (Result<User, Error>) -> Void)
+}
+
+protocol FamilyRepository {
+    @discardableResult
+    func observeFamilyMembers(userID: String, handler: @escaping (Result<[FamilyMember], Error>) -> Void) -> ListenerRegistration?
+    @discardableResult
+    func observeOutgoingFamilyInvites(userID: String, handler: @escaping (Result<[FamilyInvite], Error>) -> Void) -> ListenerRegistration?
+    @discardableResult
+    func observeIncomingFamilyInvites(userID: String, handler: @escaping (Result<[FamilyInvite], Error>) -> Void) -> ListenerRegistration?
+    func sendFamilyInvite(email: String, completion: @escaping (Result<Void, Error>) -> Void)
+    func respondToFamilyInvite(inviteID: String, accept: Bool, completion: @escaping (Result<Void, Error>) -> Void)
+    func cancelFamilyInvite(inviteID: String, completion: @escaping (Result<Void, Error>) -> Void)
+    func removeFamilyMember(otherUserID: String, completion: @escaping (Result<Void, Error>) -> Void)
 }
 
 protocol SchemaRepository {
@@ -54,6 +68,8 @@ protocol FoodDataWriting {
     func deleteProduct(documentID: String, slimProductList: SlimProductList, completion: @escaping (Result<Void, Error>) -> Void)
     func saveDiary(userID: String, diary: FoodDiary, completion: @escaping (Result<Void, Error>) -> Void)
     func saveMeal(_ meal: Meal, completion: @escaping (Result<String, Error>) -> Void)
+    func deleteMeal(documentID: String, completion: @escaping (Result<Void, Error>) -> Void)
+    func shareMealWithFamily(otherUserID: String, sourceDate: Date, meal: Meal, completion: @escaping (Result<Void, Error>) -> Void)
 }
 
 protocol TrainingDataWriting {
@@ -92,6 +108,119 @@ struct FirestoreUserRepository: UserRepository {
                 completion(.failure(error))
             }
         }
+    }
+}
+
+struct FirebaseFamilyRepository: FamilyRepository {
+    private let functions = Functions.functions(region: "europe-west2")
+
+    func observeFamilyMembers(userID: String, handler: @escaping (Result<[FamilyMember], Error>) -> Void) -> ListenerRegistration? {
+        Firestore.firestore()
+            .collection("users")
+            .document(userID)
+            .collection("familyMembers")
+            .addSnapshotListener { snapshot, error in
+                if let error {
+                    handler(.failure(error))
+                    return
+                }
+
+                let members = snapshot?.documents.compactMap { document in
+                    try? document.data(as: FamilyMember.self)
+                } ?? []
+
+                handler(.success(members.sorted { lhs, rhs in
+                    (lhs.linkedAt ?? .distantPast) > (rhs.linkedAt ?? .distantPast)
+                }))
+            }
+    }
+
+    func observeOutgoingFamilyInvites(userID: String, handler: @escaping (Result<[FamilyInvite], Error>) -> Void) -> ListenerRegistration? {
+        Firestore.firestore()
+            .collection("familyInvites")
+            .whereField("fromUserID", isEqualTo: userID)
+            .addSnapshotListener { snapshot, error in
+                handleInviteSnapshot(snapshot: snapshot, error: error, handler: handler)
+            }
+    }
+
+    func observeIncomingFamilyInvites(userID: String, handler: @escaping (Result<[FamilyInvite], Error>) -> Void) -> ListenerRegistration? {
+        Firestore.firestore()
+            .collection("familyInvites")
+            .whereField("toUserID", isEqualTo: userID)
+            .addSnapshotListener { snapshot, error in
+                handleInviteSnapshot(snapshot: snapshot, error: error, handler: handler)
+            }
+    }
+
+    func sendFamilyInvite(email: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        functions.httpsCallable("sendFamilyInvite").call(["email": email]) { _, error in
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    func respondToFamilyInvite(inviteID: String, accept: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
+        functions.httpsCallable("respondToFamilyInvite").call([
+            "inviteId": inviteID,
+            "accept": accept
+        ]) { _, error in
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    func cancelFamilyInvite(inviteID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        functions.httpsCallable("cancelFamilyInvite").call([
+            "inviteId": inviteID
+        ]) { _, error in
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    func removeFamilyMember(otherUserID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        functions.httpsCallable("removeFamilyMember").call([
+            "otherUserId": otherUserID
+        ]) { _, error in
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    private func handleInviteSnapshot(
+        snapshot: QuerySnapshot?,
+        error: Error?,
+        handler: @escaping (Result<[FamilyInvite], Error>) -> Void
+    ) {
+        if let error {
+            handler(.failure(error))
+            return
+        }
+
+        let invites = snapshot?.documents.compactMap { document in
+            try? document.data(as: FamilyInvite.self)
+        } ?? []
+
+        let pendingInvites = invites
+            .filter { $0.status == .pending }
+            .sorted { lhs, rhs in
+                (lhs.createdAt ?? .distantPast) > (rhs.createdAt ?? .distantPast)
+            }
+
+        handler(.success(pendingInvites))
     }
 }
 
@@ -293,6 +422,8 @@ struct FirestoreStatisticsDataLoader: StatisticsDataLoading {
 }
 
 struct FirestoreFoodDataWriter: FoodDataWriting {
+    private let functions = Functions.functions(region: "europe-west2")
+
     func copyMeal(userID: String, date: Date, meal: Meal, completion: @escaping (Result<Void, Error>) -> Void) {
         let docRef = Firestore.firestore().collection("users").document(userID).collection("foodDiary")
         let calendar = Calendar.current
@@ -388,6 +519,176 @@ struct FirestoreFoodDataWriter: FoodDataWriting {
         } catch {
             completion(.failure(error))
         }
+    }
+
+    func deleteMeal(documentID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        Firestore.firestore().collection("meals").document(documentID).delete { error in
+            if let error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    func shareMealWithFamily(otherUserID: String, sourceDate: Date, meal: Meal, completion: @escaping (Result<Void, Error>) -> Void) {
+        do {
+            let payload = try ShareableMealPayload(meal: meal).asDictionary()
+            let isoDate = ISO8601DateFormatter().string(from: sourceDate)
+
+            functions.httpsCallable("shareMealWithFamily").call([
+                "otherUserId": otherUserID,
+                "sourceDate": isoDate,
+                "meal": payload
+            ]) { _, error in
+                if let error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        } catch {
+            completion(.failure(error))
+        }
+    }
+}
+
+private struct ShareableMealPayload: Encodable {
+    let id: String
+    let documentID: String?
+    let userID: String?
+    let name: String?
+    let products: [ShareableProductPayload]?
+    let recipe: ShareableMealRecipePayload?
+    let kcal: Double
+    let carbs: Double
+    let protein: Double
+    let fat: Double
+    let fiber: Double
+
+    init(meal: Meal) {
+        id = meal.id.uuidString
+        documentID = meal.documentID
+        userID = meal.userID
+        name = meal.name
+        products = meal.products?.map(ShareableProductPayload.init)
+        recipe = meal.recipe.map(ShareableMealRecipePayload.init)
+        kcal = meal.kcal
+        carbs = meal.carbs
+        protein = meal.protein
+        fat = meal.fat
+        fiber = meal.fiber
+    }
+
+    func asDictionary() throws -> [String: Any] {
+        let data = try JSONEncoder.shareMealEncoder.encode(self)
+        let object = try JSONSerialization.jsonObject(with: data, options: [])
+        guard let dictionary = object as? [String: Any] else {
+            throw ShareMealEncodingError.invalidPayload
+        }
+        return dictionary
+    }
+}
+
+private struct ShareableMealRecipePayload: Encodable {
+    let sourceURL: String
+    let sourceDomain: String
+    let title: String
+    let imageSourceURL: String?
+    let imageStorageURL: String?
+    let imageStoragePath: String?
+    let sourceYieldText: String?
+    let totalTimeText: String?
+    let ingredients: [String]?
+    let instructions: [String]
+    let importedAt: Date
+
+    init(recipe: MealRecipe) {
+        sourceURL = recipe.sourceURL
+        sourceDomain = recipe.sourceDomain
+        title = recipe.title
+        imageSourceURL = recipe.imageSourceURL
+        imageStorageURL = recipe.imageStorageURL
+        imageStoragePath = recipe.imageStoragePath
+        sourceYieldText = recipe.sourceYieldText
+        totalTimeText = recipe.totalTimeText
+        ingredients = recipe.ingredients
+        instructions = recipe.instructions
+        importedAt = recipe.importedAt
+    }
+}
+
+private struct ShareableProductPayload: Encodable {
+    let id: String
+    let documentID: String?
+    let userID: String?
+    let name: String
+    let kcal: Double
+    let carbs: Double
+    let protein: Double
+    let fat: Double
+    let fiber: Double
+    let unit: String
+    let portions: [ShareableProductPortionPayload]
+    let selectedProductDetails: ShareableSelectedProductDetailsPayload?
+
+    init(product: Product) {
+        id = product.id.uuidString
+        documentID = product.documentID
+        userID = product.userID
+        name = product.name
+        kcal = product.kcal
+        carbs = product.carbs
+        protein = product.protein
+        fat = product.fat
+        fiber = product.fiber
+        unit = product.unit
+        portions = product.portions.map(ShareableProductPortionPayload.init)
+        selectedProductDetails = product.selectedProductDetails.map(ShareableSelectedProductDetailsPayload.init)
+    }
+}
+
+private struct ShareableSelectedProductDetailsPayload: Encodable {
+    let id: String
+    let kcal: Double
+    let carbs: Double
+    let protein: Double
+    let fat: Double
+    let fiber: Double
+    let amount: Int
+
+    init(details: SelectedProductDetails) {
+        id = details.id.uuidString
+        kcal = details.kcal
+        carbs = details.carbs
+        protein = details.protein
+        fat = details.fat
+        fiber = details.fiber
+        amount = details.amount
+    }
+}
+
+private struct ShareableProductPortionPayload: Encodable {
+    let id: String
+    let name: String
+    let amount: Int
+
+    init(portion: ProductPortion) {
+        id = portion.id.uuidString
+        name = portion.name
+        amount = portion.amount
+    }
+}
+
+private enum ShareMealEncodingError: Error {
+    case invalidPayload
+}
+
+private extension JSONEncoder {
+    static var shareMealEncoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
     }
 }
 

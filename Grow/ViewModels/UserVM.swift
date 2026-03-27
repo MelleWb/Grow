@@ -22,10 +22,18 @@ class UserDataModel: ObservableObject{
     @Published var queryRunning: Bool = true
     @Published var workoutDonePercentage: Float = 0.0
     @Published var currentDate: Date = Date()
+    @Published var familyMembers: [FamilyMember] = []
+    @Published var outgoingFamilyInvites: [FamilyInvite] = []
+    @Published var incomingFamilyInvites: [FamilyInvite] = []
+    @Published var familyInviteActionMessage: String?
     var measurementListener: ListenerRegistration? = nil
+    var familyMembersListener: ListenerRegistration? = nil
+    var outgoingFamilyInvitesListener: ListenerRegistration? = nil
+    var incomingFamilyInvitesListener: ListenerRegistration? = nil
     
     private let sessionProvider: SessionProviding
     private let userRepository: UserRepository
+    private let familyRepository: FamilyRepository
     private let schemaRepository: SchemaRepository
     private let storeManager: StoreManaging
     private let runStartupSideEffects: Bool
@@ -41,6 +49,7 @@ class UserDataModel: ObservableObject{
     init(
         sessionProvider: SessionProviding = FirebaseSessionProvider(),
         userRepository: UserRepository = FirestoreUserRepository(),
+        familyRepository: FamilyRepository = FirebaseFamilyRepository(),
         schemaRepository: SchemaRepository = FirestoreSchemaRepository(),
         storeManager: StoreManaging = StoreManager(),
         autostart: Bool = true,
@@ -48,6 +57,7 @@ class UserDataModel: ObservableObject{
     ){
         self.sessionProvider = sessionProvider
         self.userRepository = userRepository
+        self.familyRepository = familyRepository
         self.schemaRepository = schemaRepository
         self.storeManager = storeManager
         self.runStartupSideEffects = runStartupSideEffects
@@ -73,12 +83,20 @@ class UserDataModel: ObservableObject{
         }
     }
 
+    deinit {
+        measurementListener?.remove()
+        familyMembersListener?.remove()
+        outgoingFamilyInvitesListener?.remove()
+        incomingFamilyInvitesListener?.remove()
+    }
+
     
     func fetchUser(uid: String, finished: @escaping () -> Void){
         userRepository.fetchUser(uid: uid) { result in
             switch result {
             case .success(let user):
                 self.user = user
+                self.startFamilyObservers(for: uid)
 
                 guard self.runStartupSideEffects else {
                     self.queryRunning = false
@@ -99,6 +117,122 @@ class UserDataModel: ObservableObject{
                 self.errorMessage = "Error parsing user document: \(error.localizedDescription)"
                 self.queryRunning = false
                 finished()
+            }
+        }
+    }
+
+    private func startFamilyObservers(for userID: String) {
+        familyMembersListener?.remove()
+        outgoingFamilyInvitesListener?.remove()
+        incomingFamilyInvitesListener?.remove()
+
+        familyMembersListener = familyRepository.observeFamilyMembers(userID: userID) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let members):
+                    self.familyMembers = members
+                case .failure(let error):
+                    self.familyInviteActionMessage = error.localizedDescription
+                }
+            }
+        }
+
+        outgoingFamilyInvitesListener = familyRepository.observeOutgoingFamilyInvites(userID: userID) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let invites):
+                    self.outgoingFamilyInvites = invites
+                case .failure(let error):
+                    self.familyInviteActionMessage = error.localizedDescription
+                }
+            }
+        }
+
+        incomingFamilyInvitesListener = familyRepository.observeIncomingFamilyInvites(userID: userID) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let invites):
+                    self.incomingFamilyInvites = invites
+                case .failure(let error):
+                    self.familyInviteActionMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    func sendFamilyInvite(to email: String, completion: @escaping (Bool) -> Void = { _ in }) {
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard normalizedEmail.isEmpty == false else {
+            familyInviteActionMessage = "Vul een e-mailadres in."
+            completion(false)
+            return
+        }
+
+        familyRepository.sendFamilyInvite(email: normalizedEmail) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.familyInviteActionMessage = nil
+                    completion(true)
+                case .failure(let error):
+                    self.familyInviteActionMessage = error.localizedDescription
+                    completion(false)
+                }
+            }
+        }
+    }
+
+    func respondToFamilyInvite(_ invite: FamilyInvite, accept: Bool) {
+        guard let inviteID = invite.id, inviteID.isEmpty == false else {
+            familyInviteActionMessage = "Uitnodiging kon niet worden verwerkt."
+            return
+        }
+
+        familyRepository.respondToFamilyInvite(inviteID: inviteID, accept: accept) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.familyInviteActionMessage = nil
+                case .failure(let error):
+                    self.familyInviteActionMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    func cancelFamilyInvite(_ invite: FamilyInvite) {
+        guard let inviteID = invite.id, inviteID.isEmpty == false else {
+            familyInviteActionMessage = "Uitnodiging kon niet worden geannuleerd."
+            return
+        }
+
+        familyRepository.cancelFamilyInvite(inviteID: inviteID) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.familyInviteActionMessage = nil
+                case .failure(let error):
+                    self.familyInviteActionMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    func removeFamilyMember(_ member: FamilyMember) {
+        guard member.userID.isEmpty == false else {
+            familyInviteActionMessage = "Familielid kon niet worden verwijderd."
+            return
+        }
+
+        familyRepository.removeFamilyMember(otherUserID: member.userID) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.familyInviteActionMessage = nil
+                case .failure(let error):
+                    self.familyInviteActionMessage = error.localizedDescription
+                }
             }
         }
     }

@@ -109,7 +109,7 @@ struct FoodView: View {
                 }
             }
             .navigationDestination(item: $mealToDetail) { meal in
-                MealDetailView(meal: meal)
+                MealDetailView(meal: meal, sourceDate: foodModel.date)
             }
             .navigationBarHidden(enableSheet)
             .navigationBarBackButtonHidden(enableSheet)

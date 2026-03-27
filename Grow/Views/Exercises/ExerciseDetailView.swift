@@ -28,6 +28,29 @@ struct ExerciseDetailView: View {
     @State var exercise: Exercise
     @StateObject private var exerciseStatsModel = StatisticsDataModel(autostart: false, runStartupSideEffects: false)
 
+    private var isRunningExercise: Bool {
+        exercise.category == "Hardlopen" || exercise.category == "Cardio"
+    }
+
+    private var isIntervalExercise: Bool {
+        exercise.category == "Interval"
+    }
+
+    private var isHyroxExercise: Bool {
+        exercise.category == "Hyrox"
+    }
+
+    private var cardioSets: [ExerciseStatistics] {
+        exerciseStatsModel.exerciseStatistics
+            .filter { ($0.durationSeconds ?? 0) > 0 || ($0.distanceKilometers ?? 0) > 0 || ($0.completedIntervals ?? 0) > 0 }
+            .sorted { lhs, rhs in
+                if lhs.date == rhs.date {
+                    return lhs.set < rhs.set
+                }
+                return lhs.date < rhs.date
+            }
+    }
+
     private var completedSets: [ExerciseStatistics] {
         exerciseStatsModel.exerciseStatistics
             .filter { ($0.reps ?? 0) > 0 && ($0.weight ?? 0) > 0 }
@@ -116,49 +139,86 @@ struct ExerciseDetailView: View {
         sessionSummaries.count
     }
 
+    private var totalDistance: Double {
+        cardioSets.reduce(0) { $0 + ($1.distanceKilometers ?? 0) }
+    }
+
+    private var totalDurationSeconds: Int {
+        cardioSets.reduce(0) { $0 + ($1.durationSeconds ?? 0) }
+    }
+
+    private var totalCompletedIntervals: Int {
+        cardioSets.reduce(0) { $0 + ($1.completedIntervals ?? 0) }
+    }
+
+    private var averagePaceInSecondsPerKilometer: Double {
+        guard totalDistance > 0, totalDurationSeconds > 0 else {
+            return 0
+        }
+
+        return Double(totalDurationSeconds) / totalDistance
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                NavigationLink(destination: ExerciseDescription(exercise: exercise)) {
-                    ExerciseInfoCard(exercise: exercise)
+        Group {
+            if exerciseStatsModel.isLoadingExerciseStatistics {
+                VStack {
+                    LoadingView(loadingText: "Statistieken laden")
                 }
-                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        NavigationLink(destination: ExerciseDescription(exercise: exercise)) {
+                            ExerciseInfoCard(exercise: exercise)
+                        }
+                        .buttonStyle(.plain)
 
-                if completedSets.isEmpty {
-                    ExerciseEmptyStateCard()
-                } else {
-                    ExerciseHeroCard(
-                        exerciseName: exercise.name,
-                        personalRecordWeight: personalRecordWeight,
-                        personalRecordReps: personalRecordReps,
-                        estimatedOneRepMax: estimatedOneRepMaxValue,
-                        personalRecordDate: personalRecordDate
-                    )
+                        if completedSets.isEmpty {
+                            if cardioSets.isEmpty {
+                                ExerciseEmptyStateCard()
+                            } else {
+                                cardioStatsContent
+                            }
+                        } else {
+                            if isRunningExercise || isIntervalExercise || isHyroxExercise {
+                                cardioStatsContent
+                            } else {
+                                ExerciseHeroCard(
+                                    exerciseName: exercise.name,
+                                    personalRecordWeight: personalRecordWeight,
+                                    personalRecordReps: personalRecordReps,
+                                    estimatedOneRepMax: estimatedOneRepMaxValue,
+                                    personalRecordDate: personalRecordDate
+                                )
 
-                    HStack(spacing: 12) {
-                        ExerciseStatPill(
-                            title: "Sessies",
-                            value: "\(sessionCount)",
-                            subtitle: "afgerond",
-                            tint: Color.accentColor
-                        )
-                        ExerciseStatPill(
-                            title: "Totaal volume",
-                            value: "\(Int(totalVolume)) kg",
-                            subtitle: "\(totalReps) reps",
-                            tint: Color.orange
-                        )
-                    }
-                    if !exerciseStatsModel.estimatedWeights.isEmpty {
-                        EstimatedWeightsCard(estimatedWeights: exerciseStatsModel.estimatedWeights)
-                    }
+                                HStack(spacing: 12) {
+                                    ExerciseStatPill(
+                                        title: "Sessies",
+                                        value: "\(sessionCount)",
+                                        subtitle: "afgerond",
+                                        tint: Color.accentColor
+                                    )
+                                    ExerciseStatPill(
+                                        title: "Totaal volume",
+                                        value: "\(Int(totalVolume)) kg",
+                                        subtitle: "\(totalReps) reps",
+                                        tint: Color.orange
+                                    )
+                                }
+                                if !exerciseStatsModel.estimatedWeights.isEmpty {
+                                    EstimatedWeightsCard(estimatedWeights: exerciseStatsModel.estimatedWeights)
+                                }
 
-                    if !recentSets.isEmpty {
-                        RecentSetsCard(sets: recentSets)
+                                if !recentSets.isEmpty {
+                                    RecentSetsCard(sets: recentSets)
+                                }
+                            }
+                        }
                     }
+                    .padding(16)
                 }
             }
-            .padding(16)
         }
         .background(ExerciseDetailBackground())
         .navigationTitle(exercise.name)
@@ -178,6 +238,122 @@ struct ExerciseDetailView: View {
             given: stats.reps ?? 1,
             weight: stats.weight ?? 1
         )
+    }
+
+    @ViewBuilder
+    private var cardioStatsContent: some View {
+        if isRunningExercise {
+            CardioHeroCard(
+                title: "Hardloopstatistieken",
+                primaryValue: "\(NumberHelper.roundNumbersMaxTwoDecimals(unit: totalDistance)) km",
+                secondaryValue: formattedDuration(totalDurationSeconds),
+                tertiaryValue: averagePaceInSecondsPerKilometer > 0 ? paceString(from: averagePaceInSecondsPerKilometer) : "Geen tempo"
+            )
+
+            HStack(spacing: 12) {
+                ExerciseStatPill(
+                    title: "Sessies",
+                    value: "\(Set(cardioSets.map { Calendar.current.startOfDay(for: $0.date) }).count)",
+                    subtitle: "afgerond",
+                    tint: Color.accentColor
+                )
+                ExerciseStatPill(
+                    title: "Gemiddeld tempo",
+                    value: averagePaceInSecondsPerKilometer > 0 ? paceString(from: averagePaceInSecondsPerKilometer) : "-",
+                    subtitle: "min/km",
+                    tint: Color.orange
+                )
+            }
+
+            CardioRecentSetsCard(
+                title: "Recente runs",
+                sets: cardioSets,
+                detailText: { stats in
+                    let pace = paceString(durationSeconds: stats.durationSeconds ?? 0, distanceKilometers: stats.distanceKilometers ?? 0)
+                    return "\(NumberHelper.roundNumbersMaxTwoDecimals(unit: stats.distanceKilometers ?? 0)) km • \(formattedDuration(stats.durationSeconds ?? 0)) • \(pace)"
+                }
+            )
+        } else if isIntervalExercise {
+            CardioHeroCard(
+                title: "Intervalstatistieken",
+                primaryValue: "\(totalCompletedIntervals)x",
+                secondaryValue: formattedDuration(totalDurationSeconds),
+                tertiaryValue: "totaal afgewerkt"
+            )
+
+            HStack(spacing: 12) {
+                ExerciseStatPill(
+                    title: "Blokken",
+                    value: "\(cardioSets.count)",
+                    subtitle: "gelogd",
+                    tint: Color.accentColor
+                )
+                ExerciseStatPill(
+                    title: "Intervallen",
+                    value: "\(totalCompletedIntervals)x",
+                    subtitle: "voltooid",
+                    tint: Color.orange
+                )
+            }
+
+            CardioRecentSetsCard(
+                title: "Recente intervalsessies",
+                sets: cardioSets,
+                detailText: { stats in
+                    "\(stats.completedIntervals ?? 0)x • \(formattedDuration(stats.durationSeconds ?? 0))"
+                }
+            )
+        } else if isHyroxExercise {
+            CardioHeroCard(
+                title: "Hyroxstatistieken",
+                primaryValue: formattedDuration(totalDurationSeconds),
+                secondaryValue: "\(cardioSets.count) sets",
+                tertiaryValue: "totale tijd"
+            )
+
+            HStack(spacing: 12) {
+                ExerciseStatPill(
+                    title: "Sessies",
+                    value: "\(Set(cardioSets.map { Calendar.current.startOfDay(for: $0.date) }).count)",
+                    subtitle: "afgerond",
+                    tint: Color.accentColor
+                )
+                ExerciseStatPill(
+                    title: "Gemiddeld",
+                    value: cardioSets.isEmpty ? "-" : formattedDuration(totalDurationSeconds / max(cardioSets.count, 1)),
+                    subtitle: "per set",
+                    tint: Color.orange
+                )
+            }
+
+            CardioRecentSetsCard(
+                title: "Recente Hyrox sets",
+                sets: cardioSets,
+                detailText: { stats in
+                    formattedDuration(stats.durationSeconds ?? 0)
+                }
+            )
+        }
+    }
+
+    private func formattedDuration(_ durationSeconds: Int) -> String {
+        let minutes = durationSeconds / 60
+        let seconds = durationSeconds % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    private func paceString(from paceInSecondsPerKilometer: Double) -> String {
+        let totalSeconds = Int(paceInSecondsPerKilometer.rounded())
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        return "\(minutes):\(String(format: "%02d", seconds))"
+    }
+
+    private func paceString(durationSeconds: Int, distanceKilometers: Double) -> String {
+        guard durationSeconds > 0, distanceKilometers > 0 else {
+            return "Geen tempo"
+        }
+        return "\(paceString(from: Double(durationSeconds) / distanceKilometers)) min/km"
     }
 
 }
@@ -273,6 +449,40 @@ private struct ExerciseHeroCard: View {
                     title: "Laatste PR",
                     value: personalRecordDate.formatted(date: .abbreviated, time: .omitted)
                 )
+            }
+        }
+        .padding(20)
+        .background(
+            LinearGradient(
+                colors: [Color.accentColor, Color.orange],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(color: Color.accentColor.opacity(0.22), radius: 22, x: 0, y: 16)
+    }
+}
+
+private struct CardioHeroCard: View {
+    let title: String
+    let primaryValue: String
+    let secondaryValue: String
+    let tertiaryValue: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.85))
+
+            Text(primaryValue)
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            HStack(spacing: 12) {
+                HeroMetricBadge(title: "Tijd", value: secondaryValue)
+                HeroMetricBadge(title: "Tempo", value: tertiaryValue)
             }
         }
         .padding(20)
@@ -428,6 +638,49 @@ private struct RecentSetsCard: View {
                         .font(.headline)
                         .monospacedDigit()
                         .foregroundStyle(Color.init("blackWhite"))
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color(.secondarySystemBackground))
+                )
+            }
+        }
+        .padding(18)
+        .background(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(Color(.systemBackground))
+        )
+    }
+}
+
+private struct CardioRecentSetsCard: View {
+    let title: String
+    let sets: [ExerciseStatistics]
+    let detailText: (ExerciseStatistics) -> String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(title)
+                .font(.headline)
+
+            ForEach(sets.suffix(5).reversed(), id: \.id) { stats in
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(stats.date.formatted(date: .abbreviated, time: .omitted))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.init("blackWhite"))
+                        Text("Set \(stats.set + 1)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Text(detailText(stats))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Color.init("blackWhite"))
+                        .multilineTextAlignment(.trailing)
                 }
                 .padding(14)
                 .background(

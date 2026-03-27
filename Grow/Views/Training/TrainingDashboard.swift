@@ -29,7 +29,7 @@ struct TrainingDashboardView : View {
                         NavigationLink(destination: TrainingVolumeView()){
                             HStack{
                                 Image(systemName: "chart.bar").foregroundColor(.accentColor)
-                                Text("Trainingsvolume progressie").font(.subheadline)
+                                Text("Trainingsprogressie").font(.subheadline)
                             }
                         }
                         NavigationLink(destination: TrainingHistoryOverview()){

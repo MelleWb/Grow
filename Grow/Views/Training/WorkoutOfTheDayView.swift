@@ -134,7 +134,7 @@ struct ExerciseRow:View{
                 NavigationLink(destination:ExerciseDetailView(exercise: exercise)){
                     VStack(alignment: .leading){
                         Text(exercise.name).font(.headline)
-                        Text("\(String(amountOfSets)) sets van \(String(exercise.reps)) reps").font(.subheadline)
+                        Text(summaryText).font(.subheadline)
                     }.padding(10)
                 }
                 }.swipeActions(edge: .leading, allowsFullSwipe: true) {
@@ -146,22 +146,81 @@ struct ExerciseRow:View{
                     .tint(.indigo)
                 }
         VStack(alignment: .center){
-            HStack{
-                ForEach(0..<amountOfSets, id: \.self) { index in
-                    WeightRow(set: index, exercise: exercise)
-                        .frame(maxWidth: .infinity)
+            if statisticsModel.isRunningExercise(exercise) {
+                HStack{
+                    ForEach(0..<amountOfSets, id: \.self) { index in
+                        DistanceRow(set: index, exercise: exercise)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
-            }
-                
-            HStack{
-                ForEach(0..<amountOfSets, id: \.self) { index in
-                    RepsRow(set: index, exercise: exercise)
-                        .frame(maxWidth: .infinity)
+
+                HStack{
+                    ForEach(0..<amountOfSets, id: \.self) { index in
+                        DurationRow(set: index, exercise: exercise, placeholderLabel: "min")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+            } else if statisticsModel.isIntervalExercise(exercise) {
+                HStack{
+                    ForEach(0..<amountOfSets, id: \.self) { index in
+                        CompletedIntervalsRow(set: index, exercise: exercise)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+
+                HStack{
+                    ForEach(0..<amountOfSets, id: \.self) { index in
+                        DurationRow(set: index, exercise: exercise, placeholderLabel: "sec")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+            } else if statisticsModel.isHyroxExercise(exercise) {
+                HStack{
+                    ForEach(0..<amountOfSets, id: \.self) { index in
+                        DurationRow(set: index, exercise: exercise, placeholderLabel: "min")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+            } else {
+                HStack{
+                    ForEach(0..<amountOfSets, id: \.self) { index in
+                        WeightRow(set: index, exercise: exercise)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+
+                HStack{
+                    ForEach(0..<amountOfSets, id: \.self) { index in
+                        RepsRow(set: index, exercise: exercise)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
             }
         }.onTapGesture {
             hideKeyboard()
         }
+    }
+
+    private var summaryText: String {
+        if statisticsModel.isRunningExercise(exercise) {
+            let distanceText = exercise.distanceKilometers > 0 ? "\(NumberHelper.roundNumbersMaxTwoDecimals(unit: exercise.distanceKilometers)) km" : "afstand open"
+            let timeText = exercise.durationMinutes > 0 ? "\(exercise.durationMinutes) min" : "tijd open"
+            return "\(amountOfSets)x \(distanceText) • \(timeText)"
+        }
+
+        if statisticsModel.isIntervalExercise(exercise) {
+            let intervalsText = exercise.intervalCount > 0 ? "\(exercise.intervalCount)x" : "interval open"
+            let workText = exercise.workSeconds > 0 ? "\(exercise.workSeconds)s snel" : "snel open"
+            let restText = exercise.restSeconds > 0 ? "\(exercise.restSeconds)s rust" : "rust open"
+            return "\(amountOfSets)x \(intervalsText) • \(workText) • \(restText)"
+        }
+
+        if statisticsModel.isHyroxExercise(exercise) {
+            let timeText = exercise.durationMinutes > 0 ? "\(exercise.durationMinutes) min" : "tijd open"
+            return "\(amountOfSets)x \(timeText)"
+        }
+
+        return "\(String(amountOfSets)) sets van \(String(exercise.reps)) reps"
     }
 }
 
@@ -253,6 +312,128 @@ struct WeightRow:View{
             }
 
         })
+    }
+}
+
+struct DistanceRow: View {
+    @State var set: Int
+    @State var exercise: Exercise
+    @State var placeholder: String = "km"
+    @State var distanceInput: String = ""
+    @EnvironmentObject var statisticsModel: StatisticsDataModel
+
+    var body: some View {
+        VStack {
+            TextField(placeholder, text: $distanceInput, onEditingChanged: { _ in
+                if let value = NumberFormatter().number(from: distanceInput) {
+                    self.statisticsModel.createUpdateDistance(for: exercise, for: set, with: value.doubleValue)
+                }
+            })
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(maxWidth: .infinity, minHeight: 40)
+            .multilineTextAlignment(.center)
+            .keyboardType(.decimalPad)
+        }
+        .onAppear {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.maximumFractionDigits = 2
+
+            if self.statisticsModel.getDistanceForSet(for: exercise, for: set) != 0 {
+                let number = NSNumber(value: self.statisticsModel.getDistanceForSet(for: exercise, for: set))
+                self.distanceInput = formatter.string(from: number) ?? ""
+            }
+
+            if self.statisticsModel.getDistancePlaceholder(for: exercise, for: set) != 0 {
+                let number = NSNumber(value: self.statisticsModel.getDistancePlaceholder(for: exercise, for: set))
+                self.placeholder = formatter.string(from: number) ?? "km"
+            } else if exercise.distanceKilometers > 0 {
+                let number = NSNumber(value: exercise.distanceKilometers)
+                self.placeholder = formatter.string(from: number) ?? "km"
+            }
+        }
+    }
+}
+
+struct DurationRow: View {
+    @State var set: Int
+    @State var exercise: Exercise
+    let placeholderLabel: String
+    @State var placeholder: String = ""
+    @State var durationInput: String = ""
+    @EnvironmentObject var statisticsModel: StatisticsDataModel
+
+    var body: some View {
+        VStack {
+            TextField(placeholder, text: $durationInput, onEditingChanged: { _ in
+                if let value = NumberFormatter().number(from: durationInput) {
+                    let rawValue = value.intValue
+                    let durationSeconds = placeholderLabel == "min" ? rawValue * 60 : rawValue
+                    self.statisticsModel.createUpdateDuration(for: exercise, for: set, with: durationSeconds)
+                }
+            })
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(maxWidth: .infinity, minHeight: 40)
+            .multilineTextAlignment(.center)
+            .keyboardType(.numberPad)
+        }
+        .onAppear {
+            let currentDuration = self.statisticsModel.getDurationForSet(for: exercise, for: set)
+            if currentDuration != 0 {
+                self.durationInput = displayValue(for: currentDuration)
+            }
+
+            let placeholderDuration = self.statisticsModel.getDurationPlaceholder(for: exercise, for: set)
+            if placeholderDuration != 0 {
+                self.placeholder = displayValue(for: placeholderDuration)
+            } else if exercise.durationMinutes > 0 && placeholderLabel == "min" {
+                self.placeholder = String(exercise.durationMinutes)
+            } else if exercise.workSeconds > 0 && exercise.restSeconds > 0 && placeholderLabel == "sec" {
+                self.placeholder = String((exercise.workSeconds + exercise.restSeconds) * max(exercise.intervalCount, 1))
+            } else {
+                self.placeholder = placeholderLabel
+            }
+        }
+    }
+
+    private func displayValue(for durationSeconds: Int) -> String {
+        if placeholderLabel == "min" {
+            return String(durationSeconds / 60)
+        }
+        return String(durationSeconds)
+    }
+}
+
+struct CompletedIntervalsRow: View {
+    @State var set: Int
+    @State var exercise: Exercise
+    @State var placeholder: String = "x"
+    @State var intervalsInput: String = ""
+    @EnvironmentObject var statisticsModel: StatisticsDataModel
+
+    var body: some View {
+        VStack {
+            TextField(placeholder, text: $intervalsInput, onEditingChanged: { _ in
+                if let value = NumberFormatter().number(from: intervalsInput) {
+                    self.statisticsModel.createUpdateCompletedIntervals(for: exercise, for: set, with: value.intValue)
+                }
+            })
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(maxWidth: .infinity, minHeight: 40)
+            .multilineTextAlignment(.center)
+            .keyboardType(.numberPad)
+        }
+        .onAppear {
+            if self.statisticsModel.getCompletedIntervalsForSet(for: exercise, for: set) != 0 {
+                self.intervalsInput = String(self.statisticsModel.getCompletedIntervalsForSet(for: exercise, for: set))
+            }
+
+            if self.statisticsModel.getCompletedIntervalsPlaceholder(for: exercise, for: set) != 0 {
+                self.placeholder = String(self.statisticsModel.getCompletedIntervalsPlaceholder(for: exercise, for: set))
+            } else if exercise.intervalCount > 0 {
+                self.placeholder = String(exercise.intervalCount)
+            }
+        }
     }
 }
 

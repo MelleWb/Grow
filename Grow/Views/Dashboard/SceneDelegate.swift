@@ -8,8 +8,11 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import UIKit
 
 struct SceneDelegate: View {
+    @AppStorage("shouldShowRegistrationPaywall") private var shouldShowRegistrationPaywall = false
+    @Environment(\.scenePhase) private var scenePhase
 
     enum RootDestination: Equatable {
         case loading
@@ -79,6 +82,16 @@ struct SceneDelegate: View {
         .environmentObject(trainingModel)
         .environmentObject(statisticsModel)
         .environmentObject(foodModel)
+        .fullScreenCover(isPresented: $shouldShowRegistrationPaywall) {
+            RegistrationPaywallScreen {
+                shouldShowRegistrationPaywall = false
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                PushNotificationManager.shared.refreshAuthorizationStatus()
+            }
+        }
     }
 
     @MainActor
@@ -103,6 +116,9 @@ struct SceneDelegate: View {
 
             try await ensureFirestoreUserDocumentExists(uid: user.uid)
             try await fetchCurrentUser(uid: user.uid)
+
+            PushNotificationManager.shared.configure(for: user.uid)
+            PushNotificationManager.shared.registerForPushNotifications()
 
             if userModel.user.hasRequiredProfileData {
                 foodModel.initiateFoodModel()
@@ -141,6 +157,10 @@ struct SceneDelegate: View {
     @MainActor
     private func signOutCurrentUser() {
         do {
+            if let currentUserID = Auth.auth().currentUser?.uid {
+                PushNotificationManager.shared.removeCurrentDeviceToken(for: currentUserID)
+            }
+            UIApplication.shared.unregisterForRemoteNotifications()
             try Auth.auth().signOut()
             viewToDisplay = .login
         } catch {
@@ -192,7 +212,7 @@ struct SceneDelegate: View {
         }
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            db.collection("users").document(uid).setData([:]) { error in
+            db.collection("users").document(uid).setData([:], merge: true) { error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {

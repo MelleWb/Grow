@@ -124,6 +124,7 @@ private final class FoodDataWriterSpy: FoodDataWriting {
     var deletedProducts = [(documentID: String, slimProductList: SlimProductList)]()
     var savedDiaries = [(userID: String, diary: FoodDiary)]()
     var savedMeals = [Meal]()
+    var deletedMealDocumentIDs = [String]()
 
     func copyMeal(userID: String, date: Date, meal: Meal, completion: @escaping (Result<Void, Error>) -> Void) {
         copiedMeals.append((userID, date, meal))
@@ -148,6 +149,11 @@ private final class FoodDataWriterSpy: FoodDataWriting {
     func saveMeal(_ meal: Meal, completion: @escaping (Result<String, Error>) -> Void) {
         savedMeals.append(meal)
         completion(.success(meal.documentID ?? "saved-meal-\(savedMeals.count)"))
+    }
+
+    func deleteMeal(documentID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        deletedMealDocumentIDs.append(documentID)
+        completion(.success(()))
     }
 }
 
@@ -263,12 +269,18 @@ struct StartupIsolationTests {
         _ = model.createProduct(product: Product(name: "Chicken"))
         model.copyMeal(meal: Meal(name: "Lunch"))
         model.saveDiary()
-        _ = model.saveMeal(for: Meal(name: "Dinner"))
+        var didSaveMeal = false
+        model.saveMeal(for: Meal(name: "Dinner")) { result in
+            if case .success = result {
+                didSaveMeal = true
+            }
+        }
 
         #expect(writer.savedProducts.count == 1)
         #expect(writer.copiedMeals.count == 1)
         #expect(writer.savedDiaries.count == 1)
         #expect(writer.savedMeals.count == 1)
+        #expect(didSaveMeal)
     }
 
     @Test

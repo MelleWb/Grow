@@ -7,8 +7,10 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 struct Register: View {
+    @AppStorage("shouldShowRegistrationPaywall") private var shouldShowRegistrationPaywall = false
 
     enum FocusFields {
         case email, password, confirmPassword
@@ -56,13 +58,32 @@ struct Register: View {
             }
 
             authResult?.user.sendEmailVerification { verificationError in
-                isSubmitting = false
-
                 if let verificationError {
+                    isSubmitting = false
                     alertText = verificationError.localizedDescription
                     showAlert = true
-                } else {
-                    dismiss()
+                    return
+                }
+
+                guard let uid = authResult?.user.uid else {
+                    isSubmitting = false
+                    alertText = "Gebruiker kon niet worden aangemaakt."
+                    showAlert = true
+                    return
+                }
+
+                Firestore.firestore().collection("users").document(uid).setData([
+                    "role": UserRole.member.rawValue
+                ], merge: true) { firestoreError in
+                    isSubmitting = false
+
+                    if let firestoreError {
+                        alertText = firestoreError.localizedDescription
+                        showAlert = true
+                    } else {
+                        shouldShowRegistrationPaywall = true
+                        dismiss()
+                    }
                 }
             }
         }

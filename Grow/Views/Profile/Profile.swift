@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import UserNotifications
 
 struct Profile: View {
     
@@ -14,8 +15,12 @@ struct Profile: View {
     @EnvironmentObject var foodModel: FoodDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
+    @StateObject private var pushNotificationManager = PushNotificationManager.shared
+    @Environment(\.scenePhase) private var scenePhase
     
     @State var showAlert: Bool = false
+    @State private var familyInviteEmail = ""
+    @State private var showFamilyInviteSheet = false
     var showsLogout: Bool = true
     var onProfileSaved: (() -> Void)? = nil
     
@@ -165,6 +170,13 @@ struct Profile: View {
                                 .keyboardType(.numberPad)
                                 .frame(maxWidth: 80)
                         }
+
+                        HStack {
+                            Text("Rol")
+                            Spacer()
+                            Text(userModel.user.role?.displayName ?? "Onbekend")
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     Section("Plan"){
                         
@@ -244,6 +256,129 @@ struct Profile: View {
                             }
                         }
                     }
+                    Section {
+                        Button {
+                            showFamilyInviteSheet = true
+                        } label: {
+                            Label("Familielid toevoegen", systemImage: "plus")
+                        }
+                        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+
+                        if let familyInviteActionMessage = userModel.familyInviteActionMessage,
+                           familyInviteActionMessage.isEmpty == false {
+                            Text(familyInviteActionMessage)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        if userModel.familyMembers.isEmpty == false {
+                            Text("Actieve familieleden")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+
+                            ForEach(userModel.familyMembers, id: \.stableIdentifier) { member in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(member.resolvedDisplayName)
+                                    Text(member.status.displayName)
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        userModel.removeFamilyMember(member)
+                                    } label: {
+                                        Label("Verwijder", systemImage: "trash")
+                                    }
+                                }
+                            }
+                        }
+
+                        if userModel.outgoingFamilyInvites.isEmpty == false {
+                            Text("Uitnodigingen verzonden")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+
+                            ForEach(userModel.outgoingFamilyInvites, id: \.stableIdentifier) { invite in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(invite.toEmail ?? invite.displayName)
+                                    Text(invite.status.displayName)
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        userModel.cancelFamilyInvite(invite)
+                                    } label: {
+                                        Label("Verwijder", systemImage: "trash")
+                                    }
+                                }
+                            }
+                        }
+
+                        if userModel.incomingFamilyInvites.isEmpty == false {
+                            Text("Uitnodigingen ontvangen")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+
+                            ForEach(userModel.incomingFamilyInvites, id: \.stableIdentifier) { invite in
+                                HStack(spacing: 12) {
+                                    Text(invite.fromDisplayName ?? invite.fromEmail ?? "Onbekend")
+                                        .lineLimit(1)
+
+                                    Spacer()
+
+                                    Button {
+                                        userModel.respondToFamilyInvite(invite, accept: true)
+                                    } label: {
+                                        Image(systemName: "checkmark")
+                                    }
+                                    .buttonStyle(.borderless)
+                                    .foregroundStyle(.green)
+
+                                    Button {
+                                        userModel.respondToFamilyInvite(invite, accept: false)
+                                    } label: {
+                                        Image(systemName: "xmark")
+                                    }
+                                    .buttonStyle(.borderless)
+                                    .foregroundStyle(.red)
+                                }
+                            }
+                        }
+
+                        if userModel.familyMembers.isEmpty &&
+                            userModel.outgoingFamilyInvites.isEmpty &&
+                            userModel.incomingFamilyInvites.isEmpty {
+                            Text("Nog geen familieleden of openstaande uitnodigingen.")
+                                .foregroundStyle(.secondary)
+                        }
+                    } header: {
+                        Text("Familie")
+                    } footer: {
+                        Text("Voeg een familielid toe via het e-mailadres waarmee die persoon inlogt.")
+                    }
+                    Section {
+                        HStack {
+                            Text("Push notificaties")
+                            Spacer()
+                            Text(pushNotificationManager.authorizationStatusDisplayName)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Button("Open notificatie-instellingen") {
+                            pushNotificationManager.openNotificationSettings()
+                        }
+
+                        if pushNotificationManager.authorizationStatus == .notDetermined {
+                            Button("Sta notificaties toe") {
+                                pushNotificationManager.registerForPushNotifications()
+                            }
+                        }
+                    } header: {
+                        Text("Notificaties")
+                    } footer: {
+                        Text("Notificaties zet je aan of uit in de iOS-instellingen van Grow.")
+                    }
                 }
             }
             .navigationTitle(Text("Profiel"))
@@ -266,6 +401,65 @@ struct Profile: View {
                 if trainingModel.fetchedSchemas.isEmpty {
                     trainingModel.fetchData()
                 }
+                pushNotificationManager.refreshAuthorizationStatus()
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    pushNotificationManager.refreshAuthorizationStatus()
+                }
+            }
+            .sheet(isPresented: $showFamilyInviteSheet) {
+                NavigationStack {
+                    FamilyInviteSheet(
+                        email: $familyInviteEmail,
+                        onInvite: {
+                            userModel.sendFamilyInvite(to: familyInviteEmail) { success in
+                                if success {
+                                    familyInviteEmail = ""
+                                    showFamilyInviteSheet = false
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+private struct FamilyInviteSheet: View {
+    @Binding var email: String
+    let onInvite: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("", text: $email)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .keyboardType(.emailAddress)
+            } header: {
+                Text("E-mailadres")
+            } footer: {
+                Text("Gebruik het e-mailadres waarmee het familielid inlogt in Grow.")
+            }
+        }
+        .navigationTitle("Familielid toevoegen")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Annuleer") {
+                    dismiss()
+                }
+            }
+
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Verstuur") {
+                    onInvite()
+                }
+                .disabled(email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
     }

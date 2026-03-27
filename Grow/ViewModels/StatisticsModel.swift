@@ -31,6 +31,7 @@ class StatisticsDataModel: ObservableObject {
     @Published var estimatedWeights = [EstimatedWeights()]
     @Published var trainingStatistics = TrainingStatistics()
     @Published var trainingHistory = [TrainingStatistics()]
+    @Published var isLoadingExerciseStatistics = false
     
     var trainingHistoryListener: ListenerRegistration? = nil
     var trainingStatsListener: ListenerRegistration? = nil
@@ -118,6 +119,23 @@ class StatisticsDataModel: ObservableObject {
         
     }
 
+    func isRunningExercise(_ exercise: Exercise) -> Bool {
+        let category = exercise.category.trimmingCharacters(in: .whitespacesAndNewlines)
+        return category.caseInsensitiveCompare("Hardlopen") == .orderedSame || category.caseInsensitiveCompare("Cardio") == .orderedSame
+    }
+
+    func isIntervalExercise(_ exercise: Exercise) -> Bool {
+        exercise.category.trimmingCharacters(in: .whitespacesAndNewlines).caseInsensitiveCompare("Interval") == .orderedSame
+    }
+
+    func isHyroxExercise(_ exercise: Exercise) -> Bool {
+        exercise.category.trimmingCharacters(in: .whitespacesAndNewlines).caseInsensitiveCompare("Hyrox") == .orderedSame
+    }
+
+    func isCardioExercise(_ exercise: Exercise) -> Bool {
+        isRunningExercise(exercise) || isIntervalExercise(exercise) || isHyroxExercise(exercise)
+    }
+
     func getEstimatedWeightForReps(oneRepMax:Double, reps:Int) -> Double{
         
         let percentage:Double = self.getPercentageForReps(reps: reps)
@@ -169,10 +187,13 @@ class StatisticsDataModel: ObservableObject {
 
     
     func fetchStatsForExercise(for exerciseName: String){
+        isLoadingExerciseStatistics = true
+
         guard let userID = sessionProvider.currentUserID else {
             self.exerciseStatistics = []
             self.maxWeight = ExerciseStatistics()
             self.estimatedWeights = []
+            self.isLoadingExerciseStatistics = false
             return
         }
 
@@ -190,6 +211,7 @@ class StatisticsDataModel: ObservableObject {
                     self.exerciseStatistics = []
                     self.maxWeight = ExerciseStatistics()
                     self.estimatedWeights = []
+                    self.isLoadingExerciseStatistics = false
                     return
                 }
 
@@ -214,6 +236,7 @@ class StatisticsDataModel: ObservableObject {
                 }
 
                 self.updateExerciseInsights()
+                self.isLoadingExerciseStatistics = false
             }
     }
 
@@ -263,12 +286,39 @@ class StatisticsDataModel: ObservableObject {
         }
         return value
     }
+
+    func getDurationPlaceholder(for exercise: Exercise, for set: Int) -> Int {
+        var value: Int = 0
+
+        if let exerciseID = self.trainingStatistics.exerciceStatistics?.firstIndex(where: { $0.exerciseName == exercise.name && $0.set == set }) {
+            value = self.trainingStatistics.exerciceStatistics?[exerciseID].durationSeconds ?? 0
+        }
+        return value
+    }
     
     func getWeightPlaceholder(for exercise: Exercise, for set:Int) -> Double{
         var value: Double = 0
         
         if let exerciseID = self.trainingStatistics.exerciceStatistics?.firstIndex(where: {$0.exerciseName == exercise.name && $0.set == set}){
             value = self.trainingStatistics.exerciceStatistics![exerciseID].weight ?? 0
+        }
+        return value
+    }
+
+    func getDistancePlaceholder(for exercise: Exercise, for set: Int) -> Double {
+        var value: Double = 0
+
+        if let exerciseID = self.trainingStatistics.exerciceStatistics?.firstIndex(where: { $0.exerciseName == exercise.name && $0.set == set }) {
+            value = self.trainingStatistics.exerciceStatistics?[exerciseID].distanceKilometers ?? 0
+        }
+        return value
+    }
+
+    func getCompletedIntervalsPlaceholder(for exercise: Exercise, for set: Int) -> Int {
+        var value: Int = 0
+
+        if let exerciseID = self.trainingStatistics.exerciceStatistics?.firstIndex(where: { $0.exerciseName == exercise.name && $0.set == set }) {
+            value = self.trainingStatistics.exerciceStatistics?[exerciseID].completedIntervals ?? 0
         }
         return value
     }
@@ -471,6 +521,27 @@ class StatisticsDataModel: ObservableObject {
         }
         return 0
     }
+
+    func getDurationForSet(for exercise: Exercise, for set: Int) -> Int {
+        if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID == exercise.id && $0.set == set }) {
+            return self.exerciseStatistics[index].durationSeconds ?? 0
+        }
+        return 0
+    }
+
+    func getDistanceForSet(for exercise: Exercise, for set: Int) -> Double {
+        if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID == exercise.id && $0.set == set }) {
+            return self.exerciseStatistics[index].distanceKilometers ?? 0
+        }
+        return 0
+    }
+
+    func getCompletedIntervalsForSet(for exercise: Exercise, for set: Int) -> Int {
+        if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID == exercise.id && $0.set == set }) {
+            return self.exerciseStatistics[index].completedIntervals ?? 0
+        }
+        return 0
+    }
     
     func createUpdateReps(for exercise: Exercise, for set: Int, with reps: Int) {
         //check if self.exerciseStatistics is empty
@@ -504,6 +575,162 @@ class StatisticsDataModel: ObservableObject {
                 //Initialize the stat
                 self.exerciseStatistics.append(ExerciseStatistics(id: UUID(), documentID: nil, exerciseID: exercise.id, exerciseName: exercise.name, date: Date(), set: set, reps: 0, weight: weight))
             }
+        }
+    }
+
+    func createUpdateDuration(for exercise: Exercise, for set: Int, with durationSeconds: Int) {
+        if self.exerciseStatistics.isEmpty {
+            self.exerciseStatistics = [
+                ExerciseStatistics(
+                    id: UUID(),
+                    documentID: nil,
+                    exerciseID: exercise.id,
+                    exerciseName: exercise.name,
+                    date: Date(),
+                    set: set,
+                    reps: 0,
+                    weight: 0,
+                    durationSeconds: durationSeconds,
+                    distanceKilometers: 0,
+                    completedIntervals: 0
+                )
+            ]
+        } else if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID == exercise.id && $0.set == set }) {
+            let current = self.exerciseStatistics[index]
+            self.exerciseStatistics[index] = ExerciseStatistics(
+                id: UUID(),
+                documentID: nil,
+                exerciseID: exercise.id,
+                exerciseName: exercise.name,
+                date: Date(),
+                set: set,
+                reps: current.reps ?? 0,
+                weight: current.weight ?? 0,
+                estimatedOneRepMax: current.estimatedOneRepMax,
+                durationSeconds: durationSeconds,
+                distanceKilometers: current.distanceKilometers ?? 0,
+                completedIntervals: current.completedIntervals ?? 0
+            )
+        } else {
+            self.exerciseStatistics.append(
+                ExerciseStatistics(
+                    id: UUID(),
+                    documentID: nil,
+                    exerciseID: exercise.id,
+                    exerciseName: exercise.name,
+                    date: Date(),
+                    set: set,
+                    reps: 0,
+                    weight: 0,
+                    durationSeconds: durationSeconds,
+                    distanceKilometers: 0,
+                    completedIntervals: 0
+                )
+            )
+        }
+    }
+
+    func createUpdateDistance(for exercise: Exercise, for set: Int, with distanceKilometers: Double) {
+        if self.exerciseStatistics.isEmpty {
+            self.exerciseStatistics = [
+                ExerciseStatistics(
+                    id: UUID(),
+                    documentID: nil,
+                    exerciseID: exercise.id,
+                    exerciseName: exercise.name,
+                    date: Date(),
+                    set: set,
+                    reps: 0,
+                    weight: 0,
+                    durationSeconds: 0,
+                    distanceKilometers: distanceKilometers,
+                    completedIntervals: 0
+                )
+            ]
+        } else if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID == exercise.id && $0.set == set }) {
+            let current = self.exerciseStatistics[index]
+            self.exerciseStatistics[index] = ExerciseStatistics(
+                id: UUID(),
+                documentID: nil,
+                exerciseID: exercise.id,
+                exerciseName: exercise.name,
+                date: Date(),
+                set: set,
+                reps: current.reps ?? 0,
+                weight: current.weight ?? 0,
+                estimatedOneRepMax: current.estimatedOneRepMax,
+                durationSeconds: current.durationSeconds ?? 0,
+                distanceKilometers: distanceKilometers,
+                completedIntervals: current.completedIntervals ?? 0
+            )
+        } else {
+            self.exerciseStatistics.append(
+                ExerciseStatistics(
+                    id: UUID(),
+                    documentID: nil,
+                    exerciseID: exercise.id,
+                    exerciseName: exercise.name,
+                    date: Date(),
+                    set: set,
+                    reps: 0,
+                    weight: 0,
+                    durationSeconds: 0,
+                    distanceKilometers: distanceKilometers,
+                    completedIntervals: 0
+                )
+            )
+        }
+    }
+
+    func createUpdateCompletedIntervals(for exercise: Exercise, for set: Int, with completedIntervals: Int) {
+        if self.exerciseStatistics.isEmpty {
+            self.exerciseStatistics = [
+                ExerciseStatistics(
+                    id: UUID(),
+                    documentID: nil,
+                    exerciseID: exercise.id,
+                    exerciseName: exercise.name,
+                    date: Date(),
+                    set: set,
+                    reps: 0,
+                    weight: 0,
+                    durationSeconds: 0,
+                    distanceKilometers: 0,
+                    completedIntervals: completedIntervals
+                )
+            ]
+        } else if let index = self.exerciseStatistics.firstIndex(where: { $0.exerciseID == exercise.id && $0.set == set }) {
+            let current = self.exerciseStatistics[index]
+            self.exerciseStatistics[index] = ExerciseStatistics(
+                id: UUID(),
+                documentID: nil,
+                exerciseID: exercise.id,
+                exerciseName: exercise.name,
+                date: Date(),
+                set: set,
+                reps: current.reps ?? 0,
+                weight: current.weight ?? 0,
+                estimatedOneRepMax: current.estimatedOneRepMax,
+                durationSeconds: current.durationSeconds ?? 0,
+                distanceKilometers: current.distanceKilometers ?? 0,
+                completedIntervals: completedIntervals
+            )
+        } else {
+            self.exerciseStatistics.append(
+                ExerciseStatistics(
+                    id: UUID(),
+                    documentID: nil,
+                    exerciseID: exercise.id,
+                    exerciseName: exercise.name,
+                    date: Date(),
+                    set: set,
+                    reps: 0,
+                    weight: 0,
+                    durationSeconds: 0,
+                    distanceKilometers: 0,
+                    completedIntervals: completedIntervals
+                )
+            )
         }
     }
 }
@@ -545,8 +772,11 @@ struct ExerciseStatistics : Codable, Identifiable, Hashable {
     var reps: Int?
     var weight: Double?
     var estimatedOneRepMax: Double?
+    var durationSeconds: Int?
+    var distanceKilometers: Double?
+    var completedIntervals: Int?
     
-    init(id: UUID = UUID(), documentID: String? = nil, exerciseID: UUID = UUID(), exerciseName:String = "", date:Date = DateHelper.from(year: 1970, month: 1, day: 1),set:Int = 0, reps:Int? = 0, weight:Double? = 0, estimatedOneRepMax:Double? = 0 ){
+    init(id: UUID = UUID(), documentID: String? = nil, exerciseID: UUID = UUID(), exerciseName:String = "", date:Date = DateHelper.from(year: 1970, month: 1, day: 1),set:Int = 0, reps:Int? = 0, weight:Double? = 0, estimatedOneRepMax:Double? = 0, durationSeconds: Int? = 0, distanceKilometers: Double? = 0, completedIntervals: Int? = 0 ){
         self.id = id
         self.documentID = documentID
         self.exerciseID = exerciseID
@@ -556,6 +786,9 @@ struct ExerciseStatistics : Codable, Identifiable, Hashable {
         self.reps = reps
         self.weight = weight
         self.estimatedOneRepMax = estimatedOneRepMax
+        self.durationSeconds = durationSeconds
+        self.distanceKilometers = distanceKilometers
+        self.completedIntervals = completedIntervals
     }
     
     enum CodingKeys: String, CodingKey {
@@ -567,6 +800,9 @@ struct ExerciseStatistics : Codable, Identifiable, Hashable {
         case reps
         case weight
         case estimatedOneRepMax
+        case durationSeconds
+        case distanceKilometers
+        case completedIntervals
     }
     
     init(from decoder: Decoder) throws {
@@ -581,6 +817,9 @@ struct ExerciseStatistics : Codable, Identifiable, Hashable {
         self.reps = try container.decodeIfPresent(Int.self, forKey: .reps)
         self.weight = try container.decodeIfPresent(Double.self, forKey: .weight)
         self.estimatedOneRepMax = try container.decodeIfPresent(Double.self, forKey: .estimatedOneRepMax)
+        self.durationSeconds = try container.decodeIfPresent(Int.self, forKey: .durationSeconds)
+        self.distanceKilometers = try container.decodeIfPresent(Double.self, forKey: .distanceKilometers)
+        self.completedIntervals = try container.decodeIfPresent(Int.self, forKey: .completedIntervals)
     }
 }
 

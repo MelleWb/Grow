@@ -25,6 +25,7 @@ private extension KeyedDecodingContainer {
 
 struct User: Codable {
     @DocumentID var id: String?
+    var role: UserRole?
     var firstName: String?
     var lastName: String?
     var dateOfBirth: Date?
@@ -51,6 +52,10 @@ struct User: Codable {
 }
 
 extension User {
+    var isAdmin: Bool {
+        role == .admin
+    }
+
     var hasRequiredProfileData: Bool {
         let hasFirstName = firstName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
         let hasLastName = lastName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
@@ -61,6 +66,90 @@ extension User {
         let hasSchema = schema?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
 
         return hasFirstName && hasLastName && hasWeight && hasHeight && hasPlan && hasPal && hasSchema
+    }
+}
+
+enum UserRole: String, Codable {
+    case admin
+    case member
+
+    var displayName: String {
+        switch self {
+        case .admin:
+            return "Admin"
+        case .member:
+            return "Member"
+        }
+    }
+}
+
+enum FamilyInviteStatus: String, Codable {
+    case pending
+
+    var displayName: String {
+        switch self {
+        case .pending:
+            return "Uitgenodigd"
+        }
+    }
+}
+
+enum FamilyLinkStatus: String, Codable {
+    case active
+
+    var displayName: String {
+        switch self {
+        case .active:
+            return "Actief"
+        }
+    }
+}
+
+struct FamilyInvite: Codable, Identifiable, Hashable {
+    @DocumentID var id: String?
+    var fromUserID: String = ""
+    var fromEmail: String?
+    var fromDisplayName: String?
+    var toUserID: String = ""
+    var toEmail: String?
+    var toDisplayName: String?
+    var status: FamilyInviteStatus = .pending
+    var createdAt: Date?
+    var updatedAt: Date?
+
+    var displayName: String {
+        if let toDisplayName, toDisplayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            return toDisplayName
+        }
+        if let fromDisplayName, fromDisplayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            return fromDisplayName
+        }
+        return toEmail ?? fromEmail ?? "Onbekend"
+    }
+
+    var stableIdentifier: String {
+        id ?? "\(fromUserID)_\(toUserID)"
+    }
+}
+
+struct FamilyMember: Codable, Identifiable, Hashable {
+    @DocumentID var id: String?
+    var userID: String = ""
+    var email: String?
+    var displayName: String?
+    var status: FamilyLinkStatus = .active
+    var linkedAt: Date?
+    var createdBy: String?
+
+    var resolvedDisplayName: String {
+        if let displayName, displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            return displayName
+        }
+        return email ?? "Onbekend"
+    }
+
+    var stableIdentifier: String {
+        userID
     }
 }
 
