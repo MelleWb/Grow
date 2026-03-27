@@ -2,7 +2,6 @@ import SwiftUI
 
 struct DashboardTrainingSection: View {
     @EnvironmentObject private var userModel: UserDataModel
-    @StateObject private var pushNotificationManager = PushNotificationManager.shared
 
     let roundedWorkoutPercentage: Int
     @Binding var isWorkOutPresented: Bool
@@ -31,7 +30,6 @@ struct DashboardTrainingSection: View {
                 HStack {
                     Button {
                         if todaysWorkoutID != nil {
-                            pushNotificationManager.scheduleTrainingReminder()
                             isWorkOutPresented = true
                         }
                     } label: {

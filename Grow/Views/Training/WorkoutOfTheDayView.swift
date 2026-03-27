@@ -72,6 +72,7 @@ struct WorkoutOfTheDayView: View {
             }
         }
         .onAppear(perform: {
+            pushNotificationManager.scheduleTrainingReminder(after: 3600)
             if loadsStatisticsOnAppear {
                 self.statisticsModel.getStatisticsForCurrentRoutine()
             }

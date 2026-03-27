@@ -95,15 +95,6 @@ struct SettingsView: View {
             }
 
         }
-            .toolbar(content: {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        self.storeManager.restoreProducts()
-                    }) {
-                        Text("Herstel aankopen")
-                    }
-                }
-            })
             .listStyle(InsetGroupedListStyle())
             .navigationTitle(Text("Instellingen"))
     }
