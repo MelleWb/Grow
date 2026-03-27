@@ -18,6 +18,7 @@ struct Login: View {
     @FocusState private var focusedField: FocusFields?
     @State private var showActivityIndicator = false
     @State private var alertText = ""
+    @State private var alertTitle = "Error"
     @State private var showAlert = false
 
     private func login() {
@@ -27,9 +28,33 @@ struct Login: View {
             showActivityIndicator = false
 
             if let error {
+                alertTitle = "Error"
                 alertText = error.localizedDescription
                 showAlert = true
             }
+        }
+    }
+
+    private func sendPasswordResetEmail() {
+        let email = userSettings.username.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard email.isEmpty == false else {
+            alertTitle = "E-mail vereist"
+            alertText = "Vul eerst je e-mailadres in om een resetlink te ontvangen."
+            showAlert = true
+            return
+        }
+
+        Auth.auth().sendPasswordReset(withEmail: email) { error in
+            if let error {
+                alertTitle = "Error"
+                alertText = error.localizedDescription
+            } else {
+                alertTitle = "E-mail verzonden"
+                alertText = "We hebben een e-mail gestuurd om je wachtwoord opnieuw in te stellen."
+            }
+
+            showAlert = true
         }
     }
 
@@ -68,6 +93,13 @@ struct Login: View {
                     .focused($focusedField, equals: .password)
                     .cornerRadius(15)
 
+                Button(action: sendPasswordResetEmail) {
+                    Text("Wachtwoord vergeten?")
+                        .font(.footnote)
+                        .foregroundColor(.accentColor)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+
                 Button(action: login) {
                     if showActivityIndicator {
                         ProgressView()
@@ -99,7 +131,7 @@ struct Login: View {
                 .edgesIgnoringSafeArea(.all)
                 .opacity(0.5)
             )
-            .alert("Error", isPresented: $showAlert) {
+            .alert(alertTitle, isPresented: $showAlert) {
                 Button("Ok", role: .cancel) { }
             } message: {
                 Text(alertText)

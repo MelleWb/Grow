@@ -10,6 +10,7 @@ import SwiftUI
 struct WorkoutOfTheDayView: View {
     
     @Binding var showWOD: Bool
+    @StateObject private var pushNotificationManager = PushNotificationManager.shared
     @EnvironmentObject var userModel: UserDataModel
     @EnvironmentObject var trainingModel: TrainingDataModel
     @EnvironmentObject var statisticsModel: StatisticsDataModel
@@ -105,6 +106,7 @@ struct WorkoutOfTheDayView: View {
 
         let success: Bool = self.statisticsModel.saveTraining(for: userID, for: routine)
         if success {
+            pushNotificationManager.cancelTrainingReminder()
             self.trainingModel.initiateTrainingModel()
             self.statisticsModel.initiateStatistics()
             self.showWOD = false
