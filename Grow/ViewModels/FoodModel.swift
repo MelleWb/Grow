@@ -857,6 +857,16 @@ struct FoodDiary: Codable, Hashable, Identifiable {
     var usersCalorieUsed: Calories
     var usersCalorieLeftOver: Calories
     var usersCalorieUsedPercentage: CaloriesPercentages
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case meals
+        case date
+        case usersCalorieBudget
+        case usersCalorieUsed
+        case usersCalorieLeftOver
+        case usersCalorieUsedPercentage
+    }
     
     init(id:String? = nil,meals: [Meal]? = [Meal()], date: Date = Date(), usersCalorieBudget: Calories = Calories(), usersCalorieUsed: Calories = Calories(), usersCalorieLeftOver: Calories = Calories(), usersCalorieUsedPercentage: CaloriesPercentages = CaloriesPercentages()){
         self.id = id
@@ -866,6 +876,18 @@ struct FoodDiary: Codable, Hashable, Identifiable {
         self.usersCalorieUsed = usersCalorieUsed
         self.usersCalorieLeftOver = usersCalorieLeftOver
         self.usersCalorieUsedPercentage = usersCalorieUsedPercentage
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decodeIfPresent(String.self, forKey: .id)
+        meals = try container.decodeIfPresent([Meal].self, forKey: .meals)
+        date = (try? container.decode(Date.self, forKey: .date)) ?? Date()
+        usersCalorieBudget = (try? container.decode(Calories.self, forKey: .usersCalorieBudget)) ?? Calories()
+        usersCalorieUsed = (try? container.decode(Calories.self, forKey: .usersCalorieUsed)) ?? Calories()
+        usersCalorieLeftOver = (try? container.decode(Calories.self, forKey: .usersCalorieLeftOver)) ?? Calories()
+        usersCalorieUsedPercentage = (try? container.decode(CaloriesPercentages.self, forKey: .usersCalorieUsedPercentage)) ?? CaloriesPercentages()
     }
 }
 
