@@ -1,51 +1,202 @@
-
+import Foundation
+import SwiftUI
 import UIKit
 import UserNotifications
+import FirebaseAuth
 import FirebaseFirestore
 import FirebaseMessaging
 
-class PushNotificationManager: NSObject, MessagingDelegate, UNUserNotificationCenterDelegate {
-    let userID: String
-    init(userID: String) {
-        self.userID = userID
+final class PushNotificationManager: NSObject, ObservableObject, MessagingDelegate, UNUserNotificationCenterDelegate {
+    static let shared = PushNotificationManager()
+
+    @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
+
+    private let installationIDKey = "push_notification_installation_id"
+    private var currentUserID: String?
+
+    private override init() {
         super.init()
+        UNUserNotificationCenter.current().delegate = self
+        Messaging.messaging().delegate = self
     }
-    
-    func registerForPushNotifications() {
-        if #available(iOS 10.0, *) {
-            // For iOS 10 display notification (sent via APNS)
-            UNUserNotificationCenter.current().delegate = self
-            let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-            UNUserNotificationCenter.current().requestAuthorization(
-                options: authOptions,
-                completionHandler: {_, _ in })
-            // For iOS 10 data message (sent via FCM)
-            Messaging.messaging().delegate = self
-        } else {
-            let settings: UIUserNotificationSettings =
-                UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-            UIApplication.shared.registerUserNotificationSettings(settings)
-        }
-        UIApplication.shared.registerForRemoteNotifications()
-        updateFirestorePushTokenIfNeeded()
-    }
-    
-    func updateFirestorePushTokenIfNeeded() {
-        if let token = Messaging.messaging().fcmToken{
-            let usersRef = Firestore.firestore().collection("users").document(userID)
-            usersRef.setData(["fcmToken": token], merge: true)
+
+    var authorizationStatusDisplayName: String {
+        switch authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            return "Aan"
+        case .denied:
+            return "Uit"
+        case .notDetermined:
+            return "Nog niet gekozen"
+        @unknown default:
+            return "Onbekend"
         }
     }
 
-//    func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
-//        print(remoteMessage.appData)
-//    }
-    
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        updateFirestorePushTokenIfNeeded()
+    func configure(for userID: String) {
+        currentUserID = userID
+        refreshAuthorizationStatus()
     }
-    
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        print(response)
+
+    func registerForPushNotifications() {
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { [weak self] _, _ in
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+                self?.refreshAuthorizationStatus()
+            }
+        }
+    }
+
+    func refreshAuthorizationStatus() {
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            guard let self else { return }
+
+            DispatchQueue.main.async {
+                self.authorizationStatus = settings.authorizationStatus
+
+                switch settings.authorizationStatus {
+                case .authorized, .provisional, .ephemeral:
+                    UIApplication.shared.registerForRemoteNotifications()
+                    self.syncEnabledPushState()
+                case .denied:
+                    self.syncDisabledPushState()
+                case .notDetermined:
+                    self.syncDisabledPushState()
+                @unknown default:
+                    self.syncDisabledPushState()
+                }
+            }
+        }
+    }
+
+    func removeCurrentDeviceToken(for userID: String? = nil) {
+        guard let resolvedUserID = userID ?? currentUserID else {
+            return
+        }
+
+        Firestore.firestore()
+            .collection("users")
+            .document(resolvedUserID)
+            .collection("deviceTokens")
+            .document(installationID)
+            .delete()
+    }
+
+    func openNotificationSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+            return
+        }
+
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        }
+    }
+
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        syncEnabledPushState()
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        completionHandler()
+    }
+
+    private var installationID: String {
+        let defaults = UserDefaults.standard
+
+        if let existingValue = defaults.string(forKey: installationIDKey), existingValue.isEmpty == false {
+            return existingValue
+        }
+
+        let generatedValue = UUID().uuidString
+        defaults.set(generatedValue, forKey: installationIDKey)
+        return generatedValue
+    }
+
+    private func syncEnabledPushState() {
+        guard let userID = currentUserID else {
+            return
+        }
+
+        Messaging.messaging().token { [weak self] token, _ in
+            guard let self else { return }
+
+            DispatchQueue.main.async {
+                guard let token, token.isEmpty == false else {
+                    self.writeDeviceTokenDocument(userID: userID, token: nil)
+                    return
+                }
+
+                self.writeDeviceTokenDocument(userID: userID, token: token)
+            }
+        }
+    }
+
+    private func syncDisabledPushState() {
+        guard let userID = currentUserID else {
+            return
+        }
+
+        writeDeviceTokenDocument(userID: userID, token: nil)
+    }
+
+    private func writeDeviceTokenDocument(userID: String, token: String?) {
+        let deviceTokenRef = Firestore.firestore()
+            .collection("users")
+            .document(userID)
+            .collection("deviceTokens")
+            .document(installationID)
+
+        var payload: [String: Any] = [
+            "platform": "iOS",
+            "installationID": installationID,
+            "authorizationStatus": authorizationStatus.firestoreValue,
+            "notificationsEnabled": authorizationStatus.isEnabledForPush,
+            "updatedAt": FieldValue.serverTimestamp(),
+            "createdAt": FieldValue.serverTimestamp()
+        ]
+
+        if let token, token.isEmpty == false {
+            payload["token"] = token
+        } else {
+            payload["token"] = FieldValue.delete()
+        }
+
+        deviceTokenRef.setData(payload, merge: true)
+    }
+}
+
+private extension UNAuthorizationStatus {
+    var firestoreValue: String {
+        switch self {
+        case .authorized:
+            return "authorized"
+        case .denied:
+            return "denied"
+        case .notDetermined:
+            return "notDetermined"
+        case .provisional:
+            return "provisional"
+        case .ephemeral:
+            return "ephemeral"
+        @unknown default:
+            return "unknown"
+        }
+    }
+
+    var isEnabledForPush: Bool {
+        switch self {
+        case .authorized, .provisional, .ephemeral:
+            return true
+        case .denied, .notDetermined:
+            return false
+        @unknown default:
+            return false
+        }
     }
 }

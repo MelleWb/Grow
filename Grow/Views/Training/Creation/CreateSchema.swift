@@ -135,7 +135,7 @@ struct CreateRoutine : View{
         }
         .navigationDestination(item: $selectedSuperset) { supersetID in
             if let index = routine.superset.firstIndex(where: { $0.id == supersetID }) {
-                AddSuperSet(superSet: $routine.superset[index], selectedSuperset: $selectedSuperset)
+                AddSuperSet(superSet: $routine.superset[index], selectedSuperset: $selectedSuperset, routineType: routine.type)
             }
         }
     }
@@ -144,6 +144,7 @@ struct CreateRoutine : View{
 struct AddSuperSet: View {
     @Binding var superSet: Superset
     @Binding var selectedSuperset: UUID?
+    let routineType: String
     @State var selectedExercise: UUID? = nil
     @State var showAddExercise: Bool = false
     @State var isRepsSheetEnabled: Bool = false
@@ -166,16 +167,24 @@ struct AddSuperSet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(exercise.name)
                                 .font(.headline)
-                            Picker("Herhalingen", selection: $exercise.reps) {
-                                ForEach(1..<50) {
-                                   if $0 > 1 {
-                                       Text("\($0) reps")
-                                   } else {
-                                       Text("1 rep")
+                            if exercise.category == "Hardlopen" || exercise.category == "Cardio" {
+                                RunningSchemaEditor(exercise: $exercise)
+                            } else if exercise.category == "Interval" {
+                                IntervalSchemaEditor(exercise: $exercise)
+                            } else if exercise.category == "Hyrox" {
+                                HyroxSchemaEditor(exercise: $exercise)
+                            } else {
+                                Picker("Herhalingen", selection: $exercise.reps) {
+                                    ForEach(1..<50) {
+                                       if $0 > 1 {
+                                           Text("\($0) reps")
+                                       } else {
+                                           Text("1 rep")
+                                       }
                                    }
                                }
-                           }
-                           .pickerStyle(.menu)
+                               .pickerStyle(.menu)
+                            }
                         }
                         .padding(.vertical, 4)
                     }
@@ -190,7 +199,7 @@ struct AddSuperSet: View {
         }
         .navigationTitle("Superset")
         .navigationDestination(isPresented: $showAddExercise) {
-            AddExerciseToRoutine(showAddExercise: $showAddExercise, exercises: $superSet.exercises)
+            AddExerciseToRoutine(showAddExercise: $showAddExercise, exercises: $superSet.exercises, routineType: routineType)
         }
         .blur(radius: isRepsSheetEnabled ? 1 : 0)
         .overlay(isRepsSheetEnabled ? Color.black.opacity(0.6) : nil)
@@ -205,12 +214,13 @@ struct AddExerciseToRoutine: View {
     @State var searching = false
     @Binding var showAddExercise: Bool
     @Binding var exercises: [Exercise]
+    let routineType: String
     
     private var filteredExercises: [Exercise] {
         exerciseModel.exercises.filter { exercise in
             let matchesSearch = exercise.name.range(of: searchText, options: .caseInsensitive) != nil || searchText == ""
             let isAlreadySelected = exercises.contains(where: { $0.documentID == exercise.documentID })
-            return matchesSearch && !isAlreadySelected
+            return matchesSearch && !isAlreadySelected && isAllowed(exercise)
         }
     }
     
@@ -287,6 +297,18 @@ struct AddExerciseToRoutine: View {
         if let index = exercises.firstIndex(where: { $0.documentID == exercise.documentID }) {
             exercises.remove(at: index)
         }
+    }
+
+    private func isAllowed(_ exercise: Exercise) -> Bool {
+        if routineType == "Cardio" {
+            return exercise.category == "Hardlopen" || exercise.category == "Cardio" || exercise.category == "Interval"
+        }
+
+        if routineType == "Hyrox" {
+            return exercise.category == "Hyrox"
+        }
+
+        return exercise.category != "Hardlopen" && exercise.category != "Cardio" && exercise.category != "Interval"
     }
 }
 
@@ -371,7 +393,7 @@ private struct SupersetSummaryRow: View {
                         HStack {
                             Text(exercise.name)
                             Spacer()
-                            Text("\(exercise.reps) reps")
+                            Text(summary(for: exercise))
                                 .foregroundStyle(.secondary)
                         }
                         .font(.subheadline)
@@ -390,5 +412,108 @@ private struct SupersetSummaryRow: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(.vertical, 4)
+    }
+
+    private func summary(for exercise: Exercise) -> String {
+        if exercise.category == "Hardlopen" || exercise.category == "Cardio" {
+            let distanceText = exercise.distanceKilometers > 0 ? "\(NumberHelper.roundNumbersMaxTwoDecimals(unit: exercise.distanceKilometers)) km" : "afstand open"
+            let durationText = exercise.durationMinutes > 0 ? "\(exercise.durationMinutes) min" : "tijd open"
+            return "\(distanceText) • \(durationText)"
+        }
+
+        if exercise.category == "Interval" {
+            let intervalsText = exercise.intervalCount > 0 ? "\(exercise.intervalCount)x" : "interval open"
+            let workText = exercise.workSeconds > 0 ? "\(exercise.workSeconds)s snel" : "snel open"
+            let restText = exercise.restSeconds > 0 ? "\(exercise.restSeconds)s rust" : "rust open"
+            return "\(intervalsText) • \(workText) • \(restText)"
+        }
+
+        if exercise.category == "Hyrox" {
+            return exercise.durationMinutes > 0 ? "\(exercise.durationMinutes) min" : "tijd open"
+        }
+
+        return "\(exercise.reps) reps"
+    }
+}
+
+private struct RunningSchemaEditor: View {
+    @Binding var exercise: Exercise
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Afstand")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                TextField("km", value: $exercise.distanceKilometers, format: .number)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 90)
+            }
+
+            HStack {
+                Text("Doeltijd")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Stepper(value: $exercise.durationMinutes, in: 0...300) {
+                    Text("\(exercise.durationMinutes) min")
+                        .monospacedDigit()
+                }
+            }
+        }
+    }
+}
+
+private struct IntervalSchemaEditor: View {
+    @Binding var exercise: Exercise
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Intervallen")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Stepper(value: $exercise.intervalCount, in: 0...50) {
+                    Text("\(exercise.intervalCount)x")
+                        .monospacedDigit()
+                }
+            }
+
+            HStack {
+                Text("Versnellen")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Stepper(value: $exercise.workSeconds, in: 0...3600, step: 5) {
+                    Text("\(exercise.workSeconds)s")
+                        .monospacedDigit()
+                }
+            }
+
+            HStack {
+                Text("Rust")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Stepper(value: $exercise.restSeconds, in: 0...3600, step: 5) {
+                    Text("\(exercise.restSeconds)s")
+                        .monospacedDigit()
+                }
+            }
+        }
+    }
+}
+
+private struct HyroxSchemaEditor: View {
+    @Binding var exercise: Exercise
+
+    var body: some View {
+        HStack {
+            Text("Doeltijd")
+                .foregroundStyle(.secondary)
+            Spacer()
+            Stepper(value: $exercise.durationMinutes, in: 0...300) {
+                Text("\(exercise.durationMinutes) min")
+                    .monospacedDigit()
+            }
+        }
     }
 }

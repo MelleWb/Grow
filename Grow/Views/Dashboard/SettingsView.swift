@@ -24,6 +24,18 @@ struct SettingsView: View {
                         HStack{
                             ZStack{
                                 Button(""){}
+                                NavigationLink(destination: Profile()){
+                                    Image(systemName: "person.crop.circle")
+                                        .resizable()
+                                        .foregroundColor(.accentColor)
+                                        .frame(width: 20, height: 20, alignment: .center)
+                                        Text("Profiel")
+                                    }
+                            }
+                        }
+                        HStack{
+                            ZStack{
+                                Button(""){}
                                 NavigationLink(destination: SlimProductOverview()){
                                     Image(systemName: "doc.text")
                                         .resizable()
@@ -36,16 +48,27 @@ struct SettingsView: View {
                         HStack{
                             ZStack{
                                 Button(""){}
-                                NavigationLink(destination: Profile()){
-                                    Image(systemName: "person.crop.circle")
+                                NavigationLink(destination: ManageExercisesView()){
+                                    Image(systemName: "figure.strengthtraining.traditional")
                                         .resizable()
                                         .foregroundColor(.accentColor)
-                                        .frame(width: 20, height: 20, alignment: .center)
-                                        Text("Profiel")
+                                        .frame(width: 18, height: 18, alignment: .center)
+                                        Text("Oefeningen")
                                     }
                             }
                         }
-                        
+                        HStack{
+                            ZStack{
+                                Button(""){}
+                                NavigationLink(destination: ManageMealsView()){
+                                    Image(systemName: "fork.knife.circle")
+                                        .resizable()
+                                        .foregroundColor(.accentColor)
+                                        .frame(width: 20, height: 20, alignment: .center)
+                                        Text("Beheer maaltijden")
+                                    }
+                            }
+                        }
                     }
                     ForEach(self.storeManager.myProducts, id: \.self) { product in
                     HStack {

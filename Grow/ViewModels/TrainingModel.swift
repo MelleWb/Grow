@@ -172,6 +172,18 @@ class TrainingDataModel: ObservableObject{
                     self.routine.superset[supersetIndex].exercises[exerciseIndex].description = toExercise.description
                     
                     self.routine.superset[supersetIndex].exercises[exerciseIndex].statistics = toExercise.statistics
+
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].category = toExercise.category
+
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].durationMinutes = toExercise.durationMinutes
+
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].distanceKilometers = toExercise.distanceKilometers
+
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].intervalCount = toExercise.intervalCount
+
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].workSeconds = toExercise.workSeconds
+
+                    self.routine.superset[supersetIndex].exercises[exerciseIndex].restSeconds = toExercise.restSeconds
                     
                     self.routine.superset[supersetIndex].exercises[exerciseIndex].documentID = toExercise.documentID
                     
@@ -227,6 +239,56 @@ class TrainingDataModel: ObservableObject{
         }
         
     }
+
+    func updateExerciseDuration(for routine: Routine, for superset: Superset, for exercise: Exercise, to durationMinutes: Int) {
+        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                if let exerciseIndex = self.schema.routines[routineIndex].superset[supersetIndex].exercises.firstIndex(where: { $0.documentID == exercise.documentID }) {
+                    self.schema.routines[routineIndex].superset[supersetIndex].exercises[exerciseIndex].durationMinutes = durationMinutes
+                }
+            }
+        }
+    }
+
+    func updateExerciseDistance(for routine: Routine, for superset: Superset, for exercise: Exercise, to distanceKilometers: Double) {
+        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                if let exerciseIndex = self.schema.routines[routineIndex].superset[supersetIndex].exercises.firstIndex(where: { $0.documentID == exercise.documentID }) {
+                    self.schema.routines[routineIndex].superset[supersetIndex].exercises[exerciseIndex].distanceKilometers = distanceKilometers
+                }
+            }
+        }
+    }
+
+    func updateExerciseIntervalCount(for routine: Routine, for superset: Superset, for exercise: Exercise, to intervalCount: Int) {
+        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                if let exerciseIndex = self.schema.routines[routineIndex].superset[supersetIndex].exercises.firstIndex(where: { $0.documentID == exercise.documentID }) {
+                    self.schema.routines[routineIndex].superset[supersetIndex].exercises[exerciseIndex].intervalCount = intervalCount
+                }
+            }
+        }
+    }
+
+    func updateExerciseWorkSeconds(for routine: Routine, for superset: Superset, for exercise: Exercise, to workSeconds: Int) {
+        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                if let exerciseIndex = self.schema.routines[routineIndex].superset[supersetIndex].exercises.firstIndex(where: { $0.documentID == exercise.documentID }) {
+                    self.schema.routines[routineIndex].superset[supersetIndex].exercises[exerciseIndex].workSeconds = workSeconds
+                }
+            }
+        }
+    }
+
+    func updateExerciseRestSeconds(for routine: Routine, for superset: Superset, for exercise: Exercise, to restSeconds: Int) {
+        if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
+            if let supersetIndex = self.schema.routines[routineIndex].superset.firstIndex(where: { $0.id == superset.id }) {
+                if let exerciseIndex = self.schema.routines[routineIndex].superset[supersetIndex].exercises.firstIndex(where: { $0.documentID == exercise.documentID }) {
+                    self.schema.routines[routineIndex].superset[supersetIndex].exercises[exerciseIndex].restSeconds = restSeconds
+                }
+            }
+        }
+    }
     
     func removeExercise(for routine: Routine, for superset: Superset, for exerciseIndex: Int){
         if let routineIndex = self.schema.routines.firstIndex(where: { $0.id == routine.id }) {
@@ -272,7 +334,7 @@ class TrainingDataModel: ObservableObject{
         _ = trainingDataLoader.observeSchemas { result in
             switch result {
             case .success(let schemas):
-                self.fetchedSchemas = schemas
+                self.fetchedSchemas = schemas.filter { self.canAccessContent(ownerUserID: $0.userID) }
             case .failure(let error):
                 print("error decoding schema: \(error)")
                 self.fetchedSchemas = []
@@ -316,6 +378,8 @@ class TrainingDataModel: ObservableObject{
             schemaName += "-Volume:\(volume)"
             schema.name = schemaName
         }
+
+        schema.userID = ownerUserIDForNewContent()
         
         var success = true
         trainingDataWriter.createSchema(schema) { result in
@@ -360,12 +424,29 @@ class TrainingDataModel: ObservableObject{
             }
         }
     }
+
+    private func canAccessContent(ownerUserID: String?) -> Bool {
+        guard let ownerUserID, !ownerUserID.isEmpty else {
+            return true
+        }
+
+        return ownerUserID == sessionProvider.currentUserID
+    }
+
+    private func ownerUserIDForNewContent() -> String? {
+        if user.isAdmin {
+            return nil
+        }
+
+        return user.id ?? sessionProvider.currentUserID
+    }
 }
 
 
 struct Schema: Codable, Hashable, Identifiable  {
     @DocumentID var docID: String?
     var id: UUID
+    var userID: String?
     var type: String
     var name: String
     var routines: [Routine]
@@ -373,6 +454,7 @@ struct Schema: Codable, Hashable, Identifiable  {
     init(id:UUID = UUID(),
          docID: String? = nil,
          documentID: String? = nil,
+         userID: String? = nil,
          type: String = "",
          name: String = "",
          routines: [Routine] = [Routine]()
@@ -380,6 +462,7 @@ struct Schema: Codable, Hashable, Identifiable  {
     {
         self.id = id
         self.docID = docID
+        self.userID = userID
         self.type = type
         self.name = name
         self.routines = routines
@@ -387,6 +470,7 @@ struct Schema: Codable, Hashable, Identifiable  {
 
     enum CodingKeys: String, CodingKey {
         case id
+        case userID
         case type
         case name
         case routines
@@ -397,6 +481,7 @@ struct Schema: Codable, Hashable, Identifiable  {
 
         self.id = container.decodeUUIDIfPresent(forKey: .id) ?? UUID()
         self.docID = nil
+        self.userID = try container.decodeIfPresent(String.self, forKey: .userID)
         self.type = try container.decodeIfPresent(String.self, forKey: .type) ?? ""
         self.name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
         self.routines = try container.decodeIfPresent([Routine].self, forKey: .routines) ?? []

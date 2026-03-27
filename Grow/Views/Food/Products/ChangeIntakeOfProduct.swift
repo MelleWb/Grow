@@ -7,35 +7,122 @@
 
 import SwiftUI
 
-struct ChangeIntakeOfProduct: View {
-    
-    @EnvironmentObject var foodModel: FoodDataModel
-    @Environment(\.dismiss) private var dismiss
-    @State var product:Product
-    @State var meal: Meal
-    @State var amount: String
+struct ProductIntakeEditorView: View {
+    let product: Product
+    let saveButtonTitle: String
+    let onSave: (SelectedProductDetails) -> Bool
+    let onSuccess: () -> Void
+
+    @State private var amount: String
     @State private var amountInput: String = ""
     @State private var selectedPortionIndex = 0
     @State private var portionCountText: String = ""
-    
-    @State var calories: Double = 0
-    @State var carbs: Double = 0
-    @State var protein: Double = 0
-    @State var fat: Double = 0
-    @State var fiber: Double = 0
-    
-    func calculation(unit: Double, portion: Int) -> Double {
-        let per100gram:Double = unit
-        let per1gram:Double = Double(per100gram) / 100
-        return (Double(per1gram) * Double(portion)).rounded()
+
+    @State private var calories: Double = 0
+    @State private var carbs: Double = 0
+    @State private var protein: Double = 0
+    @State private var fat: Double = 0
+    @State private var fiber: Double = 0
+
+    init(
+        product: Product,
+        initialAmount: Int,
+        saveButtonTitle: String,
+        onSave: @escaping (SelectedProductDetails) -> Bool,
+        onSuccess: @escaping () -> Void
+    ) {
+        self.product = product
+        self.saveButtonTitle = saveButtonTitle
+        self.onSave = onSave
+        self.onSuccess = onSuccess
+        _amount = State(initialValue: String(initialAmount))
     }
-    
-    func updateCalories(portion: Int){
-        self.calories = calculation(unit: product.kcal, portion: portion)
-        self.carbs = calculation(unit: product.carbs, portion: portion)
-        self.protein = calculation(unit: product.protein, portion: portion)
-        self.fat = calculation(unit: product.fat, portion: portion)
-        self.fiber = calculation(unit: product.fiber, portion: portion)
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    Picker("Portie", selection: $selectedPortionIndex) {
+                        ForEach(Array(product.portions.enumerated()), id: \.offset) { index, portion in
+                            Text("\(portion.name) (\(portion.amount) g)").tag(index)
+                        }
+                    }
+                }
+                HStack {
+                    Text("Aantal porties")
+                    Spacer()
+                    TextField("", text: $portionCountText, prompt: Text("1"))
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                }
+                HStack {
+                    Text("Portiegrootte (g)")
+                    Spacer()
+                    TextField("", text: amountBinding, prompt: Text(amount))
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+
+            Section(header: Text("Nutriënten per \(amount) g")) {
+                HStack {
+                    Text("Calorieën")
+                    Spacer()
+                    Text(NumberHelper.roundedNumbersFromDouble(unit: calories))
+                }
+                HStack {
+                    Text("Koolhydraten")
+                    Spacer()
+                    Text(NumberHelper.roundNumbersMaxTwoDecimals(unit: carbs))
+                }
+                HStack {
+                    Text("Eiwitten")
+                    Spacer()
+                    Text(NumberHelper.roundNumbersMaxTwoDecimals(unit: protein))
+                }
+                HStack {
+                    Text("Vetten")
+                    Spacer()
+                    Text(NumberHelper.roundNumbersMaxTwoDecimals(unit: fat))
+                }
+                HStack {
+                    Text("Vezels")
+                    Spacer()
+                    Text(NumberHelper.roundNumbersMaxTwoDecimals(unit: fiber))
+                }
+            }
+            .onTapGesture {
+                hideKeyboard()
+            }
+        }
+        .navigationTitle(Text(product.name))
+        .toolbar {
+            Button(saveButtonTitle) {
+                save()
+            }
+        }
+        .onAppear {
+            configureSelectionFromExistingAmount()
+        }
+        .onChange(of: selectedPortionIndex) { _, _ in
+            applySelectedPortion()
+        }
+        .onChange(of: portionCountText) { _, _ in
+            applySelectedPortion()
+        }
+    }
+
+    private func calculation(unit: Double, portion: Int) -> Double {
+        let per1gram = unit / 100
+        return (per1gram * Double(portion)).rounded()
+    }
+
+    private func updateCalories(portion: Int) {
+        calories = calculation(unit: product.kcal, portion: portion)
+        carbs = calculation(unit: product.carbs, portion: portion)
+        protein = calculation(unit: product.protein, portion: portion)
+        fat = calculation(unit: product.fat, portion: portion)
+        fiber = calculation(unit: product.fiber, portion: portion)
     }
 
     private var selectedPortion: ProductPortion? {
@@ -106,85 +193,45 @@ struct ChangeIntakeOfProduct: View {
             updateCalories(portion: currentAmount)
         }
     }
-    
-    var body: some View {
-        Form{
-            Section{
-                HStack{
-                    Picker("Portie", selection: $selectedPortionIndex) {
-                        ForEach(Array(product.portions.enumerated()), id: \.offset) { index, portion in
-                            Text("\(portion.name) (\(portion.amount) g)").tag(index)
-                        }
-                    }
-                }
-                HStack{
-                    Text("Aantal porties")
-                    Spacer()
-                    TextField("", text: $portionCountText, prompt: Text("1"))
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                }
-                HStack{
-                    Text("Portiegrootte (g)")
-                    Spacer()
-                    TextField("", text: amountBinding, prompt: Text(amount))
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                }
-            }
-            Section(header:Text("Nutriënten per \(amount) g")){
-                HStack{
-                    Text("Calorieën")
-                    Spacer()
-                    Text(NumberHelper.roundedNumbersFromDouble(unit:calories))
-                }
-                HStack{
-                    Text("Koolhydraten")
-                    Spacer()
-                    Text(NumberHelper.roundNumbersMaxTwoDecimals(unit:carbs))
-                }
-                HStack{
-                    Text("Eiwitten")
-                    Spacer()
-                    Text(NumberHelper.roundNumbersMaxTwoDecimals(unit:protein))
-                }
-                HStack{
-                    Text("Vetten")
-                    Spacer()
-                    Text(NumberHelper.roundNumbersMaxTwoDecimals(unit:fat))
-                }
-                HStack{
-                    Text("Vezels")
-                    Spacer()
-                    Text(NumberHelper.roundNumbersMaxTwoDecimals(unit:fiber))
-                }
-            }.onTapGesture {
-                hideKeyboard()
-            }
-        }.navigationTitle(Text(product.name))
-        .toolbar(content: {Button("Sla op"){
-            //Update the root
-            
-            if let value = NumberFormatter().number(from: amount) {
-                let createdProduct:SelectedProductDetails = SelectedProductDetails(kcal: self.calories, carbs: self.carbs, protein: self.protein, fat: self.fat, fiber: self.fiber, amount: value.intValue)
-        
-                let success = self.foodModel.updateProductInMeal(for: meal, with: self.product, with: createdProduct)
-                
-                if success {
-                    dismiss()
-                }
-            }
-            
 
-        }})
-        .onAppear(perform:{
-            self.configureSelectionFromExistingAmount()
-        })
-        .onChange(of: selectedPortionIndex) { _, _ in
-            applySelectedPortion()
+    private func save() {
+        guard let value = NumberFormatter().number(from: amount) else {
+            return
         }
-        .onChange(of: portionCountText) { _, _ in
-            applySelectedPortion()
+
+        let createdProduct = SelectedProductDetails(
+            kcal: calories,
+            carbs: carbs,
+            protein: protein,
+            fat: fat,
+            fiber: fiber,
+            amount: value.intValue
+        )
+
+        if onSave(createdProduct) {
+            onSuccess()
         }
+    }
+}
+
+struct ChangeIntakeOfProduct: View {
+    @EnvironmentObject var foodModel: FoodDataModel
+    @Environment(\.dismiss) private var dismiss
+    @State var product: Product
+    @State var meal: Meal
+    @State var amount: String
+
+    var body: some View {
+        ProductIntakeEditorView(
+            product: product,
+            initialAmount: NumberFormatter().number(from: amount)?.intValue ?? 100,
+            saveButtonTitle: "Sla op",
+            onSave: { createdProduct in
+                foodModel.updateProductInMeal(for: meal, with: product, with: createdProduct)
+            },
+            onSuccess: {
+                dismiss()
+            }
+        )
     }
 }

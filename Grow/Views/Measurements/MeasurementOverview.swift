@@ -107,6 +107,10 @@ struct MeasurementRow: View{
     @Binding var showImageViewer: Bool
     @Binding var compare : Bool
     @Binding var selectedMeasurements: [BodyMeasurement]?
+
+    private var formattedWeight: String {
+        String(format: "%.1f", measurement.weight ?? 0)
+    }
     
     var body: some View{
         VStack(alignment:.leading){
@@ -115,7 +119,7 @@ struct MeasurementRow: View{
                     .font(.headline)
                     .padding()
                 Spacer()
-                Text("\( measurement.weight ?? 0) kg")
+                Text("\(formattedWeight) kg")
                     .padding()
             }
                 HStack{

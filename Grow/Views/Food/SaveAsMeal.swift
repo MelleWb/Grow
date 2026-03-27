@@ -40,9 +40,10 @@ struct SaveAsMeal: View {
             }
         }.navigationBarItems(trailing:
             Button("Opslaan"){
-                let success = self.foodModel.saveMeal(for:meal)
-                if success{
-                    dismiss()
+                self.foodModel.saveMeal(for: meal) { result in
+                    if case .success = result {
+                        dismiss()
+                    }
                 }
             })
     }
