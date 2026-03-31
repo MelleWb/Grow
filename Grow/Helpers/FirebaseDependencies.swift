@@ -499,14 +499,35 @@ struct FirestoreFoodDataWriter: FoodDataWriting {
 
     func saveDiary(userID: String, diary: FoodDiary, completion: @escaping (Result<Void, Error>) -> Void) {
         let diaryRef = Firestore.firestore().collection("users").document(userID).collection("foodDiary")
-        let documentRef = diary.id.flatMap { !$0.isEmpty ? diaryRef.document($0) : nil } ?? diaryRef.document()
 
-        do {
-            try documentRef.setData(from: diary, merge: true)
-            completion(.success(()))
-        } catch {
-            completion(.failure(error))
+        if let diaryID = diary.id, diaryID.isEmpty == false {
+            persistDiary(diary, in: diaryRef.document(diaryID), completion: completion)
+            return
         }
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: diary.date)
+        let start = calendar.date(from: components) ?? diary.date
+        let end = calendar.date(byAdding: .day, value: 1, to: start) ?? start
+
+        diaryRef
+            .whereField("date", isGreaterThan: start)
+            .whereField("date", isLessThan: end)
+            .limit(to: 1)
+            .getDocuments { snapshot, error in
+                if let error {
+                    completion(.failure(error))
+                    return
+                }
+
+                if let existingDocument = snapshot?.documents.first {
+                    persistDiary(diary, in: existingDocument.reference, completion: completion)
+                    return
+                }
+
+                let documentRef = diaryRef.document(self.diaryDocumentID(for: start))
+                persistDiary(diary, in: documentRef, completion: completion)
+            }
     }
 
     func saveMeal(_ meal: Meal, completion: @escaping (Result<String, Error>) -> Void) {
@@ -550,6 +571,24 @@ struct FirestoreFoodDataWriter: FoodDataWriting {
         } catch {
             completion(.failure(error))
         }
+    }
+
+    private func persistDiary(_ diary: FoodDiary, in documentRef: DocumentReference, completion: @escaping (Result<Void, Error>) -> Void) {
+        do {
+            try documentRef.setData(from: diary, merge: true)
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    private func diaryDocumentID(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
     }
 }
 

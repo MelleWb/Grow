@@ -247,6 +247,53 @@ class FoodDataModel: ObservableObject{
         }
         return success
     }
+
+    func saveProductBarcode(for product: Product, barcode: String?, completion: @escaping (Bool) -> Void) {
+        guard let documentID = product.documentID, documentID.isEmpty == false else {
+            completion(false)
+            return
+        }
+
+        var slimProductList = self.fullSlimProductList
+        if let slimProdIndex = slimProductList.products.firstIndex(where: { $0.documentID == documentID }) {
+            var slimProduct = slimProductList.products[slimProdIndex]
+            slimProduct.name = product.name
+            if slimProduct.userID == nil {
+                slimProduct.userID = product.userID ?? ownerUserIDForNewContent()
+            }
+            slimProductList.products[slimProdIndex] = slimProduct
+        } else {
+            slimProductList.products.append(
+                SlimProduct(
+                    documentID: documentID,
+                    name: product.name,
+                    userID: product.userID ?? ownerUserIDForNewContent()
+                )
+            )
+        }
+
+        var productToSave = product
+        let trimmedBarcode = barcode?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if trimmedBarcode.isEmpty {
+            productToSave.barcodes = []
+        } else {
+            productToSave.barcodes = Array(Set(productToSave.barcodes + [trimmedBarcode])).sorted()
+        }
+
+        foodDataWriter.saveProduct(productToSave, slimProductList: slimProductList) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.fullSlimProductList = slimProductList
+                    self.applyVisibleSlimProductFilter()
+                    completion(true)
+                case .failure(let error):
+                    print(error)
+                    completion(false)
+                }
+            }
+        }
+    }
     
     func deleteProduct(documentID: String){
         var slimProductList = self.fullSlimProductList
@@ -286,6 +333,133 @@ class FoodDataModel: ObservableObject{
                 completion(nil, "Error")
             }
         }
+    }
+
+    func findProducts(for barcode: String, completion: @escaping ([Product]) -> Void) {
+        let trimmedBarcode = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard trimmedBarcode.isEmpty == false else {
+            completion([])
+            return
+        }
+
+        let collection = Firestore.firestore().collection("foodProducts")
+
+        collection
+            .whereField("barcodes", arrayContains: trimmedBarcode)
+            .getDocuments { snapshot, error in
+                if let error {
+                    print("Error fetching product by barcodes: \(error)")
+                    completion([])
+                    return
+                }
+
+                let products = snapshot?.documents.compactMap { document -> Product? in
+                    try? document.data(as: Product.self)
+                } ?? []
+
+                collection
+                    .whereField("barcode", isEqualTo: trimmedBarcode)
+                    .getDocuments { legacySnapshot, legacyError in
+                        if let legacyError {
+                            print("Error fetching product by legacy barcode: \(legacyError)")
+                            completion([])
+                            return
+                        }
+
+                        let legacyProducts = legacySnapshot?.documents.compactMap { document -> Product? in
+                            try? document.data(as: Product.self)
+                        } ?? []
+
+                        let combinedProducts = products + legacyProducts
+                        var uniqueProductsByDocumentID = [String: Product]()
+
+                        for product in combinedProducts where self.canAccessContent(ownerUserID: product.userID) {
+                            if let documentID = product.documentID {
+                                uniqueProductsByDocumentID[documentID] = product
+                            }
+                        }
+
+                        let matchingProducts = uniqueProductsByDocumentID.values.sorted {
+                            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+                        }
+                        completion(matchingProducts)
+                    }
+            }
+    }
+
+    func findProductDocumentID(for barcode: String, completion: @escaping (String?) -> Void) {
+        findProducts(for: barcode) { products in
+            completion(products.first?.documentID)
+        }
+    }
+
+    func fetchOpenFoodFactsProduct(barcode: String, completion: @escaping (Product?) -> Void) {
+        let trimmedBarcode = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard trimmedBarcode.isEmpty == false else {
+            completion(nil)
+            return
+        }
+
+        guard let url = URL(string: "https://world.openfoodfacts.net/api/v2/product/\(trimmedBarcode).json") else {
+            completion(nil)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let credentials = Data("off:off".utf8).base64EncodedString()
+        request.setValue("Basic \(credentials)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error {
+                print("Error fetching Open Food Facts product: \(error)")
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+                return
+            }
+
+            guard let data else {
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+                return
+            }
+
+            do {
+                let response = try JSONDecoder().decode(OpenFoodFactsProductResponse.self, from: data)
+                guard response.status == 1, let remoteProduct = response.product else {
+                    DispatchQueue.main.async {
+                        completion(nil)
+                    }
+                    return
+                }
+
+                let prefilledProduct = Product(
+                    name: remoteProduct.displayName,
+                    kcal: remoteProduct.nutriments.energyKcal100g ?? 0,
+                    carbs: remoteProduct.nutriments.carbohydrates100g ?? 0,
+                    protein: remoteProduct.nutriments.proteins100g ?? 0,
+                    fat: remoteProduct.nutriments.fat100g ?? 0,
+                    fiber: remoteProduct.nutriments.fiber100g ?? 0,
+                    portions: remoteProduct.productPortions,
+                    barcodes: [trimmedBarcode],
+                    imageURL: remoteProduct.imageURL
+                )
+
+                DispatchQueue.main.async {
+                    completion(prefilledProduct)
+                }
+            } catch {
+                print("Error decoding Open Food Facts product: \(error)")
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+            }
+        }
+        .resume()
     }
     
     func saveDiary() {
@@ -1004,8 +1178,18 @@ struct Product: Codable, Hashable, Identifiable{
     var unit: String
     var portions: [ProductPortion]
     var selectedProductDetails : SelectedProductDetails?
-    
-    init(id:UUID = UUID(), documentID:String? = nil, userID: String? = nil, name:String = "", kcal:Double = 0, carbs:Double = 0, protein:Double = 0, fat:Double = 0, fiber:Double = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil){
+    var barcodes: [String]
+    var imageURL: String?
+
+    var barcode: String? {
+        get { barcodes.first }
+        set {
+            let trimmedBarcode = newValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            barcodes = trimmedBarcode.isEmpty ? [] : [trimmedBarcode]
+        }
+    }
+
+    init(id:UUID = UUID(), documentID:String? = nil, userID: String? = nil, name:String = "", kcal:Double = 0, carbs:Double = 0, protein:Double = 0, fat:Double = 0, fiber:Double = 0, unit:String = "Grammen", portions:[ProductPortion] = [ProductPortion(name: "Standaard", amount: 100)], selectedProductDetails: SelectedProductDetails? = nil, barcode: String? = nil, barcodes: [String] = [], imageURL: String? = nil){
         self.id = id
         self.documentID = documentID
         self.userID = userID
@@ -1018,6 +1202,68 @@ struct Product: Codable, Hashable, Identifiable{
         self.unit = unit
         self.portions = portions
         self.selectedProductDetails = selectedProductDetails
+        let combinedBarcodes = barcodes + (barcode.map { [$0] } ?? [])
+        self.barcodes = Array(Set(combinedBarcodes.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })).sorted()
+        self.imageURL = imageURL
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case documentID
+        case userID
+        case name
+        case kcal
+        case carbs
+        case protein
+        case fat
+        case fiber
+        case unit
+        case portions
+        case selectedProductDetails
+        case barcode
+        case barcodes
+        case imageURL
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        documentID = try container.decodeIfPresent(String.self, forKey: .documentID)
+        userID = try container.decodeIfPresent(String.self, forKey: .userID)
+        name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+        kcal = try container.decodeIfPresent(Double.self, forKey: .kcal) ?? 0
+        carbs = try container.decodeIfPresent(Double.self, forKey: .carbs) ?? 0
+        protein = try container.decodeIfPresent(Double.self, forKey: .protein) ?? 0
+        fat = try container.decodeIfPresent(Double.self, forKey: .fat) ?? 0
+        fiber = try container.decodeIfPresent(Double.self, forKey: .fiber) ?? 0
+        unit = try container.decodeIfPresent(String.self, forKey: .unit) ?? "Grammen"
+        portions = try container.decodeIfPresent([ProductPortion].self, forKey: .portions) ?? [ProductPortion(name: "Standaard", amount: 100)]
+        selectedProductDetails = try container.decodeIfPresent(SelectedProductDetails.self, forKey: .selectedProductDetails)
+        imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
+
+        let decodedBarcodes = try container.decodeIfPresent([String].self, forKey: .barcodes) ?? []
+        let decodedLegacyBarcode = try container.decodeIfPresent(String.self, forKey: .barcode)
+        let combinedBarcodes = decodedBarcodes + (decodedLegacyBarcode.map { [$0] } ?? [])
+        barcodes = Array(Set(combinedBarcodes.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })).sorted()
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(documentID, forKey: .documentID)
+        try container.encodeIfPresent(userID, forKey: .userID)
+        try container.encode(name, forKey: .name)
+        try container.encode(kcal, forKey: .kcal)
+        try container.encode(carbs, forKey: .carbs)
+        try container.encode(protein, forKey: .protein)
+        try container.encode(fat, forKey: .fat)
+        try container.encode(fiber, forKey: .fiber)
+        try container.encode(unit, forKey: .unit)
+        try container.encode(portions, forKey: .portions)
+        try container.encodeIfPresent(selectedProductDetails, forKey: .selectedProductDetails)
+        try container.encode(barcodes, forKey: .barcodes)
+        try container.encodeIfPresent(barcodes.first, forKey: .barcode)
+        try container.encodeIfPresent(imageURL, forKey: .imageURL)
     }
 }
 
@@ -1068,4 +1314,78 @@ struct SlimProduct: Codable, Hashable{
     var documentID: String
     var name: String
     var userID: String?
+}
+
+private struct OpenFoodFactsProductResponse: Decodable {
+    let status: Int
+    let product: OpenFoodFactsProduct?
+}
+
+private struct OpenFoodFactsProduct: Decodable {
+    let productNameNL: String?
+    let productName: String?
+    let brands: String?
+    let abbreviatedProductName: String?
+    let imageURL: String?
+    let servingQuantity: Double?
+    let servingQuantityUnit: String?
+    let nutriments: OpenFoodFactsNutriments
+
+    enum CodingKeys: String, CodingKey {
+        case productNameNL = "product_name_nl"
+        case productName = "product_name"
+        case brands
+        case abbreviatedProductName = "abbreviated_product_name"
+        case imageURL = "image_url"
+        case servingQuantity = "serving_quantity"
+        case servingQuantityUnit = "serving_quantity_unit"
+        case nutriments
+    }
+
+    var displayName: String {
+        let prioritizedCandidates = [productNameNL, productName, brands, abbreviatedProductName]
+
+        return prioritizedCandidates
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .first(where: { $0.isEmpty == false }) ?? ""
+    }
+
+    var productPortions: [ProductPortion] {
+        var portions = [ProductPortion(name: "Standaard", amount: 100)]
+
+        guard
+            let servingQuantity,
+            servingQuantity > 0,
+            let servingQuantityUnit,
+            servingQuantityUnit.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+        else {
+            return portions
+        }
+
+        let roundedAmount = Int(servingQuantity.rounded())
+        let normalizedUnit = servingQuantityUnit.trimmingCharacters(in: .whitespacesAndNewlines)
+        let portionName = "\(roundedAmount) \(normalizedUnit)"
+
+        if portions.contains(where: { $0.name.caseInsensitiveCompare(portionName) == .orderedSame && $0.amount == roundedAmount }) == false {
+            portions.append(ProductPortion(name: portionName, amount: roundedAmount))
+        }
+
+        return portions
+    }
+}
+
+private struct OpenFoodFactsNutriments: Decodable {
+    let energyKcal100g: Double?
+    let carbohydrates100g: Double?
+    let proteins100g: Double?
+    let fat100g: Double?
+    let fiber100g: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case energyKcal100g = "energy-kcal_100g"
+        case carbohydrates100g = "carbohydrates_100g"
+        case proteins100g = "proteins_100g"
+        case fat100g = "fat_100g"
+        case fiber100g = "fiber_100g"
+    }
 }

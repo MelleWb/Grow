@@ -20,6 +20,7 @@ struct FoodView: View {
     @State private var mealToSave: Meal?
     @State private var mealToDetail: Meal?
     @State private var showAddProductToMeal = false
+    @State private var startAddProductToMealWithScanner = false
     @State private var showSelectSavedMeal = false
     @State private var showSaveAsMeal = false
     @FocusState var focusedField: UUID?
@@ -78,6 +79,11 @@ struct FoodView: View {
                         },
                         onDeleteMeal: {
                             self.foodModel.removeMeal(for: meal)
+                        },
+                        onScanProduct: {
+                            self.meal = meal
+                            self.startAddProductToMealWithScanner = true
+                            self.showAddProductToMeal = true
                         }
                     )
                 }
@@ -87,6 +93,11 @@ struct FoodView: View {
             
             .onReceive(foodModel.$date) { date in
                 self.foodModel.dateHasChanged()
+            }
+            .onChange(of: showAddProductToMeal) { _, newValue in
+                if newValue == false {
+                    startAddProductToMealWithScanner = false
+                }
             }
             .introspectTabBarController { (UITabBarController) in
                 if enableSheet {
@@ -98,7 +109,11 @@ struct FoodView: View {
             .listStyle(.insetGrouped)
             .navigationTitle(Text("Voeding"))
             .navigationDestination(isPresented: $showAddProductToMeal) {
-                AddProductToMealList(meal: meal, isPresented: $showAddProductToMeal)
+                AddProductToMealList(
+                    meal: meal,
+                    isPresented: $showAddProductToMeal,
+                    startWithScanner: startAddProductToMealWithScanner
+                )
             }
             .navigationDestination(isPresented: $showSelectSavedMeal) {
                 SelectSavedMeal(isPresented: $showSelectSavedMeal)

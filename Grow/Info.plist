@@ -24,12 +24,14 @@
 	<true/>
 	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
 	<string>We gebruiken je health records om te tonen in het dashboard</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>Wij gebruiken je gegevens voor een optimaal dashboard</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>Just showing the info</string>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
+		<key>NSHealthShareUsageDescription</key>
+		<string>Wij gebruiken je gegevens voor een optimaal dashboard</string>
+		<key>NSHealthUpdateUsageDescription</key>
+		<string>Just showing the info</string>
+		<key>NSCameraUsageDescription</key>
+		<string>We gebruiken de camera om barcodes van producten te scannen.</string>
+		<key>UIApplicationSceneManifest</key>
+		<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<true/>
 	</dict>

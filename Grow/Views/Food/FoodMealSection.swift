@@ -12,6 +12,7 @@ struct FoodMealSection: View {
     let onOpenMealDetail: () -> Void
     let onCopyMealForwardOneDay: () -> Void
     let onDeleteMeal: () -> Void
+    let onScanProduct: () -> Void
 
     var body: some View {
         Section {
@@ -44,15 +45,25 @@ struct FoodMealSection: View {
 
             FoodProductsList(meal: meal)
 
-            Button(action: {
-                selectedMeal = meal
-                showAddProductToMeal = true
-            }) {
-                HStack {
-                    Image(systemName: "plus").foregroundColor(.accentColor)
-                    Text("Voeg product toe").foregroundColor(.accentColor)
+            HStack {
+                Button(action: {
+                    selectedMeal = meal
+                    showAddProductToMeal = true
+                }) {
+                    HStack {
+                        Image(systemName: "plus").foregroundColor(.accentColor)
+                        Text("Voeg product toe").foregroundColor(.accentColor)
+                    }
+                }
+
+                Spacer()
+
+                Button(action: onScanProduct) {
+                    Image(systemName: "barcode.viewfinder")
+                        .foregroundColor(.accentColor)
                 }
             }
+            .buttonStyle(.plain)
         }
     }
 }
@@ -197,7 +208,8 @@ private struct FoodMealSectionPreviewHarness: View {
             focusedField: _focusedField,
             onOpenMealDetail: {},
             onCopyMealForwardOneDay: {},
-            onDeleteMeal: {}
+            onDeleteMeal: {},
+            onScanProduct: {}
         )
     }
 }

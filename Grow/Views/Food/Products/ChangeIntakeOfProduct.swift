@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct ProductIntakeEditorView: View {
+    @EnvironmentObject private var foodModel: FoodDataModel
     let product: Product
     let saveButtonTitle: String
     let onSave: (SelectedProductDetails) -> Bool
     let onSuccess: () -> Void
 
+    @State private var currentProduct: Product
     @State private var amount: String
     @State private var amountInput: String = ""
     @State private var selectedPortionIndex = 0
@@ -23,6 +25,11 @@ struct ProductIntakeEditorView: View {
     @State private var protein: Double = 0
     @State private var fat: Double = 0
     @State private var fiber: Double = 0
+    @State private var showBarcodeScanner = false
+    @State private var showManualBarcodeEntry = false
+    @State private var barcodeDraft = ""
+    @State private var isSavingBarcode = false
+    @State private var barcodeSaveMessage: String?
 
     init(
         product: Product,
@@ -35,6 +42,7 @@ struct ProductIntakeEditorView: View {
         self.saveButtonTitle = saveButtonTitle
         self.onSave = onSave
         self.onSuccess = onSuccess
+        _currentProduct = State(initialValue: product)
         _amount = State(initialValue: String(initialAmount))
     }
 
@@ -43,7 +51,7 @@ struct ProductIntakeEditorView: View {
             Section {
                 HStack {
                     Picker("Portie", selection: $selectedPortionIndex) {
-                        ForEach(Array(product.portions.enumerated()), id: \.offset) { index, portion in
+                        ForEach(Array(currentProduct.portions.enumerated()), id: \.offset) { index, portion in
                             Text("\(portion.name) (\(portion.amount) g)").tag(index)
                         }
                     }
@@ -61,6 +69,44 @@ struct ProductIntakeEditorView: View {
                     TextField("", text: amountBinding, prompt: Text(amount))
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
+                }
+            }
+
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    if currentProduct.barcodes.isEmpty == false {
+                        ForEach(currentProduct.barcodes, id: \.self) { barcode in
+                            Label(barcode, systemImage: "barcode")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Button("Scan opnieuw") {
+                            showBarcodeScanner = true
+                        }
+                        .font(.footnote)
+                    } else {
+                        Button {
+                            showBarcodeScanner = true
+                        } label: {
+                            Label("Scan barcode", systemImage: "barcode.viewfinder")
+                        }
+
+                        Button("Voer barcode handmatig in") {
+                            barcodeDraft = ""
+                            showManualBarcodeEntry = true
+                        }
+                        .font(.footnote)
+                    }
+
+                    if isSavingBarcode {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Barcode opslaan...")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
 
@@ -95,7 +141,38 @@ struct ProductIntakeEditorView: View {
                 hideKeyboard()
             }
         }
-        .navigationTitle(Text(product.name))
+        .navigationTitle(Text(currentProduct.name))
+        .sheet(isPresented: $showBarcodeScanner) {
+            BarcodeScannerSheet { barcode in
+                persistBarcode(barcode)
+            }
+        }
+        .alert("Barcode handmatig aanpassen", isPresented: $showManualBarcodeEntry) {
+            TextField("Barcode", text: $barcodeDraft)
+                .keyboardType(.numberPad)
+            Button("Annuleer", role: .cancel) {
+                barcodeDraft = ""
+            }
+            Button("Opslaan") {
+                persistBarcode(barcodeDraft)
+            }
+        } message: {
+            Text("De barcode wordt direct opgeslagen bij dit product.")
+        }
+        .alert("Barcode", isPresented: Binding(
+            get: { barcodeSaveMessage != nil },
+            set: { newValue in
+                if newValue == false {
+                    barcodeSaveMessage = nil
+                }
+            }
+        )) {
+            Button("Ok", role: .cancel) {
+                barcodeSaveMessage = nil
+            }
+        } message: {
+            Text(barcodeSaveMessage ?? "")
+        }
         .toolbar {
             Button(saveButtonTitle) {
                 save()
@@ -118,19 +195,19 @@ struct ProductIntakeEditorView: View {
     }
 
     private func updateCalories(portion: Int) {
-        calories = calculation(unit: product.kcal, portion: portion)
-        carbs = calculation(unit: product.carbs, portion: portion)
-        protein = calculation(unit: product.protein, portion: portion)
-        fat = calculation(unit: product.fat, portion: portion)
-        fiber = calculation(unit: product.fiber, portion: portion)
+        calories = calculation(unit: currentProduct.kcal, portion: portion)
+        carbs = calculation(unit: currentProduct.carbs, portion: portion)
+        protein = calculation(unit: currentProduct.protein, portion: portion)
+        fat = calculation(unit: currentProduct.fat, portion: portion)
+        fiber = calculation(unit: currentProduct.fiber, portion: portion)
     }
 
     private var selectedPortion: ProductPortion? {
-        guard product.portions.indices.contains(selectedPortionIndex) else {
+        guard currentProduct.portions.indices.contains(selectedPortionIndex) else {
             return nil
         }
 
-        return product.portions[selectedPortionIndex]
+        return currentProduct.portions[selectedPortionIndex]
     }
 
     private var portionCount: Int {
@@ -174,7 +251,7 @@ struct ProductIntakeEditorView: View {
             return
         }
 
-        let exactMatch = product.portions.enumerated()
+        let exactMatch = currentProduct.portions.enumerated()
             .filter { _, portion in
                 portion.amount > 0 && currentAmount % portion.amount == 0
             }
@@ -210,6 +287,25 @@ struct ProductIntakeEditorView: View {
 
         if onSave(createdProduct) {
             onSuccess()
+        }
+    }
+
+    private func persistBarcode(_ barcode: String) {
+        let trimmedBarcode = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedBarcode.isEmpty == false else {
+            barcodeSaveMessage = "Voer eerst een geldige barcode in."
+            return
+        }
+
+        isSavingBarcode = true
+        foodModel.saveProductBarcode(for: currentProduct, barcode: trimmedBarcode) { success in
+            isSavingBarcode = false
+            if success {
+                currentProduct.barcodes = Array(Set(currentProduct.barcodes + [trimmedBarcode])).sorted()
+                barcodeDraft = trimmedBarcode
+            } else {
+                barcodeSaveMessage = "De barcode kon niet worden opgeslagen."
+            }
         }
     }
 }
