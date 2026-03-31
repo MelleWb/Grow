@@ -175,11 +175,13 @@ struct AddSuperSet: View {
                                 HyroxSchemaEditor(exercise: $exercise)
                             } else {
                                 Picker("Herhalingen", selection: $exercise.reps) {
-                                    ForEach(1..<50) {
+                                    ForEach(1...50, id: \.self) {
                                        if $0 > 1 {
                                            Text("\($0) reps")
+                                               .tag($0)
                                        } else {
                                            Text("1 rep")
+                                               .tag($0)
                                        }
                                    }
                                }

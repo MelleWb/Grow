@@ -12,6 +12,7 @@ final class PushNotificationManager: NSObject, ObservableObject, MessagingDelega
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     private let installationIDKey = "push_notification_installation_id"
+    private let trainingReminderNotificationID = "training_reminder_pending_save"
     private var currentUserID: String?
 
     private override init() {
@@ -92,6 +93,32 @@ final class PushNotificationManager: NSObject, ObservableObject, MessagingDelega
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
+    }
+
+    func scheduleTrainingReminder(after interval: TimeInterval = 3600) {
+        guard authorizationStatus.isEnabledForPush else {
+            return
+        }
+
+        let content = UNMutableNotificationContent()
+        content.title = "Training opslaan"
+        content.body = "Vergeet je training van vandaag niet op te slaan"
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: trainingReminderNotificationID,
+            content: content,
+            trigger: trigger
+        )
+
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [trainingReminderNotificationID])
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func cancelTrainingReminder() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [trainingReminderNotificationID])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [trainingReminderNotificationID])
     }
 
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
